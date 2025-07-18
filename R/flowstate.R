@@ -1,0 +1,288 @@
+FCSoffsets<-function(con){
+  ##HEADER segement
+  ##version identifier; TEXT segment; DATA segment; ANALYSIS segment
+  ##6+4+8*2+8*2+8*2 = 58 bytes
+  ##initialize a list for storing byte offsets
+  offsets<-stats::setNames(
+    vector(mode = "list",length = 4L),
+    nm = c("version","TEXT","DATA","ANALYSIS")
+  )
+  ##first six bytes contain "FCS#.#"; version identifier
+  version <- readChar(con, 6)
+  if(version!="FCS3.1"){
+    stop("Is this a .fcs file (version 3.1")
+  }
+  version <- substring(version, 4, nchar(version))
+  offsets$version<-as.double(version)
+  ##next four bytes contain space characters (ASCII 32);
+  ##stop otherwise (not a legal/expected .FCS file)
+  stopifnot(readChar(con,4) == "    ")
+  ##byte offsets for TEXT, DATA, and ANALYSIS
+  ##character strings; 8 bytes; right justified with space padding
+  ##start and end positions
+  for(i in c("TEXT","DATA","ANALYSIS")){
+    offsets[[i]]<- c(
+      start = as.integer(readChar(con,8)),
+      end = as.integer(readChar(con,8))
+    )
+  }
+  return(offsets)
+}
+
+readFCStext<-function(con,offsets){
+  ##using the return of 'FCSoffsets(...)$TEXT'
+  seek(con,offsets['start'])
+  ##hex/ASCII encoded keyword-value pairs
+  txt <- readBin(
+    con = con,
+    what = "raw",
+    n = offsets['end'] + 1 - offsets['start']
+  )
+  ##convert
+  txt<-rawToChar(txt)
+  ##delimiter
+  delimiter<-substr(txt, 1, 1)
+  ##split the string; start at position 2
+  kv<-strsplit(substr(txt,2,nchar(txt)),delimiter)[[1]]
+  ##keyword value pairs; keyword name (odd) and value (even)
+  kv<-stats::setNames(
+    kv[seq_along(kv) %%2 != 1],
+    nm=kv[seq_along(kv) %%2 == 1]
+  )
+  ##as a list
+  kv<-as.list(kv)
+  return(kv)
+}
+
+parameters.to.data.table<-function(
+    keywords,
+    add.PROJ.identifier=TRUE,
+    colnames.syntactically.valid=TRUE
+)
+{
+  ##using the return of 'readFCStext(...)'
+  ##number of parameters
+  par.n<-as.numeric(keywords[['$PAR']])
+  ##regex pattern to find '$P#' and 'P#'
+  par.pattern<-"^\\$P\\d+|^P\\d+"
+  parameter.names<-grep(
+    pattern = par.pattern,
+    x = names(keywords),
+    value = TRUE
+  )
+  ##parameters; named vector
+  pars<-trimws(unlist(keywords[parameter.names]))
+  ##split parameters vector into 'types'; list
+  par.types<-split(x=pars,f=factor(sub(par.pattern,"",names(pars))))
+  ##create a data.table
+  dt.parameters<-data.table::data.table(par=paste0('$P',seq(par.n)))
+  ##fill the data.table by 'par.type'
+  for(j in names(par.types)){
+    par.vec<-par.types[[j]]
+    par.i<-as.integer(gsub("\\D+","",names(par.vec)))
+    data.table::set(dt.parameters,i=par.i,j=j,value = par.vec)
+  }
+  ##add '$PROJ' identifier; if not found, use '$DATE' instead
+  if(add.PROJ.identifier){
+    if(any(grepl("PROJ",names(keywords)))){
+      proj<-grep("PROJ",names(keywords),value = T)
+      dt.parameters[,PROJ:=as.factor(keywords[[proj]])]
+    }else if(any(grepl("DATE",names(keywords)))){
+      date<-grep("DATE",names(keywords),value = T)
+      dt.parameters[,PROJ:=as.factor(keywords[[date]])]
+    }
+  }
+  ##make N syntactically valid
+  ##make S syntactically valid
+  ##create alias columns
+  if(colnames.syntactically.valid){
+    dt.parameters[!grepl("[FS]SC|Time",N),N.alias:=gsub(" |-","",sub("-A$","",N))]
+    dt.parameters[grepl("[FS]SC",N),N.alias:=sub("-","_",sub("SSC-B","SSCB",N))]
+    dt.parameters[is.na(N.alias),N.alias := N]
+    ##
+    dt.parameters[,S.alias:=gsub(" |-","",S)]
+    dt.parameters[is.na(S.alias),S.alias:=N.alias]
+    ##
+    dt.parameters[!is.na(S),S_N.alias := paste(S.alias,N.alias,sep="_")]
+    dt.parameters[is.na(S_N.alias),S_N.alias := N.alias]
+  }
+  ##return the data.table
+  dt.parameters[]
+}
+
+keywords.to.data.table<-function(keywords,drop.primary=TRUE,drop.spill=TRUE){
+  ##using the return of 'readFCStext(...)'
+  ##regex pattern to find '$P#' and 'P#'
+  par.pattern<-"^\\$P\\d+|^P\\d+"
+  keyword.names<-grep(
+    pattern = par.pattern,
+    x = names(keywords),
+    value = TRUE,
+    invert = T
+  )
+  ##keywords; named vector
+  kw<-trimws(unlist(keywords[keyword.names]))
+  ##create a data.table
+  dt.keywords<-data.table::as.data.table(as.list(kw))
+  ##drop required keywords
+  if(drop.primary){
+    dt.keywords[,fcs.text.primary.required.keywords():=NULL]
+  }
+  ##drop spillover keyword-value pair (string)
+  if(drop.spill){
+    spill.name<-grep("spill",names(dt.keywords),ignore.case = T,value = T)
+    dt.keywords[,(spill.name):=NULL]
+  }
+  ##return the data.table
+  dt.keywords[]
+}
+
+spill.matrix<-function(keywords,add.PROJ.identifier=TRUE){
+  ##using the return of 'readFCStext(...)'
+  ##spill/spillover keyword name
+  spill.name<-grep('spill',names(keywords),ignore.case = TRUE,value = T)
+  ##parse the spillover string
+  if(length(spill.name)==1){
+    spillover.string<-keywords[[spill.name]]
+    spill.split<-unlist(strsplit(spillover.string,","))
+    N.cols<-as.numeric(spill.split[1])
+    col.names <- spill.split[2:(N.cols + 1)]
+    vals<-as.numeric(spill.split[(N.cols+2):length(spill.split)])
+    spill.mat<-matrix(
+      data = vals,
+      ncol = N.cols,
+      byrow = TRUE,
+      dimnames = list(NULL,col.names)
+    )
+    if(add.PROJ.identifier){
+      proj<-grep("PROJ",names(keywords),value = T)
+      attr(spill.mat,'PROJ')<-keywords[[proj]]
+      return(spill.mat)
+    }
+    ##
+    return(spill.mat)
+  }
+}
+
+readFCSdata<-function(con,offsets,par.n){
+  ##using the return of 'FCSoffsets(...)$DATA'
+  ##DATA stream start
+  seek(con,offsets['start'])
+  ##read data stream --> matrix --> data.table
+  dt<-data.table::as.data.table(
+    matrix(
+      data = readBin(
+        con = con,
+        what = "numeric",
+        n = (offsets[['end']] + 1 - offsets[['start']])/(32/8),
+        size = 32/8,
+        signed = TRUE,
+        endian = "little"
+      ),
+      ncol = as.numeric(par.n),
+      byrow = TRUE
+    )
+  )
+  ##return the data.table
+  dt[]
+}
+
+flowstate.object<-function(fcs.file){
+  ##open a connection to the file (.fcs); read binary mode
+  con <- file(fcs.file, open = "rb")
+  on.exit(close(con))
+  ##get byte offsets for reading FCS version, TEXT, DATA, and ANALYSIS segments
+  offsets<-FCSoffsets(con)
+  ##keyword-value pairs from TEXT segment
+  keywords<-readFCStext(con,offsets$TEXT)
+  ##update offsets$DATA' with '$BEGINDATA' and '$ENDDATA' keyword values
+  offsets$DATA<-replace(
+    offsets$DATA,
+    values=as.numeric(unlist(keywords[c('$BEGINDATA','$ENDDATA')]))
+  )
+  ##create a flowstate.object (fs); class 'flowstate'
+  fs<-structure(
+    list(
+      data = readFCSdata(con,offsets$DATA,par.n = keywords[['$PAR']]),
+      parameters = parameters.to.data.table(keywords,add.PROJ.identifier = TRUE),
+      keywords = keywords.to.data.table(keywords,drop.primary = TRUE,drop.spill = TRUE),
+      spill = spill.matrix(keywords),
+      meta = NULL
+    ),
+    class = "flowstate"
+  )
+  ##
+  return(fs)
+}
+
+#' @title flowstate: read, process, and store .fcs data
+#'
+#' @param fcs.file.path Character string (length 1); full path to .fcs file.
+#' @param colnames.type Character string; one of:
+#' \itemize{
+#'   \item `"S_N"` -- `[['data']]` columns are named by combining $PS (stain) and $PN (name), separated by an underscore.
+#'   \item `"S"` -- `[['data']]` columns are named by using only their respective $PS (stain) keyword value.
+#'   \item `"N"` -- `[['data']]` columns are named by using only their respective $PN (name) keyword value.
+#' }
+#' @param cofactor Numeric; default `5000`. Any/all parameters with a `$PnTYPE` of 'Raw_Fluorescence' or 'Unmixed_Fluorescence' will be transformed using \link{asinh} and the defined cofactor value (`asinh(x/cofactor)`).
+#' @param sample.id Character string; the keyword label defined through `sample.id` (default `TUBENAME`) will be used to add respective keyword values from `[['keywords']]` as an identifier to `[['data']]`.
+#'
+#' @returns An object of class flowstate.
+#' @export
+#'
+flowstate<-function(
+    fcs.file.path,
+    colnames.type=c("S_N","S","N"),
+    cofactor=5000,
+    sample.id='TUBENAME'
+)
+{
+  ##create the object
+  fs<-flowstate.object(fcs.file.path)
+  ##update [['data']] names
+  colnames.type<-switch(
+    match.arg(colnames.type),
+    S_N = "S_N.alias",
+    S = "S.alias",
+    N = "N.alias"
+  )
+  data.table::setnames(fs$data,new = fs$parameters[[colnames.type]])
+  ##update [['spill']] to match
+  colnames(fs$spill)<-fs$parameters[[colnames.type]][
+    match(colnames(fs$spill),fs$parameters[['N']])]
+  ##transform [['data']]
+  if(!is.null(cofactor)){
+    ##Cytek Aurora; spectral
+    cols.transform<-fs$parameters[grep("fluorescence",TYPE,ignore.case = T)][[colnames.type]]
+    ##
+    for(j in cols.transform){
+      data.table::set(
+        x = fs$data,
+        j = j,
+        value = asinh(fs$data[[j]]/cofactor)
+      )
+    }
+    ##
+    fs$parameters[
+      i = fs$parameters[[colnames.type]] %in% cols.transform,
+      j = c('transform','cofactor'):=list('asinh',cofactor)
+    ]
+  }
+  ##add an identifier to [['data']]
+  if(!sample.id %in% names(fs$keywords)){
+    sample.id<-'$FIL'
+  }
+  data.table::set(
+    x = fs$data,
+    j = 'sample.id',
+    value=as.factor(
+      fs$keywords[
+        ,
+        rep(sub(".fcs","",j),as.numeric(`$TOT`)),
+        env = list(j = sample.id)
+      ]
+    )
+  )
+  ##return the object
+  return(fs)
+}

@@ -1,0 +1,14 @@
+fcs.text.primary.required.keywords<-function(){
+  c(
+    '$BEGINANALYSIS',
+    '$BEGINDATA',
+    '$BEGINSTEXT',
+    '$BYTEORD',
+    '$DATATYPE',
+    '$ENDANALYSIS',
+    '$ENDDATA',
+    '$ENDSTEXT',
+    '$MODE',
+    '$NEXTDATA'
+  )
+}

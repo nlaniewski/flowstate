@@ -14,3 +14,5 @@ Imports:
     scales,
     stats,
     viridis
+URL: https://github.com/nlaniewski/flowstate
+BugReports: https://github.com/nlaniewski/flowstate/issues

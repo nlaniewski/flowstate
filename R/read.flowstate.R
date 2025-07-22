@@ -1,5 +1,5 @@
 FCSoffsets<-function(con){
-  ##HEADER segement
+  ##HEADER segment
   ##version identifier; TEXT segment; DATA segment; ANALYSIS segment
   ##6+4+8*2+8*2+8*2 = 58 bytes
   ##initialize a list for storing byte offsets
@@ -126,7 +126,7 @@ keywords.to.data.table<-function(keywords,drop.primary=TRUE,drop.spill=TRUE){
   dt.keywords<-data.table::as.data.table(as.list(kw))
   ##drop required keywords
   if(drop.primary){
-    dt.keywords[,fcs.text.primary.required.keywords():=NULL]
+    dt.keywords[,(fcs.text.primary.required.keywords):=NULL]
   }
   ##drop spillover keyword-value pair (string)
   if(drop.spill){
@@ -137,7 +137,7 @@ keywords.to.data.table<-function(keywords,drop.primary=TRUE,drop.spill=TRUE){
   dt.keywords[]
 }
 
-spill.matrix<-function(keywords,add.PROJ.identifier=TRUE){
+spill.to.data.table<-function(keywords,add.PROJ.identifier=TRUE){
   ##using the return of 'readFCStext(...)'
   ##spill/spillover keyword name
   spill.name<-grep('spill',names(keywords),ignore.case = TRUE,value = T)
@@ -148,19 +148,23 @@ spill.matrix<-function(keywords,add.PROJ.identifier=TRUE){
     N.cols<-as.numeric(spill.split[1])
     col.names <- spill.split[2:(N.cols + 1)]
     vals<-as.numeric(spill.split[(N.cols+2):length(spill.split)])
-    spill.mat<-matrix(
-      data = vals,
-      ncol = N.cols,
-      byrow = TRUE,
-      dimnames = list(NULL,col.names)
+    dt.spill<-data.table::as.data.table(
+      matrix(
+        data = vals,
+        ncol = N.cols,
+        byrow = TRUE,
+        dimnames = list(NULL,col.names)
+      )
     )
+    rownames(dt.spill)<-names(dt.spill)
     if(add.PROJ.identifier){
       proj<-grep("PROJ",names(keywords),value = T)
-      attr(spill.mat,'PROJ')<-keywords[[proj]]
-      return(spill.mat)
+      data.table::setattr(dt.spill,'PROJ',keywords[[proj]])
+      # attr(spill.mat,'PROJ')<-keywords[[proj]]
+      # return(spill.mat)
     }
     ##
-    return(spill.mat)
+    return(dt.spill)
   }
 }
 
@@ -206,7 +210,7 @@ flowstate.object<-function(fcs.file){
       data = readFCSdata(con,offsets$DATA,par.n = keywords[['$PAR']]),
       parameters = parameters.to.data.table(keywords,add.PROJ.identifier = TRUE),
       keywords = keywords.to.data.table(keywords,drop.primary = TRUE,drop.spill = TRUE),
-      spill = spill.matrix(keywords),
+      spill = spill.to.data.table(keywords),
       meta = NULL
     ),
     class = "flowstate"
@@ -217,7 +221,7 @@ flowstate.object<-function(fcs.file){
 
 #' @title flowstate: read, process, and store .fcs data
 #'
-#' @param fcs.file.path Character string (length 1); full path to .fcs file.
+#' @param fcs.file.paths Character string; path(s) returned from `list.files(...,full.names=T,pattern=".fcs")`.
 #' @param colnames.type Character string; one of:
 #' \itemize{
 #'   \item `"S_N"` -- `[['data']]` columns are named by combining $PS (stain) and $PN (name), separated by an underscore.
@@ -230,59 +234,88 @@ flowstate.object<-function(fcs.file){
 #' @returns An object of class flowstate.
 #' @export
 #'
-flowstate<-function(
-    fcs.file.path,
+read.flowstate<-function(
+    fcs.file.paths,
     colnames.type=c("S_N","S","N"),
     cofactor=5000,
     sample.id='TUBENAME'
 )
 {
-  ##create the object
-  fs<-flowstate.object(fcs.file.path)
-  ##update [['data']] names
+  ##add names to fcs.files.paths
+  fcs.file.paths<-stats::setNames(fcs.file.paths,nm=basename(fcs.file.paths))
+  ##create the object(s)
+  fs<-lapply(stats::setNames(fcs.file.paths,nm=basename(fcs.file.paths)),flowstate.object)
+  ##
   colnames.type<-switch(
     match.arg(colnames.type),
     S_N = "S_N.alias",
     S = "S.alias",
     N = "N.alias"
   )
-  data.table::setnames(fs$data,new = fs$parameters[[colnames.type]])
+  ##update [['data']] by reference using data.table::setnames
+  invisible(
+    lapply(fs,function(fs.obj){
+      data.table::setnames(fs.obj$data,new = fs.obj$parameters[[colnames.type]])
+    })
+  )
   ##update [['spill']] to match
-  colnames(fs$spill)<-fs$parameters[[colnames.type]][
-    match(colnames(fs$spill),fs$parameters[['N']])]
+  invisible(
+    lapply(fs,function(fs.obj){
+      data.table::setnames(
+        x = fs.obj$spill,
+        new = fs.obj$parameters[[colnames.type]][match(names(fs.obj$spill),fs.obj$parameters[['N']])]
+      )
+    })
+  )
   ##transform [['data']]
   if(!is.null(cofactor)){
-    ##Cytek Aurora; spectral
-    cols.transform<-fs$parameters[grep("fluorescence",TYPE,ignore.case = T)][[colnames.type]]
-    ##
-    for(j in cols.transform){
-      data.table::set(
-        x = fs$data,
-        j = j,
-        value = asinh(fs$data[[j]]/cofactor)
-      )
-    }
-    ##
-    fs$parameters[
-      i = fs$parameters[[colnames.type]] %in% cols.transform,
-      j = c('transform','cofactor'):=list('asinh',cofactor)
-    ]
+    invisible(
+      lapply(fs,function(fs.obj){
+        ##Cytek Aurora; spectral
+        cols.transform<-fs.obj$parameters[grep("fluorescence",TYPE,ignore.case = T)][[colnames.type]]
+        ##
+        for(j in cols.transform){
+          data.table::set(
+            x = fs.obj$data,
+            j = j,
+            value = asinh(fs.obj$data[[j]]/cofactor)
+          )
+        }
+        ##
+        fs.obj$parameters[
+          i = fs.obj$parameters[[colnames.type]] %in% cols.transform,
+          j = c('transform','cofactor'):=list('asinh',cofactor)
+        ]
+      })
+    )
   }
   ##add an identifier to [['data']]
-  if(!sample.id %in% names(fs$keywords)){
-    sample.id<-'$FIL'
-  }
-  data.table::set(
-    x = fs$data,
-    j = 'sample.id',
-    value=as.factor(
-      fs$keywords[
-        ,
-        rep(sub(".fcs","",j),as.numeric(`$TOT`)),
-        env = list(j = sample.id)
-      ]
-    )
+  invisible(
+    lapply(fs,function(fs.obj){
+      if(!sample.id %in% names(fs.obj$keywords)){
+        sample.id<-'$FIL'
+      }
+      data.table::set(
+        x = fs.obj$data,
+        j = 'sample.id',
+        value=as.factor(
+          fs.obj$keywords[
+            ,
+            rep(sub(".fcs","",j),as.numeric(`$TOT`)),
+            env = list(j = sample.id)
+          ]
+        )
+      )
+    })
   )
   ##return the object
   return(fs)
 }
+
+# flowstate.concatenate<-function(flowstate.objects){
+#   data.table::rbindlist(lapply(fs,'[[','data'))
+#   unique(data.table::rbindlist(lapply(fs,'[[','keywords')))
+#   unique(data.table::rbindlist(lapply(fs,'[[','parameters')))
+#   unique(data.table::rbindlist(lapply(fs,'[[','spill')))
+#   unique(data.table::rbindlist(lapply(fs,'[[','meta')))
+# }

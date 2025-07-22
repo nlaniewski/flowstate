@@ -3,6 +3,8 @@
 # dput(unlist(strsplit(trimws(utils::readClipboard())," ")))
 utils::globalVariables(
   c("$TOT",
+    "alias",
+    "j",
     "N",
     "N.alias",
     "PROJ",

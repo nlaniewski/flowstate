@@ -2,10 +2,19 @@
 % Please edit documentation in R/flowstate-package.R
 \docType{package}
 \name{flowstate-package}
+\alias{flowstate}
 \alias{flowstate-package}
 \title{flowstate: Flow Cytometry Standard (FCS) Processing, Analysis, and Visualization}
 \description{
 Flow cytometry standard (.fcs) files are S3 structured to facilitate efficient processing, analysis, and visualization of data -- acheive your flow state.
+}
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/nlaniewski/flowstate}
+  \item Report bugs at \url{https://github.com/nlaniewski/flowstate/issues}
+}
+
 }
 \author{
 \strong{Maintainer}: Nathan Laniewski \email{nathan_laniewski@urmc.rochester.edu}

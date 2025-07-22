@@ -1,6 +1,6 @@
 #' @title Plot flowstate data
 #'
-#' @param flowstate.object A flowstate object as returned from  [flowstate].
+#' @param x A flowstate object as returned from  [flowstate].
 #' @param ... ... \link[ggplot2]{aes} arguments (unquoted); essentially x and y. If a `z` aesthetic is provided, the plot will switch to \link[ggplot2]{stat_summary_hex}, using this defined third variable as a 'color-by'.
 #' @param bins \link[ggplot2]{geom_hex} argument; numeric vector giving the number of bins in both vertical and horizontal directions.
 #' @param limits \link[ggplot2]{continuous_scale} argument.
@@ -9,12 +9,12 @@
 #' @returns A \link[ggplot2]{ggplot} object.
 #' @export
 #'
-plot_flowstate <- function(flowstate.object,..., bins = 200, limits = NULL, sample.n = NULL){
+plot.flowstate <- function(x,..., bins = 200, limits = NULL, sample.n = NULL){
   p <- ggplot2::ggplot(
     data = if(!is.null(sample.n)){
-      flowstate.object$data[sample(.N,sample.n)]
+      x$data[sample(.N,sample.n)]
     }else{
-      flowstate.object$data
+      x$data
     },
     mapping = ggplot2::aes(...)
   )

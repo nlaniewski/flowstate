@@ -21,6 +21,7 @@ spill.to.string<-function(fs.obj){
   spill<-data.table::copy(fs.obj$spill)
   col.match<-fs.obj$parameters[,sapply(.SD,function(j){all(names(spill) %in% j)})]
   col.match<-names(which(col.match))
+  if(length(col.match)>1) col.match<-col.match[1]
   names.match<-fs.obj$parameters[['N']][match(names(spill),fs.obj$parameters[[col.match]])]
   data.table::setnames(spill,new = names.match)
   ##

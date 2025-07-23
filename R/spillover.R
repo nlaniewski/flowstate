@@ -21,8 +21,8 @@ spillover.update.value<-function(flowstate.object,i,j,value){
   )
 }
 
-spillover.apply<-function(flowstate.object){
-  if('applied' %in% names(attributes(flowstate.object$spill))){
+spillover.apply<-function(flowstate.object,decompensate=FALSE){
+  if(attr(flowstate.object$spill,'applied') & isFALSE(decompensate)){
     stop("Spillover has already been applied.")
   }
   cols.spill<-sapply(c(1,2),function(margin){
@@ -56,7 +56,11 @@ spillover.apply<-function(flowstate.object){
     ,
     (cols.spill) := as.list(
       as.data.frame(
-        as.matrix(flowstate.object$data[,.SD,.SDcols = cols.spill]) %*% solve(spill.mat)
+        if(decompensate){
+          as.matrix(flowstate.object$data[,.SD,.SDcols = cols.spill]) %*% spill.mat
+        }else{
+          as.matrix(flowstate.object$data[,.SD,.SDcols = cols.spill]) %*% solve(spill.mat)
+        }
       )
     )
   ]
@@ -69,6 +73,10 @@ spillover.apply<-function(flowstate.object){
     )
   }
   ##
-  data.table::setattr(flowstate.object$spill,name = "applied",value = TRUE)
+  if(decompensate){
+    data.table::setattr(flowstate.object$spill,name = "applied",value = FALSE)
+  }else{
+    data.table::setattr(flowstate.object$spill,name = "applied",value = TRUE)
+  }
 }
 ##

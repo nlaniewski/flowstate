@@ -10,7 +10,7 @@ FCSoffsets<-function(con){
   ##first six bytes contain "FCS#.#"; version identifier
   version <- readChar(con, 6)
   if(version!="FCS3.1"){
-    stop("Is this a .fcs file (version 3.1")
+    stop("Is this a .fcs file (version 3.1)?")
   }
   version <- substring(version, 4, nchar(version))
   offsets$version<-as.double(version)
@@ -43,7 +43,7 @@ readFCStext<-function(con,offsets){
   ##delimiter
   delimiter<-substr(txt, 1, 1)
   ##split the string; start at position 2
-  kv<-strsplit(substr(txt,2,nchar(txt)),delimiter)[[1]]
+  kv<-strsplit(substr(txt,2,nchar(txt)),delimiter,fixed = TRUE)[[1]]#match exactly the delimiter
   ##keyword value pairs; keyword name (odd) and value (even)
   kv<-stats::setNames(
     kv[seq_along(kv) %%2 != 1],
@@ -133,6 +133,11 @@ keywords.to.data.table<-function(keywords,drop.primary=TRUE,drop.spill=TRUE){
     spill.name<-grep("spill",names(dt.keywords),ignore.case = T,value = T)
     dt.keywords[,(spill.name):=NULL]
   }
+  ##add keywords related to originality/modification
+  dt.keywords[,'$ORIGINALITY' := "DataModified"]
+  dt.keywords[,'$LAST_MODIFIED' := toupper(format(Sys.time(), "%d-%b-%Y %H:%M:%OS2"))]
+  dt.keywords[,'$LAST_MODIFIER' := Sys.getenv("USERNAME")]
+
   ##return the data.table
   dt.keywords[]
 }
@@ -164,12 +169,33 @@ spill.to.data.table<-function(keywords,add.PROJ.identifier=TRUE){
       # return(spill.mat)
     }
     ##
+    data.table::setattr(dt.spill,name = "applied",value = FALSE)
+    ##
     return(dt.spill)
   }
 }
 
-readFCSdata<-function(con,offsets,par.n){
-  ##using the return of 'FCSoffsets(...)$DATA'
+offsets.data.update<-function(offsets,keywords){
+  ##update offsets$DATA' with '$BEGINDATA' and '$ENDDATA' keyword values
+  ##add 'endianness' based on keyword '$BYTEORD'
+  ##add 'par.n' based on keyword '$PAR'
+  offsets<-replace(
+    offsets,
+    values=as.numeric(unlist(keywords[c('$BEGINDATA','$ENDDATA')]))
+  )
+  endian.string<-c("4,3,2,1"='big',"1,2,3,4"='little')
+  if(!keywords$`$BYTEORD` %in% names(endian.string)){
+    stop("Keyword '$BYTEORD' has unexpected endianness...data segment cannot be appropriately parsed.")
+  }else{
+    attr(offsets,"endianness") <- endian.string[[keywords[['$BYTEORD']]]]
+    attr(offsets,"par.n") <- as.numeric(keywords[['$PAR']])
+  }
+  ##
+  return(offsets)
+}
+
+readFCSdata<-function(con,offsets){
+  ##using the return of 'FCSoffsets(...)$DATA' --> updated with 'update.offsets.data(...)'
   ##DATA stream start
   seek(con,offsets['start'])
   ##read data stream --> matrix --> data.table
@@ -181,9 +207,9 @@ readFCSdata<-function(con,offsets,par.n){
         n = (offsets[['end']] + 1 - offsets[['start']])/(32/8),
         size = 32/8,
         signed = TRUE,
-        endian = "little"
+        endian = attributes(offsets)$endianness
       ),
-      ncol = as.numeric(par.n),
+      ncol = attributes(offsets)$par.n,
       byrow = TRUE
     )
   )
@@ -199,15 +225,12 @@ flowstate.object<-function(fcs.file){
   offsets<-FCSoffsets(con)
   ##keyword-value pairs from TEXT segment
   keywords<-readFCStext(con,offsets$TEXT)
-  ##update offsets$DATA' with '$BEGINDATA' and '$ENDDATA' keyword values
-  offsets$DATA<-replace(
-    offsets$DATA,
-    values=as.numeric(unlist(keywords[c('$BEGINDATA','$ENDDATA')]))
-  )
+  ##update offsets$DATA
+  offsets$DATA<-offsets.data.update(offsets$DATA,keywords)
   ##create a flowstate.object (fs); class 'flowstate'
   fs<-structure(
     list(
-      data = readFCSdata(con,offsets$DATA,par.n = keywords[['$PAR']]),
+      data = readFCSdata(con,offsets$DATA),
       parameters = parameters.to.data.table(keywords,add.PROJ.identifier = TRUE),
       keywords = keywords.to.data.table(keywords,drop.primary = TRUE,drop.spill = TRUE),
       spill = spill.to.data.table(keywords),
@@ -233,6 +256,37 @@ flowstate.object<-function(fcs.file){
 #'
 #' @returns An object of class flowstate.
 #' @export
+#' @examples
+#' fcs.file.paths <- system.file("extdata", package = "flowstate") |>
+#' list.files(full.names = TRUE, pattern = ".fcs")
+#'
+#' #read a single .fcs file as a flowstate object
+#' fs <- read.flowstate(
+#'   fcs.file.paths[1],
+#'   colnames.type="S",
+#'   cofactor = 5000
+#' )
+#' class(fs)
+#'
+#' #.fcs DATA segment as a data.table
+#'   fs$data
+#' #.fcs TEXT segment parsed and stored as three elements (data.tables)
+#'   fs$parameters #instrument-specific measurement parameters
+#'   fs$keywords #instrument/sample-specific metadata
+#'   fs$spill #instrument/sample-specific spillover
+#'
+#' #plot some data
+#' no.fill.legend <- ggplot2::guides(fill = 'none')
+#' .title1 <- paste("Batch:",fs$keywords[,`$PROJ`])
+#' .title2 <- paste(
+#'   "Instrument Serial#:",
+#'   fs$keywords[,paste(.(`$CYT`,`$CYTSN`),collapse = " ")]
+#' )
+#' .title <- paste(.title1,.title2,sep = "\n")
+#' .title <- ggplot2::labs(title = .title, subtitle = fs$keywords[,TUBENAME])
+#'
+#' plot(fs,CD3,Viability) + no.fill.legend + .title
+#' plot(fs,FSC_A,SSC_A) + no.fill.legend + .title
 #'
 read.flowstate<-function(
     fcs.file.paths,
@@ -308,14 +362,10 @@ read.flowstate<-function(
       )
     })
   )
-  ##return the object
-  return(fs)
+  ##return the object(s)
+  if(length(fs)==1){
+    return(fs[[1]])
+  }else{
+    return(fs)
+  }
 }
-
-# flowstate.concatenate<-function(flowstate.objects){
-#   data.table::rbindlist(lapply(fs,'[[','data'))
-#   unique(data.table::rbindlist(lapply(fs,'[[','keywords')))
-#   unique(data.table::rbindlist(lapply(fs,'[[','parameters')))
-#   unique(data.table::rbindlist(lapply(fs,'[[','spill')))
-#   unique(data.table::rbindlist(lapply(fs,'[[','meta')))
-# }

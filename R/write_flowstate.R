@@ -37,7 +37,12 @@ spill.to.string<-function(fs.obj){
   ##
   return(spill.string)
 }
-write.flowstate<-function(flowstate.object,filename){
+write.flowstate<-function(flowstate.object,filename,endianness = c('little','big')){
+  byteord<-switch(
+    match.arg(endianness),
+    little = "1,2,3,4",
+    big = "4,3,2,1"
+  )
   ##NULL identifier(s) in [['data']]
   ##identifiers will have a class of factor
   cols.null<-flowstate.object$data[,names(.SD),.SDcols = is.factor]
@@ -47,7 +52,7 @@ write.flowstate<-function(flowstate.object,filename){
   ##required FCS keywords
   keywords.required<-fcs.text.primary.required.keywords
   keywords.required<-stats::setNames(nm=keywords.required,rep("0",length(keywords.required)))
-  keywords.required[['$BYTEORD']]<-"4,3,2,1"
+  keywords.required[['$BYTEORD']]<-byteord
   keywords.required[['$DATATYPE']]<-'F'
   keywords.required[['$MODE']]<-"L"
   ##vector (string) of keywords
@@ -140,7 +145,7 @@ write.flowstate<-function(flowstate.object,filename){
     object = data.segment,
     con,
     size = 4,
-    endian = "big"
+    endian = match.arg(endianness)
   )
   writeChar("00000000", con, eos = NULL)
 }

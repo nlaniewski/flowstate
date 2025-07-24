@@ -55,6 +55,34 @@ parameters.unique<-function(flowstate.objects){
   parameters[]
 }
 
+#' @title Concatenate a list of flowstate objects
+#'
+#' @param flowstate.objects a list; the return of [read.flowstate]
+#'
+#' @returns An object of class flowstate.
+#' @export
+#'
+#' @examples
+#' fcs.file.paths <- system.file("extdata", package = "flowstate") |>
+#' list.files(full.names = TRUE, pattern = ".fcs")
+#'
+#' #read all .fcs files as flowstate objects
+#' fs <- read.flowstate(
+#'   fcs.file.paths,
+#'   colnames.type="S",
+#'   cofactor = 5000
+#' )
+#' #a list of flowstate objects
+#' class(fs)
+#' sapply(fs,class)
+#'
+#' #concatenate into a single flowstate object
+#' fs<-concatenate.flowstate(fs)
+#' class(fs)
+#'
+#' fs$data
+#' fs$parameters
+#' fs$keywords
 concatenate.flowstate<-function(flowstate.objects){
   ##test if objects can be concatenated
   concatenate.test(flowstate.objects)

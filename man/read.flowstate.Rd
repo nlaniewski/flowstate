@@ -8,7 +8,8 @@ read.flowstate(
   fcs.file.paths,
   colnames.type = c("S_N", "S", "N"),
   cofactor = 5000,
-  sample.id = "TUBENAME"
+  sample.id = "TUBENAME",
+  concatenate = FALSE
 )
 }
 \arguments{
@@ -24,9 +25,11 @@ read.flowstate(
 \item{cofactor}{Numeric; default \code{5000}. Any/all parameters with a \verb{$PnTYPE} of 'Raw_Fluorescence' or 'Unmixed_Fluorescence' will be transformed using \link{asinh} and the defined cofactor value (\code{asinh(x/cofactor)}).}
 
 \item{sample.id}{Character string; the keyword label defined through \code{sample.id} (default \code{TUBENAME}) will be used to add respective keyword values from \verb{[['keywords']]} as an identifier to \verb{[['data']]}.}
+
+\item{concatenate}{Logical; if \code{TRUE}, the list of flowstate objects will be combined into a single flowstate object.}
 }
 \value{
-An object of class flowstate.
+For a single file: an object of class flowstate; for multiple files: a list of flowstate objects.
 }
 \description{
 flowstate: read, process, and store .fcs data
@@ -45,24 +48,19 @@ class(fs)
 
 #.fcs DATA segment as a data.table
   fs$data
-#.fcs TEXT segment parsed and stored as three elements (data.tables)
+#.fcs TEXT segment parsed and stored as three elements (data.tables):
   fs$parameters #instrument-specific measurement parameters
   fs$keywords #instrument/sample-specific metadata
   fs$spill #instrument/sample-specific spillover
 
-#plot some data
-no.fill.legend <- ggplot2::guides(fill = 'none')
-.title1 <- paste("Batch:",fs$keywords[,`$PROJ`])
-.title2 <- paste(
-  "Instrument Serial#:",
-  fs$keywords[,paste(.(`$CYT`,`$CYTSN`),collapse = " ")]
+#read all .fcs files as flowstate objects; concatenate into a single object
+fs <- read.flowstate(
+  fcs.file.paths,
+  colnames.type="S",
+  cofactor = 5000,
+  concatenate = TRUE
 )
-.title <- paste(.title1,.title2,sep = "\n")
-.title <- ggplot2::labs(title = .title, subtitle = fs$keywords[,TUBENAME])
-
-plot(fs,CD3,Viability) + no.fill.legend + .title
-plot(fs,FSC_A,SSC_A) + no.fill.legend + .title
-
-
+class(fs)
+fs$keywords
 
 }

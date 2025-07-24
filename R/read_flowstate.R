@@ -253,8 +253,9 @@ flowstate.object<-function(fcs.file){
 #' }
 #' @param cofactor Numeric; default `5000`. Any/all parameters with a `$PnTYPE` of 'Raw_Fluorescence' or 'Unmixed_Fluorescence' will be transformed using \link{asinh} and the defined cofactor value (`asinh(x/cofactor)`).
 #' @param sample.id Character string; the keyword label defined through `sample.id` (default `TUBENAME`) will be used to add respective keyword values from `[['keywords']]` as an identifier to `[['data']]`.
+#' @param concatenate Logical; if `TRUE`, the list of flowstate objects will be combined into a single flowstate object.
 #'
-#' @returns An object of class flowstate.
+#' @returns For a single file: an object of class flowstate; for multiple files: a list of flowstate objects.
 #' @export
 #' @examples
 #' fcs.file.paths <- system.file("extdata", package = "flowstate") |>
@@ -270,29 +271,27 @@ flowstate.object<-function(fcs.file){
 #'
 #' #.fcs DATA segment as a data.table
 #'   fs$data
-#' #.fcs TEXT segment parsed and stored as three elements (data.tables)
+#' #.fcs TEXT segment parsed and stored as three elements (data.tables):
 #'   fs$parameters #instrument-specific measurement parameters
 #'   fs$keywords #instrument/sample-specific metadata
 #'   fs$spill #instrument/sample-specific spillover
 #'
-#' #plot some data
-#' no.fill.legend <- ggplot2::guides(fill = 'none')
-#' .title1 <- paste("Batch:",fs$keywords[,`$PROJ`])
-#' .title2 <- paste(
-#'   "Instrument Serial#:",
-#'   fs$keywords[,paste(.(`$CYT`,`$CYTSN`),collapse = " ")]
+#' #read all .fcs files as flowstate objects; concatenate into a single object
+#' fs <- read.flowstate(
+#'   fcs.file.paths,
+#'   colnames.type="S",
+#'   cofactor = 5000,
+#'   concatenate = TRUE
 #' )
-#' .title <- paste(.title1,.title2,sep = "\n")
-#' .title <- ggplot2::labs(title = .title, subtitle = fs$keywords[,TUBENAME])
-#'
-#' plot(fs,CD3,Viability) + no.fill.legend + .title
-#' plot(fs,FSC_A,SSC_A) + no.fill.legend + .title
+#' class(fs)
+#' fs$keywords
 #'
 read.flowstate<-function(
     fcs.file.paths,
     colnames.type=c("S_N","S","N"),
     cofactor=5000,
-    sample.id='TUBENAME'
+    sample.id='TUBENAME',
+    concatenate=FALSE
 )
 {
   ##add names to fcs.files.paths
@@ -310,7 +309,7 @@ read.flowstate<-function(
   invisible(
     lapply(fs,function(fs.obj){
       data.table::setnames(fs.obj$data,new = fs.obj$parameters[[colnames.type]])
-    })
+    })#define old here as fs.obj$parameters[['N']]?
   )
   ##update [['spill']] to match
   invisible(
@@ -366,6 +365,10 @@ read.flowstate<-function(
   if(length(fs)==1){
     return(fs[[1]])
   }else{
-    return(fs)
+    if(concatenate){
+      fs <- concatenate.flowstate(fs)
+    }else{
+      return(fs)
+    }
   }
 }

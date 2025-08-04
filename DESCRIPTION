@@ -12,8 +12,10 @@ Imports:
     data.table,
     ggplot2,
     methods,
+    patchwork,
     scales,
     stats,
+    utils,
     viridis
 URL: https://github.com/nlaniewski/flowstate
 BugReports: https://github.com/nlaniewski/flowstate/issues

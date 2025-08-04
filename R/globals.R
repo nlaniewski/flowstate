@@ -2,17 +2,7 @@
 ##to silence NSE R CMD check notes; "no visible biding for global variable..."
 # dput(unlist(strsplit(trimws(utils::readClipboard())," ")))
 utils::globalVariables(
-  c("$TOT",
-    "alias",
-    "j",
-    "N",
-    "N.alias",
-    "ord",
-    "PROJ",
-    "R",
-    "S",
-    "S.alias",
-    "S_N.alias",
-    "TYPE"
-  )
+  c("$FIL", "$TOT", "alias", "barcode", "barcode.alias", "j", "N",
+    "N.alias", "node_barcode", "nodes.assigned", "ord", "PROJ", "R",
+    "S", "S.alias", "S_N.alias", "sample.id","total.events", "TYPE")
 )

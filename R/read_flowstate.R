@@ -84,8 +84,8 @@ parameters.to.data.table<-function(
   }
   ##add '$PROJ' identifier; if not found, use '$DATE' instead
   if(add.PROJ.identifier){
-    if(any(grepl("PROJ",names(keywords)))){
-      proj<-grep("PROJ",names(keywords),value = T)
+    if(any(grepl("^\\$PROJ$",names(keywords)))){
+      proj<-grep("^\\$PROJ$",names(keywords),value = T)
       dt.parameters[,PROJ:=as.factor(keywords[[proj]])]
     }else if(any(grepl("DATE",names(keywords)))){
       date<-grep("DATE",names(keywords),value = T)
@@ -163,7 +163,7 @@ spill.to.data.table<-function(keywords,add.PROJ.identifier=TRUE){
     )
     rownames(dt.spill)<-names(dt.spill)
     if(add.PROJ.identifier){
-      proj<-grep("PROJ",names(keywords),value = T)
+      proj<-grep("^\\$PROJ$",names(keywords),value = T)
       data.table::setattr(dt.spill,'PROJ',keywords[[proj]])
       # attr(spill.mat,'PROJ')<-keywords[[proj]]
       # return(spill.mat)
@@ -176,7 +176,7 @@ spill.to.data.table<-function(keywords,add.PROJ.identifier=TRUE){
 }
 
 offsets.data.update<-function(offsets,keywords){
-  ##update offsets$DATA' with '$BEGINDATA' and '$ENDDATA' keyword values
+  ##update offsets$DATA with '$BEGINDATA' and '$ENDDATA' keyword values
   ##add 'endianness' based on keyword '$BYTEORD'
   ##add 'par.n' based on keyword '$PAR'
   offsets<-replace(
@@ -217,9 +217,9 @@ readFCSdata<-function(con,offsets){
   dt[]
 }
 
-flowstate.object<-function(fcs.file){
+flowstate.from.file.path<-function(fcs.file.path){
   ##open a connection to the file (.fcs); read binary mode
-  con <- file(fcs.file, open = "rb")
+  con <- file(fcs.file.path, open = "rb")
   on.exit(close(con))
   ##get byte offsets for reading FCS version, TEXT, DATA, and ANALYSIS segments
   offsets<-FCSoffsets(con)
@@ -227,17 +227,23 @@ flowstate.object<-function(fcs.file){
   keywords<-readFCStext(con,offsets$TEXT)
   ##update offsets$DATA
   offsets$DATA<-offsets.data.update(offsets$DATA,keywords)
-  ##create a flowstate.object (fs); class 'flowstate'
-  fs<-structure(
-    list(
-      data = readFCSdata(con,offsets$DATA),
-      parameters = parameters.to.data.table(keywords,add.PROJ.identifier = TRUE),
-      keywords = keywords.to.data.table(keywords,drop.primary = TRUE,drop.spill = TRUE),
-      spill = spill.to.data.table(keywords),
-      meta = NULL
-    ),
-    class = "flowstate"
+  ##create a flowstate (fs) S3 object ; class 'flowstate'
+  fs<-flowstate(
+    data = readFCSdata(con,offsets$DATA),
+    parameters = parameters.to.data.table(keywords,add.PROJ.identifier = TRUE),
+    keywords = keywords.to.data.table(keywords,drop.primary = TRUE,drop.spill = TRUE),
+    spill = spill.to.data.table(keywords)
   )
+  # fs<-structure(
+  #   list(
+  #     data = readFCSdata(con,offsets$DATA),
+  #     parameters = parameters.to.data.table(keywords,add.PROJ.identifier = TRUE),
+  #     keywords = keywords.to.data.table(keywords,drop.primary = TRUE,drop.spill = TRUE),
+  #     spill = spill.to.data.table(keywords),
+  #     meta = NULL
+  #   ),
+  #   class = "flowstate"
+  # )
   ##
   return(fs)
 }
@@ -297,7 +303,10 @@ read.flowstate<-function(
   ##add names to fcs.files.paths
   fcs.file.paths<-stats::setNames(fcs.file.paths,nm=basename(fcs.file.paths))
   ##create the object(s)
-  fs<-lapply(stats::setNames(fcs.file.paths,nm=basename(fcs.file.paths)),flowstate.object)
+  fs<-lapply(fcs.file.paths,function(fcs.file.path){
+    message(paste(basename(fcs.file.path),"-->","flowstate"))
+    flowstate.from.file.path(fcs.file.path)
+  })
   ##
   colnames.type<-switch(
     match.arg(colnames.type),
@@ -327,6 +336,7 @@ read.flowstate<-function(
         ##Cytek Aurora; spectral
         cols.transform<-fs.obj$parameters[grep("fluorescence",TYPE,ignore.case = T)][[colnames.type]]
         ##
+        message(paste(fs.obj$keywords[,`$FIL`],"-->","transforming..."))
         for(j in cols.transform){
           data.table::set(
             x = fs.obj$data,

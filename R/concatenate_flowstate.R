@@ -86,23 +86,32 @@ parameters.unique<-function(flowstate.objects){
 concatenate.flowstate<-function(flowstate.objects){
   ##test if objects can be concatenated
   concatenate.test(flowstate.objects)
-  ##S3 'flowstate' object structure; NULL
-  fs<-structure(
-    list(
-      data = NULL,
-      parameters = NULL,
-      keywords = NULL,
-      spill = NULL,
-      meta = NULL
-    ),
-    class = 'flowstate'
+
+  ##create a flowstate (fs) S3 object ; class 'flowstate'
+  fs <- flowstate(
+    data = data.table::rbindlist(lapply(flowstate.objects,'[[','data')),
+    parameters = parameters.unique(flowstate.objects),
+    keywords = data.table::rbindlist(lapply(flowstate.objects,'[[','keywords')),
+    spill = unique(lapply(flowstate.objects,'[[','spill'))[[1]],#needs more testing,
+    meta = data.table::rbindlist(lapply(flowstate.objects,'[[','meta'))
   )
-  ##populate the object
-  fs[['data']] <- data.table::rbindlist(lapply(flowstate.objects,'[[','data'))
-  fs[['parameters']] <- parameters.unique(flowstate.objects)
-  fs[['keywords']] <- data.table::rbindlist(lapply(flowstate.objects,'[[','keywords'))
-  fs[['spill']] <- unique(lapply(flowstate.objects,'[[','spill'))[[1]]#needs more testing
-  fs[['meta']] <- data.table::rbindlist(lapply(flowstate.objects,'[[','meta'))
+  # ##S3 'flowstate' object structure; NULL
+  # fs<-structure(
+  #   list(
+  #     data = NULL,
+  #     parameters = NULL,
+  #     keywords = NULL,
+  #     spill = NULL,
+  #     meta = NULL
+  #   ),
+  #   class = 'flowstate'
+  # )
+  # ##populate the object
+  # fs[['data']] <- data.table::rbindlist(lapply(flowstate.objects,'[[','data'))
+  # fs[['parameters']] <- parameters.unique(flowstate.objects)
+  # fs[['keywords']] <- data.table::rbindlist(lapply(flowstate.objects,'[[','keywords'))
+  # fs[['spill']] <- unique(lapply(flowstate.objects,'[[','spill'))[[1]]#needs more testing
+  # fs[['meta']] <- data.table::rbindlist(lapply(flowstate.objects,'[[','meta'))
   ##return
   return(fs)
 }

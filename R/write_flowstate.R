@@ -1,3 +1,72 @@
+parms.update<-function(flowstate.object){
+  col.parms <- names(which(flowstate.object$parameters[
+    ,
+    sapply(.SD,function(j){all(j %in% names(flowstate.object$data))})]))
+  parms.update <- names(flowstate.object$data)[
+    !names(flowstate.object$data) %in% flowstate.object$parameters[[col.parms]]]
+  parms.update <- parms.update[!parms.update %in% 'sample.id']
+}
+data.cols.to.numeric <- function(flowstate.object){
+  parms.update.convert<-names(which(flowstate.object$data[
+    ,
+    sapply(.SD,function(j){class(j)!='numeric'}),
+    .SDcols = parms.update]))
+  ##convert to numeric in [['data']]
+  if(length(parms.update.convert)>=1){
+    message(paste("Converting",paste0(parms.update.convert,collapse = ", "), "to numeric"))
+    message("Updating [['data']] by reference using data.table::set()")
+    for(j in parms.update.convert){
+      data.table::set(
+        x = flowstate.object$data,
+        j = j,
+        value = as.numeric(flowstate.object$data[[j]])
+      )
+    }
+  }else{
+    message("No columns identified for conversion to numeric.")
+  }
+}
+parameters.dt.update<-function(flowstate.object){
+  .parms.update<-parms.update(flowstate.object)
+  ##create a [['parameters']] data.table using any/all parms in .parms.update
+  dt.parms.update<-data.table::data.table(
+    par = paste0('$P',seq(length(.parms.update))+flowstate.object$parameters[,.N]),
+    B = "32",
+    DISPLAY = "LIN",
+    E = "0,0",
+    N = .parms.update,
+    R = flowstate.object$data[
+      ,
+      sapply(.SD,function(j){as.character(max(ceiling(as.numeric(j))))}),
+      .SDcols = .parms.update],
+    TYPE = "Derived_Numeric"
+  )
+  ##updated [['parameters']]
+  dt.parms.update <- rbind(
+    flowstate.object$parameters,
+    dt.parms.update,
+    fill = TRUE
+  )
+}
+keywords.to.character<-function(flowstate.object){
+  keywords.convert<-names(which(flowstate.object$keywords[
+    ,
+    sapply(.SD,function(j){class(j)!='character'})]))
+  ##convert to character in [['keywords']]
+  if(length(keywords.convert)>=1){
+    message(paste("Converting",paste0(keywords.convert,collapse = ", "), "to character."))
+    message("Updating [['keywords']] by reference using data.table::set().")
+    for(j in keywords.convert){
+      data.table::set(
+        x = flowstate.object$keywords,
+        j = j,
+        value = as.character(flowstate.object$keywords[[j]])
+      )
+    }
+  }else{
+    message("No columns identified for conversion to character.")
+  }
+}
 ##flowstate parameters (data.table) to vector (string); function
 parameters.to.string<-function(fs.obj){
   cols.parameters<-names(fs.obj$parameters)[
@@ -93,17 +162,6 @@ write.flowstate<-function(flowstate.object,filename,endianness = c('little','big
   }
 
   ##update 'text.segment'
-  # for(i in c("BEGIN","END")){
-  #   .pattern<-paste0(i,"DATA|0")
-  #   regmatches(
-  #     x = text.segment,
-  #     m = gregexpr(.pattern,text.segment,fixed = TRUE)
-  #   )<-paste(paste0(i,"DATA"),DATA.start,sep="|")
-  # }
-  # regmatches(
-  #   x = text.segment,
-  #   m = gregexpr("BEGINDATA|0",text.segment,fixed = TRUE)
-  # )<-paste("BEGINDATA",DATA.start,sep = "|")
   regmatches(text.segment,gregexpr("BEGINDATA|0",text.segment,fixed = TRUE))<-paste("BEGINDATA",DATA.start,sep = "|")
   regmatches(text.segment,gregexpr("ENDDATA|0",text.segment,fixed = TRUE))<-paste("ENDDATA",DATA.end,sep = "|")
   ##test

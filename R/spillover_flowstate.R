@@ -1,3 +1,31 @@
+spillover.update.external<-function(flowstate.object,spillover.flowjo.path.csv){
+  ##read previously exported spillover matrix (.csv) from FlowJo
+  spill.mat.external<-utils::read.csv(
+    spillover.flowjo.path.csv,
+    check.names = FALSE,
+    row.names = NULL
+  )
+  ##drop column 1
+  if(is.character(spill.mat.external[,1])){
+    spill.mat.external<-spill.mat.external[-1]
+  }
+  ##split column names using the FlowJo delimiter
+  cols.split<-strsplit(colnames(spill.mat.external)," :: ")
+  ##which split matches the names of flowstate.object[['spill']]
+  split.index<-which(sapply(seq(unique(sapply(cols.split,length))),function(i){
+    all(sapply(cols.split,'[[',i) %in% names(flowstate.object$spill))
+  }))
+  ##update the column names
+  colnames(spill.mat.external)<-sapply(cols.split,'[[',split.index)
+  ##update flowstate.object[['spill']]
+  for(j in names(flowstate.object$spill)){
+    data.table::set(
+      x = flowstate.object$spill,
+      j = j,
+      value = spill.mat.external[[j]]
+    )
+  }
+}
 #' @title Update the values of a flowstate spill data.table
 #'
 #' @param flowstate.object the return of [read.flowstate].
@@ -94,53 +122,44 @@ spillover.apply<-function(flowstate.object,decompensate=FALSE){
   if(attr(flowstate.object$spill,'applied') & isFALSE(decompensate)){
     stop("Spillover has already been applied.")
   }
-  cols.spill<-sapply(c(1,2),function(margin){
+  spill.index<-sapply(c(1,2),function(margin){
     which(apply(flowstate.object$spill,margin,function(x){any(x!=0&x!=1&x!=1E-6)}))
-  })
-  cols.spill<-names(flowstate.object$spill)[cols.spill]
-  ##transform lookup; in development
-  # col.match<-fs$parameters[,sapply(.SD,function(j){all(names(cols.spill) %in% j)})]
-  # col.match<-names(which(col.match))
-  # if(length(col.match)>1) col.match<-col.match[1]
-  # fs$parameters[S %in% names(cols.spill)]
+  }) |> Reduce(f = union, x = _) |> sort()
+  spill.index<-names(flowstate.object$spill)[spill.index]
+  ##are any js in spill.index already transformed?
+  j.match<-flowstate.object$parameters[
+    ,
+    names(which(sapply(.SD,function(j){all(spill.index %in% j)})))[1]
+  ]
+  parameters.subset<-flowstate.object$parameters[
+    i = flowstate.object$parameters[[j.match]] %in% spill.index & !is.na(transform)
+  ]
   ##need to reverse the transformation;
   ##need raw values when applying spillover
-  for(j in cols.spill){
-    data.table::set(
-      x = flowstate.object$data,
-      j = j,
-      value = sinh(flowstate.object$data[[j]])*5000
-    )
-  }
+  flowstate.transform.inverse(flowstate.object,.j=parameters.subset[[j.match]])
   ##
   spill.mat<-as.matrix(
     flowstate.object$spill[
-      i = rownames(flowstate.object$spill) %in% cols.spill,
+      i = rownames(flowstate.object$spill) %in% spill.index,
       j = .SD,
-      .SDcols = cols.spill
+      .SDcols = spill.index
     ]
   )
   ##
   flowstate.object$data[
     ,
-    (cols.spill) := as.list(
+    (spill.index) := as.list(
       as.data.frame(
         if(decompensate){
-          as.matrix(flowstate.object$data[,.SD,.SDcols = cols.spill]) %*% spill.mat
+          as.matrix(flowstate.object$data[,.SD,.SDcols = spill.index]) %*% spill.mat
         }else{
-          as.matrix(flowstate.object$data[,.SD,.SDcols = cols.spill]) %*% solve(spill.mat)
+          as.matrix(flowstate.object$data[,.SD,.SDcols = spill.index]) %*% solve(spill.mat)
         }
       )
     )
   ]
-  ##
-  for(j in cols.spill){
-    data.table::set(
-      x = flowstate.object$data,
-      j = j,
-      value = asinh(flowstate.object$data[[j]]/5000)
-    )
-  }
+  ##reapply the transformation
+  flowstate.transform(flowstate.object,.j=parameters.subset[[j.match]])
   ##
   if(decompensate){
     data.table::setattr(flowstate.object$spill,name = "applied",value = FALSE)

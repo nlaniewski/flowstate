@@ -1,4 +1,17 @@
-FCSoffsets<-function(con){
+FCSoffsets<-function(fcs.file.path){
+  if(grepl(".fcs$",fcs.file.path) & file.exists(fcs.file.path)){
+    ##open a connection to the file (.fcs); read binary mode
+    con <- file(fcs.file.path, open = "rb")
+    on.exit(close(con))
+    ##first six bytes contain "FCS#.#"; version identifier
+    version <- readChar(con, 6)
+    ##version test
+    if(version!="FCS3.1"){#sprintf("FCS3.%d",0:2)
+      stop("Is this a .fcs file (version 3.1)? flowstate has only been tested using FCS 3.1 files.")
+    }
+  }else{
+    stop("Need a valid '.fcs' file path/file.")
+  }
   ##HEADER segment
   ##version identifier; TEXT segment; DATA segment; ANALYSIS segment
   ##6+4+8*2+8*2+8*2 = 58 bytes
@@ -7,11 +20,6 @@ FCSoffsets<-function(con){
     vector(mode = "list",length = 4L),
     nm = c("version","TEXT","DATA","ANALYSIS")
   )
-  ##first six bytes contain "FCS#.#"; version identifier
-  version <- readChar(con, 6)
-  if(version!="FCS3.1"){
-    stop("Is this a .fcs file (version 3.1)?")
-  }
   version <- substring(version, 4, nchar(version))
   offsets$version<-as.double(version)
   ##next four bytes contain space characters (ASCII 32);
@@ -29,9 +37,14 @@ FCSoffsets<-function(con){
   return(offsets)
 }
 
-readFCStext<-function(con,offsets){
-  ##using the return of 'FCSoffsets(...)$TEXT'
-  seek(con,offsets['start'])
+readFCStext<-function(fcs.file.path,con=NULL,offsets=NULL){
+  ##use the return of 'FCSoffsets(...)[["TEXT"]]'
+  offsets<-FCSoffsets(fcs.file.path)[["TEXT"]]
+  ##open a connection to the file (.fcs); read binary mode
+  con <- file(fcs.file.path, open = "rb")
+  on.exit(close(con))
+  ##seek the byte position where the TEXT segment starts
+  seek(con, where = offsets['start'])
   ##hex/ASCII encoded keyword-value pairs
   txt <- readBin(
     con = con,
@@ -194,11 +207,19 @@ offsets.data.update<-function(offsets,keywords){
   return(offsets)
 }
 
-readFCSdata<-function(con,offsets){
-  ##using the return of 'FCSoffsets(...)$DATA' --> updated with 'update.offsets.data(...)'
-  ##DATA stream start
+readFCSdata<-function(fcs.file.path,con=NULL,offsets=NULL){
+  ##use the return of 'FCSoffsets(...)[["DATA"]]'
+  offsets<-FCSoffsets(fcs.file.path)[["DATA"]]
+  ##use the return of 'readFCStext(...)'
+  keywords<-readFCStext(fcs.file.path)
+  ##update 'offsets'
+  offsets<-offsets.data.update(offsets,keywords)
+  ##open a connection to the file (.fcs); read binary mode
+  con <- file(fcs.file.path, open = "rb")
+  on.exit(close(con))
+  ##seek the byte position where the DATA segment/stream starts
   seek(con,offsets['start'])
-  ##read data stream --> matrix --> data.table
+  ##read data stream: binary --> numeric --> matrix --> data.table
   dt<-data.table::as.data.table(
     matrix(
       data = readBin(
@@ -218,32 +239,16 @@ readFCSdata<-function(con,offsets){
 }
 
 flowstate.from.file.path<-function(fcs.file.path){
-  ##open a connection to the file (.fcs); read binary mode
-  con <- file(fcs.file.path, open = "rb")
-  on.exit(close(con))
-  ##get byte offsets for reading FCS version, TEXT, DATA, and ANALYSIS segments
-  offsets<-FCSoffsets(con)
-  ##keyword-value pairs from TEXT segment
-  keywords<-readFCStext(con,offsets$TEXT)
-  ##update offsets$DATA
-  offsets$DATA<-offsets.data.update(offsets$DATA,keywords)
+  ##keyword-value pairs from TEXT segment; based on offsets from 'FCSoffsets(...)[["TEXT"]]'
+  keywords<-readFCStext(fcs.file.path)
   ##create a flowstate (fs) S3 object ; class 'flowstate'
   fs<-flowstate(
-    data = readFCSdata(con,offsets$DATA),
+    ##DATA segment; based on (updated) offsets from 'FCSoffsets(...)[["DATA"]]'
+    data = readFCSdata(fcs.file.path),
     parameters = parameters.to.data.table(keywords,add.PROJ.identifier = TRUE),
     keywords = keywords.to.data.table(keywords,drop.primary = TRUE,drop.spill = TRUE),
     spill = spill.to.data.table(keywords)
   )
-  # fs<-structure(
-  #   list(
-  #     data = readFCSdata(con,offsets$DATA),
-  #     parameters = parameters.to.data.table(keywords,add.PROJ.identifier = TRUE),
-  #     keywords = keywords.to.data.table(keywords,drop.primary = TRUE,drop.spill = TRUE),
-  #     spill = spill.to.data.table(keywords),
-  #     meta = NULL
-  #   ),
-  #   class = "flowstate"
-  # )
   ##
   return(fs)
 }

@@ -1,4 +1,4 @@
-##S3 constructor for flowstate objects
+##S3 constructor for flowstate object
 new_flowstate <- function(
     data = data.table::data.table(),
     parameters = data.table::data.table(),
@@ -15,14 +15,7 @@ new_flowstate <- function(
   })
   ##flowstate object
   structure(
-    list(
-      data = data,
-      parameters = parameters,
-      keywords = keywords,
-      spill = spill,
-      meta = meta,
-      conc = conc
-    ),
+    as.list(environment()),
     class = "flowstate"
   )
 }

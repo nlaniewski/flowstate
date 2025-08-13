@@ -24,7 +24,7 @@ flowstate.parameter.keywords<-
     'V'
   )
 
-flowstate.transform.inverse<-function(flowstate.object){
+flowstate.transform.inverse<-function(flowstate.object,.j){
   if(!any(c('transform','cofactor') %in% names(flowstate.object$parameters))){
     message(
       paste(
@@ -36,10 +36,19 @@ flowstate.transform.inverse<-function(flowstate.object){
     return()
   }
   parms<-data.table::copy(flowstate.object$parameters)[!is.na(transform)]
-  col.match<-parms[,sapply(.SD,function(j){all(j %in% names(flowstate.object$data))})]
-  col.match<-names(which(col.match))[1]
-  parms<-parms[grep("Raw|Unmixed_Fluorescence",TYPE),.SD,.SDcols = c(col.match,'transform','cofactor')]
-  data.table::setnames(parms,old = col.match, new = 'alias')
+  j.match<-parms[
+    ,
+    names(which(sapply(.SD,function(j){all(j %in% names(flowstate.object$data))})))[1]
+  ]
+  parms<-parms[
+    grep("Raw|Unmixed_Fluorescence",TYPE),
+    .SD,
+    .SDcols = c(j.match,'transform','cofactor')
+  ]
+  data.table::setnames(parms,old = j.match, new = 'alias')
+  if(!is.null(.j)){
+    parms<-parms[alias %in% .j]
+  }
   for(j in parms[!is.na(transform),alias]){
     data.table::set(
       x = flowstate.object$data,
@@ -50,8 +59,13 @@ flowstate.transform.inverse<-function(flowstate.object){
         stop("In development: no inverse function defined for this transform type.")
       }
     )
+    data.table::set(
+      x = flowstate.object$parameters,
+      i = which(flowstate.object$parameters[[j.match]] %in% j),
+      j = c('transform','cofactor'),
+      value = list(NA,NA)
+    )
   }
-  flowstate.object$parameters[,c('transform','cofactor') := NULL]
 }
 
 flowstate.transform<-function(flowstate.object,.j,transform.type="asinh",cofactor=5000){
@@ -59,12 +73,13 @@ flowstate.transform<-function(flowstate.object,.j,transform.type="asinh",cofacto
     stop(".j not found in [['data']]")
   }
   ##
-  col.match<-flowstate.object$parameters[,sapply(.SD,function(j){all(.j %in% j)})]
-  col.match<-names(which(col.match))
-  if(length(col.match)>1) col.match<-col.match[1]
+  j.match<-flowstate.object$parameters[
+    ,
+    names(which(sapply(.SD,function(j){all(.j %in% j)})))[1]
+  ]
   ##
   if('transform' %in% names(flowstate.object$parameters)){
-    if(any(.j %in% flowstate.object$parameters[!is.na(transform)][[col.match]])){
+    if(any(.j %in% flowstate.object$parameters[!is.na(transform)][[j.match]])){
       stop("Transformation has already been applied to .j!")
     }
   }
@@ -79,7 +94,7 @@ flowstate.transform<-function(flowstate.object,.j,transform.type="asinh",cofacto
     ##
     data.table::set(
       x = flowstate.object$parameters,
-      i = which(flowstate.object$parameters[[col.match]] %in% j),
+      i = which(flowstate.object$parameters[[j.match]] %in% j),
       j = c('transform','cofactor'),
       value = list(transform.type,cofactor)
     )

@@ -17,7 +17,7 @@ Concatenate a list of flowstate objects
 }
 \examples{
 fcs.file.paths <- system.file("extdata", package = "flowstate") |>
-list.files(full.names = TRUE, pattern = ".fcs")
+list.files(full.names = TRUE, pattern = "BLOCK.*.fcs")
 
 #read all .fcs files as flowstate objects
 fs <- read.flowstate(

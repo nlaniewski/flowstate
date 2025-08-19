@@ -7,6 +7,7 @@
 read.flowstate(
   fcs.file.paths,
   colnames.type = c("S_N", "S", "N"),
+  S.func = NULL,
   cofactor = 5000,
   sample.id = "TUBENAME",
   concatenate = FALSE
@@ -22,6 +23,8 @@ read.flowstate(
 \item \code{"N"} -- \verb{[['data']]} columns are named by using only their respective $PN (name) keyword value.
 }}
 
+\item{S.func}{a function; default \code{NULL}. If a function is supplied, it will be used to modify/split \code{"S"}; e.g. \code{function(j){strsplit(j," ")[[1]][1]}} will be applied to \code{"S"} to return the first split element ("CD4 PE" --> "CD4").}
+
 \item{cofactor}{Numeric; default \code{5000}. Any/all parameters with a \verb{$PnTYPE} of 'Raw_Fluorescence' or 'Unmixed_Fluorescence' will be transformed using \link{asinh} and the defined cofactor value (\code{asinh(x/cofactor)}).}
 
 \item{sample.id}{Character string; the keyword label defined through \code{sample.id} (default \code{TUBENAME}) will be used to add respective keyword values from \verb{[['keywords']]} as an identifier to \verb{[['data']]}.}
@@ -36,7 +39,7 @@ flowstate: read, process, and store .fcs data
 }
 \examples{
 fcs.file.paths <- system.file("extdata", package = "flowstate") |>
-list.files(full.names = TRUE, pattern = ".fcs")
+list.files(full.names = TRUE, pattern = "BLOCK.*.fcs")
 
 #read a single .fcs file as a flowstate object
 fs <- read.flowstate(

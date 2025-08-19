@@ -19,7 +19,7 @@ Compensate data using values stored in spill
 }
 \examples{
 fcs.file.paths <- system.file("extdata", package = "flowstate") |>
-list.files(full.names = TRUE, pattern = ".fcs")
+list.files(full.names = TRUE, pattern = "BLOCK.*.fcs")
 
 #read all .fcs files as flowstate objects; concatenate into a single object
 fs <- read.flowstate(

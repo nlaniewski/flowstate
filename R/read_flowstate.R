@@ -6,8 +6,8 @@ FCSoffsets<-function(fcs.file.path){
     ##first six bytes contain "FCS#.#"; version identifier
     version <- readChar(con, 6)
     ##version test
-    if(version!="FCS3.1"){#sprintf("FCS3.%d",0:2)
-      stop("Is this a .fcs file (version 3.1)? flowstate has only been tested using FCS 3.1 files.")
+    if(!version %in% sprintf("FCS3.%d",0:1)){#sprintf("FCS3.%d",0:2)
+      stop("Is this a .fcs file (version 3.0 or 3.1)? flowstate has only been tested using FCS 3.0/3.1 files.")
     }
   }else{
     stop("Need a valid '.fcs' file path/file.")
@@ -67,10 +67,21 @@ readFCStext<-function(fcs.file.path,con=NULL,offsets=NULL){
   return(kv)
 }
 
+add.identifier.proj<-function(keywords){
+  if(any(grepl("^\\$PROJ$",names(keywords)))){
+    proj<-grep("^\\$PROJ$",names(keywords),value = T)
+  }else if(any(grepl("$DATE",names(keywords),fixed = T))){
+    proj<-grep("$DATE",names(keywords),value = T,fixed = T)
+  }
+  ##return the identifier
+  keywords[[proj]]
+}
+
 parameters.to.data.table<-function(
     keywords,
     add.PROJ.identifier=TRUE,
-    colnames.syntactically.valid=TRUE
+    colnames.syntactically.valid=TRUE,
+    S.func=NULL#function(j){strsplit(j," ")[[1]][1]}
 )
 {
   ##using the return of 'readFCStext(...)'
@@ -97,13 +108,7 @@ parameters.to.data.table<-function(
   }
   ##add '$PROJ' identifier; if not found, use '$DATE' instead
   if(add.PROJ.identifier){
-    if(any(grepl("^\\$PROJ$",names(keywords)))){
-      proj<-grep("^\\$PROJ$",names(keywords),value = T)
-      dt.parameters[,PROJ:=as.factor(keywords[[proj]])]
-    }else if(any(grepl("DATE",names(keywords)))){
-      date<-grep("DATE",names(keywords),value = T)
-      dt.parameters[,PROJ:=as.factor(keywords[[date]])]
-    }
+    dt.parameters[,PROJ:=as.factor(add.identifier.proj(keywords))]
   }
   ##make N syntactically valid
   ##make S syntactically valid
@@ -113,11 +118,17 @@ parameters.to.data.table<-function(
     dt.parameters[grepl("[FS]SC",N),N.alias:=sub("-","_",sub("SSC-B","SSCB",N))]
     dt.parameters[is.na(N.alias),N.alias := N]
     ##
-    dt.parameters[,S.alias:=gsub(" |-","",S)]
-    dt.parameters[is.na(S.alias),S.alias:=N.alias]
-    ##
-    dt.parameters[!is.na(S),S_N.alias := paste(S.alias,N.alias,sep="_")]
-    dt.parameters[is.na(S_N.alias),S_N.alias := N.alias]
+    if("S" %in% names(dt.parameters)){
+      if(is.null(S.func)){
+        dt.parameters[,S.alias:=gsub(" |-","",S)]
+      }else{
+        dt.parameters[,S.alias := sapply(S,S.func)]
+      }
+      dt.parameters[is.na(S.alias),S.alias:=N.alias]
+      ##
+      dt.parameters[!is.na(S),S_N.alias := paste(S.alias,N.alias,sep="_")]
+      dt.parameters[is.na(S_N.alias),S_N.alias := N.alias]
+    }
   }
   ##return the data.table
   dt.parameters[]
@@ -175,11 +186,9 @@ spill.to.data.table<-function(keywords,add.PROJ.identifier=TRUE){
       )
     )
     rownames(dt.spill)<-names(dt.spill)
+    ##add '$PROJ' identifier; if not found, use '$DATE' instead
     if(add.PROJ.identifier){
-      proj<-grep("^\\$PROJ$",names(keywords),value = T)
-      data.table::setattr(dt.spill,'PROJ',keywords[[proj]])
-      # attr(spill.mat,'PROJ')<-keywords[[proj]]
-      # return(spill.mat)
+      data.table::setattr(dt.spill,'PROJ',add.identifier.proj(keywords))
     }
     ##
     data.table::setattr(dt.spill,name = "applied",value = FALSE)
@@ -238,14 +247,14 @@ readFCSdata<-function(fcs.file.path,con=NULL,offsets=NULL){
   dt[]
 }
 
-flowstate.from.file.path<-function(fcs.file.path){
+flowstate.from.file.path<-function(fcs.file.path,S.func=NULL){
   ##keyword-value pairs from TEXT segment; based on offsets from 'FCSoffsets(...)[["TEXT"]]'
   keywords<-readFCStext(fcs.file.path)
   ##create a flowstate (fs) S3 object ; class 'flowstate'
   fs<-flowstate(
     ##DATA segment; based on (updated) offsets from 'FCSoffsets(...)[["DATA"]]'
     data = readFCSdata(fcs.file.path),
-    parameters = parameters.to.data.table(keywords,add.PROJ.identifier = TRUE),
+    parameters = parameters.to.data.table(keywords,S.func = S.func,add.PROJ.identifier = TRUE),
     keywords = keywords.to.data.table(keywords,drop.primary = TRUE,drop.spill = TRUE),
     spill = spill.to.data.table(keywords)
   )
@@ -262,6 +271,7 @@ flowstate.from.file.path<-function(fcs.file.path){
 #'   \item `"S"` -- `[['data']]` columns are named by using only their respective $PS (stain) keyword value.
 #'   \item `"N"` -- `[['data']]` columns are named by using only their respective $PN (name) keyword value.
 #' }
+#' @param S.func a function; default `NULL`. If a function is supplied, it will be used to modify/split `"S"`; e.g. `function(j){strsplit(j," ")[[1]][1]}` will be applied to `"S"` to return the first split element ("CD4 PE" --> "CD4").
 #' @param cofactor Numeric; default `5000`. Any/all parameters with a `$PnTYPE` of 'Raw_Fluorescence' or 'Unmixed_Fluorescence' will be transformed using \link{asinh} and the defined cofactor value (`asinh(x/cofactor)`).
 #' @param sample.id Character string; the keyword label defined through `sample.id` (default `TUBENAME`) will be used to add respective keyword values from `[['keywords']]` as an identifier to `[['data']]`.
 #' @param concatenate Logical; if `TRUE`, the list of flowstate objects will be combined into a single flowstate object.
@@ -270,7 +280,7 @@ flowstate.from.file.path<-function(fcs.file.path){
 #' @export
 #' @examples
 #' fcs.file.paths <- system.file("extdata", package = "flowstate") |>
-#' list.files(full.names = TRUE, pattern = ".fcs")
+#' list.files(full.names = TRUE, pattern = "BLOCK.*.fcs")
 #'
 #' #read a single .fcs file as a flowstate object
 #' fs <- read.flowstate(
@@ -300,6 +310,7 @@ flowstate.from.file.path<-function(fcs.file.path){
 read.flowstate<-function(
     fcs.file.paths,
     colnames.type=c("S_N","S","N"),
+    S.func=NULL,
     cofactor=5000,
     sample.id='TUBENAME',
     concatenate=FALSE

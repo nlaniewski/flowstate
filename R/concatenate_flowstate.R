@@ -91,7 +91,7 @@ concatenate.flowstate<-function(flowstate.objects){
   fs <- flowstate(
     data = data.table::rbindlist(lapply(flowstate.objects,'[[','data')),
     parameters = parameters.unique(flowstate.objects),
-    keywords = data.table::rbindlist(lapply(flowstate.objects,'[[','keywords')),
+    keywords = data.table::rbindlist(lapply(flowstate.objects,'[[','keywords'),fill=TRUE),
     spill = unique(lapply(flowstate.objects,'[[','spill'))[[1]],#needs more testing,
     meta = data.table::rbindlist(lapply(flowstate.objects,'[[','meta'))
   )

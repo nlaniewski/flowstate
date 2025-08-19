@@ -127,16 +127,18 @@ spillover.apply<-function(flowstate.object,decompensate=FALSE){
   }) |> Reduce(f = union, x = _) |> sort()
   spill.index<-names(flowstate.object$spill)[spill.index]
   ##are any js in spill.index already transformed?
-  j.match<-flowstate.object$parameters[
-    ,
-    names(which(sapply(.SD,function(j){all(spill.index %in% j)})))[1]
-  ]
-  parameters.subset<-flowstate.object$parameters[
-    i = flowstate.object$parameters[[j.match]] %in% spill.index & !is.na(transform)
-  ]
-  ##need to reverse the transformation;
-  ##need raw values when applying spillover
-  flowstate.transform.inverse(flowstate.object,.j=parameters.subset[[j.match]])
+  if('transform' %in% names(flowstate.object$parameters)){
+    j.match<-flowstate.object$parameters[
+      ,
+      names(which(sapply(.SD,function(j){all(spill.index %in% j)})))[1]
+    ]
+    parameters.subset<-flowstate.object$parameters[
+      i = flowstate.object$parameters[[j.match]] %in% spill.index & !is.na(transform)
+    ]
+    ##need to reverse the transformation;
+    ##need raw values when applying spillover
+    flowstate.transform.inverse(flowstate.object,.j=parameters.subset[[j.match]])
+  }
   ##
   spill.mat<-as.matrix(
     flowstate.object$spill[
@@ -158,8 +160,10 @@ spillover.apply<-function(flowstate.object,decompensate=FALSE){
       )
     )
   ]
-  ##reapply the transformation
-  flowstate.transform(flowstate.object,.j=parameters.subset[[j.match]])
+  if('transform' %in% names(flowstate.object$parameters)){
+    ##reapply the transformation
+    flowstate.transform(flowstate.object,.j=parameters.subset[[j.match]])
+  }
   ##
   if(decompensate){
     data.table::setattr(flowstate.object$spill,name = "applied",value = FALSE)

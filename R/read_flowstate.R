@@ -321,7 +321,7 @@ read.flowstate<-function(
   ##create the object(s)
   fs<-lapply(fcs.file.paths,function(fcs.file.path){
     message(paste(basename(fcs.file.path),"-->","flowstate"))
-    flowstate.from.file.path(fcs.file.path)
+    flowstate.from.file.path(fcs.file.path,S.func = S.func)
   })
   ##
   colnames.type<-switch(

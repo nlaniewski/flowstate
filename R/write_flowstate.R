@@ -106,7 +106,7 @@ spill.to.string<-function(fs.obj){
   ##
   return(spill.string)
 }
-write.flowstate<-function(flowstate.object,filename,endianness = c('little','big')){
+write.flowstate<-function(flowstate.object,new.fil=NULL,file.dir,endianness = c('little','big')){
   byteord<-switch(
     match.arg(endianness),
     little = "1,2,3,4",
@@ -136,6 +136,10 @@ write.flowstate<-function(flowstate.object,filename,endianness = c('little','big
   ##update; flowstate.object-specific
   keyword.list[['$TOT']]<-as.character(flowstate.object$data[,.N])
   keyword.list[['$PAR']]<-as.character(ncol(flowstate.object$data))
+  ##update '$FIL'
+  if(!is.null(new.fil)){
+    keyword.list[['$FIL']]<-new.fil
+  }
   ##TEXT segment
   text.segment<-paste0(
     "|",
@@ -192,6 +196,7 @@ write.flowstate<-function(flowstate.object,filename,endianness = c('little','big
     stop("HEADER segment does not match expected byte length/nchar of 58")
   }
   ##
+  filename<-file.path(file.dir,keyword.list[['$FIL']])
   con <- file(filename, open = "wb")
   on.exit(close(con))
   seek(con,0)

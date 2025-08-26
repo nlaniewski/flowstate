@@ -47,7 +47,7 @@ spill.matrix.from.controls<-function(
     return.spill = FALSE
 ){
   ##flowstate objects; single-stained controls; concatenated; no transformation
-  fs<-flowstate::read.flowstate(
+  fs<-read.flowstate(
     batch.specific.control.paths,
     colnames.type = "N",
     cofactor = NULL,

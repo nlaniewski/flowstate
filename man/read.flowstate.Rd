@@ -32,7 +32,7 @@ read.flowstate(
 \item{concatenate}{Logical; if \code{TRUE}, the list of flowstate objects will be combined into a single flowstate object.}
 }
 \value{
-For a single file: an object of class flowstate; for multiple files: a list of flowstate objects.
+For a single file: an object of class flowstate; for multiple files: a list of flowstate objects
 }
 \description{
 flowstate: read, process, and store .fcs data

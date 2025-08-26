@@ -24,7 +24,20 @@ flowstate.parameter.keywords<-
     'V'
   )
 
-flowstate.transform.inverse<-function(flowstate.object,.j){
+j.match.parameters.to.data <- function(flowstate.object){
+  # names(which(
+  #   flowstate.object$parameters[
+  #     ,
+  #     sapply(.SD,function(j){all(j %in% names(flowstate.object$data))})
+  #   ]
+  # ))[1]
+  names(which.max(flowstate.object$parameters[
+    ,
+    sapply(.SD,function(j){sum(j %in% names(flowstate.object$data),na.rm = TRUE)})
+  ]))[1]
+}
+
+flowstate.transform.inverse<-function(flowstate.object,.j=NULL){
   if(!any(c('transform','cofactor') %in% names(flowstate.object$parameters))){
     message(
       paste(
@@ -102,6 +115,40 @@ flowstate.transform<-function(flowstate.object,.j,transform.type="asinh",cofacto
   ##
 }
 
+#' @title Add keyword values to `flowstate[['data']]`
+#' @description
+#' Used for fast addition of factored keyword values to `flowstate[['data']]`; updates by reference.
+#'
+#' @param flowstate.object A flowstate object as returned from [read.flowstate].
+#' @param keywords Character string; keyword names in `flowstate[['keywords']]` whose factored values will be added to `flowstate[['data']]`.
+#'
+#' @returns UPDATES `flowstate[['data']]` BY REFERENCE.
+#' @export
+#'
+#' @examples
+#' fcs.file.paths <- system.file("extdata", package = "flowstate") |>
+#' list.files(full.names = TRUE, pattern = "BLOCK.*.fcs")
+#'
+#' #read all .fcs files as flowstate objects; concatenate into a single object
+#' fs <- read.flowstate(
+#'   fcs.file.paths,
+#'   colnames.type="S",
+#'   cofactor = NULL,
+#'   concatenate = TRUE
+#' )
+#'
+#' #create a new set of keywords/values
+#' fs$keywords[
+#' ,
+#' j = c('block.id','block.aliquot') := data.table::tstrsplit(
+#' TUBENAME,"_",type.convert = factor,keep=4:5)
+#' ]
+#'
+#' #add the factored keyword values to fs[['data']]
+#' add.keywords.to.data(fs,c('block.id','block.aliquot'))
+#'
+#' fs$data[,.(block.id,block.aliquot)]
+#'
 add.keywords.to.data <- function(flowstate.object,keywords){
   ##
   res <- names(which(flowstate.object$keywords[

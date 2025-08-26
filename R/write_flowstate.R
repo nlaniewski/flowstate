@@ -1,16 +1,14 @@
 parms.update<-function(flowstate.object){
-  col.parms <- names(which(flowstate.object$parameters[
-    ,
-    sapply(.SD,function(j){all(j %in% names(flowstate.object$data))})]))
+  j.match <- j.match.parameters.to.data(flowstate.object)
   parms.update <- names(flowstate.object$data)[
-    !names(flowstate.object$data) %in% flowstate.object$parameters[[col.parms]]]
+    !names(flowstate.object$data) %in% flowstate.object$parameters[[j.match]]]
   parms.update <- parms.update[!parms.update %in% 'sample.id']
 }
 data.cols.to.numeric <- function(flowstate.object){
   parms.update.convert<-names(which(flowstate.object$data[
     ,
     sapply(.SD,function(j){class(j)!='numeric'}),
-    .SDcols = parms.update]))
+    .SDcols = parms.update(flowstate.object)]))
   ##convert to numeric in [['data']]
   if(length(parms.update.convert)>=1){
     message(paste("Converting",paste0(parms.update.convert,collapse = ", "), "to numeric"))
@@ -41,7 +39,7 @@ parameters.dt.update<-function(flowstate.object){
       .SDcols = .parms.update],
     TYPE = "Derived_Numeric"
   )
-  ##updated [['parameters']]
+  ##updated [['parameters']]; needs reassignment
   dt.parms.update <- rbind(
     flowstate.object$parameters,
     dt.parms.update,
@@ -65,6 +63,44 @@ keywords.to.character<-function(flowstate.object){
     }
   }else{
     message("No columns identified for conversion to character.")
+  }
+}
+##a few checks with some verbose output; eventually update with automatic execution of the individually named functions within the check
+write.flowstate.check <- function(flowstate.object,verbose=TRUE){
+  ##
+  j.match <- j.match.parameters.to.data(flowstate.object)
+  ##
+  res <- flowstate.object$parameters[!is.na(transform)][[j.match]]
+  if(length(res)>0){
+    if(verbose){
+      message("Inverse transform the following columns in [['data']] using flowstate:::flowstate.transform.inverse():")
+      print(res)
+    }
+  }
+  ##
+  res<-names(which(flowstate.object$data[,sapply(.SD,class)!="numeric",.SDcols = !'sample.id']))
+  if(length(res)>0){
+    if(verbose){
+      message("Convert the following columns in [['data']] to numeric using flowstate:::data.cols.to.numeric():")
+      print(res)
+    }
+  }
+  ##this check needs fixing! Returns NAs after the update
+  res <- names(flowstate.object$data)[!names(flowstate.object$data) %in% flowstate.object$parameters[[j.match]]]
+  res <- grep("sample.id",res,value = T,invert = T)
+  if(length(res)>0){
+    if(verbose){
+      message("Re-assign [['parameters']] <- flowstate:::parameters.dt.update() to include:")
+      print(res)
+    }
+  }
+  ##
+  res <- names(which(flowstate.object$keywords[,sapply(.SD,class)=="factor"]))
+  if(length(res)>0){
+    if(verbose){
+      message("Convert the following columns in [['keywords']] to character using flowstate:::keywords.to.character():")
+      print(res)
+    }
   }
 }
 ##flowstate parameters (data.table) to vector (string); function

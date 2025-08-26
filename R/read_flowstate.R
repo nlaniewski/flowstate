@@ -276,8 +276,9 @@ flowstate.from.file.path<-function(fcs.file.path,S.func=NULL){
 #' @param sample.id Character string; the keyword label defined through `sample.id` (default `TUBENAME`) will be used to add respective keyword values from `[['keywords']]` as an identifier to `[['data']]`.
 #' @param concatenate Logical; if `TRUE`, the list of flowstate objects will be combined into a single flowstate object.
 #'
-#' @returns For a single file: an object of class flowstate; for multiple files: a list of flowstate objects.
+#' @returns For a single file: an object of class flowstate; for multiple files: a list of flowstate objects
 #' @export
+#'
 #' @examples
 #' fcs.file.paths <- system.file("extdata", package = "flowstate") |>
 #' list.files(full.names = TRUE, pattern = "BLOCK.*.fcs")
@@ -349,8 +350,8 @@ read.flowstate<-function(
   if(!is.null(cofactor)){
     invisible(
       lapply(fs,function(fs.obj){
-        ##Cytek Aurora; spectral
-        cols.transform<-fs.obj$parameters[grep("fluorescence",TYPE,ignore.case = T)][[colnames.type]]
+        ##Cytek Aurora; spectral keyword/value; $PnTYPE/Unmixed_Fluorescence
+        cols.transform<-fs.obj$parameters[grep("[RawUnmixed]_Fluorescence",TYPE)][[colnames.type]]
         ##
         message(paste(fs.obj$keywords[,`$FIL`],"-->","transforming..."))
         for(j in cols.transform){

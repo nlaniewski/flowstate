@@ -60,7 +60,7 @@ spectral.signature.medians <- function(fcs.file.path,subtract.internal.negative=
   ##stop if not a reference control ('TYPE' == 'Raw_Fluorescence')
   raw.fluorescence.check(fcs.file.path)
   ##flowstate object; no transformation
-  fs<-flowstate::read.flowstate(
+  fs<-read.flowstate(
     fcs.file.path,
     colnames.type = "N",
     cofactor = NULL

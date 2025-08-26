@@ -7,7 +7,7 @@
 \method{plot}{flowstate}(x, ..., bins = 200, limits = NULL, sample.n = NULL)
 }
 \arguments{
-\item{x}{A flowstate object as returned from  \link{flowstate}.}
+\item{x}{A flowstate object as returned from \link{flowstate}.}
 
 \item{...}{... \link[ggplot2]{aes} arguments (unquoted variables); essentially x and y. If a \code{z} aesthetic is defined, the plot will switch to \link[ggplot2]{stat_summary_hex}, using this defined third variable as a 'color-by'.}
 

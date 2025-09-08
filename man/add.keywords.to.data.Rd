@@ -25,7 +25,6 @@ list.files(full.names = TRUE, pattern = "BLOCK.*.fcs")
 fs <- read.flowstate(
   fcs.file.paths,
   colnames.type="S",
-  cofactor = NULL,
   concatenate = TRUE
 )
 

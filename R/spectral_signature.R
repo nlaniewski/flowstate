@@ -62,8 +62,7 @@ spectral.signature.medians <- function(fcs.file.path,subtract.internal.negative=
   ##flowstate object; no transformation
   fs<-read.flowstate(
     fcs.file.path,
-    colnames.type = "N",
-    cofactor = NULL
+    colnames.type = "N"
   )
   ##density distributions to find singlet bead population;
   ##assumes singlet beads are represented by the highest/most dense peak;

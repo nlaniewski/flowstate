@@ -16,9 +16,11 @@
 #' fs <- read.flowstate(
 #'   fcs.file.paths,
 #'   colnames.type="S",
-#'   cofactor = 5000,
 #'   concatenate = TRUE
 #' )
+#'
+#' #transform
+#' flowstate.transform(fs,c('CD3','CD4','CD8','Viability'))
 #'
 #' #plot title
 #' no.fill.legend <- ggplot2::guides(fill = 'none')

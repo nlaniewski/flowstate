@@ -3,6 +3,7 @@
 S3method(plot,flowstate)
 export(add.keywords.to.data)
 export(concatenate.flowstate)
+export(flowstate.transform)
 export(read.flowstate)
 export(spillover.apply)
 export(spillover.update.value)

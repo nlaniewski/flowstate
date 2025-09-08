@@ -44,7 +44,6 @@ spillover.update.external<-function(flowstate.object,spillover.flowjo.path.csv){
 #' fs <- read.flowstate(
 #'   fcs.file.paths,
 #'   colnames.type="S",
-#'   cofactor = 5000,
 #'   concatenate = TRUE
 #' )
 #'
@@ -95,9 +94,11 @@ spillover.update.value<-function(flowstate.object,i,j,value){
 #' fs <- read.flowstate(
 #'   fcs.file.paths,
 #'   colnames.type="S",
-#'   cofactor = 5000,
 #'   concatenate = TRUE
 #' )
+#'
+#' #transform
+#' flowstate.transform(fs,c('CD4','CD8'))
 #'
 #' #row index; CD4 vs CD8
 #' index<-which(names(fs$spill) %in% c('CD4','CD8'))
@@ -128,10 +129,7 @@ spillover.apply<-function(flowstate.object,decompensate=FALSE){
   spill.index<-names(flowstate.object$spill)[spill.index]
   ##are any js in spill.index already transformed?
   if('transform' %in% names(flowstate.object$parameters)){
-    j.match<-flowstate.object$parameters[
-      ,
-      names(which(sapply(.SD,function(j){all(spill.index %in% j)})))[1]
-    ]
+    j.match <- j.match.parameters.to.data(flowstate.object)
     parameters.subset<-flowstate.object$parameters[
       i = flowstate.object$parameters[[j.match]] %in% spill.index & !is.na(transform)
     ]

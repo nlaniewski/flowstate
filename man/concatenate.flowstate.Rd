@@ -22,9 +22,9 @@ list.files(full.names = TRUE, pattern = "BLOCK.*.fcs")
 #read all .fcs files as flowstate objects
 fs <- read.flowstate(
   fcs.file.paths,
-  colnames.type="S",
-  cofactor = 5000
+  colnames.type="S"
 )
+
 #a list of flowstate objects
 class(fs)
 sapply(fs,class)

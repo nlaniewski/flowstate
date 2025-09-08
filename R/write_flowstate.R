@@ -102,6 +102,14 @@ write.flowstate.check <- function(flowstate.object,verbose=TRUE){
       print(res)
     }
   }
+  ##
+  res <- attr(flowstate.object$spill,'applied')
+  if(res){
+    if(verbose){
+      message("Decompensate using flowstate::spillover.apply(...,decompensate = TRUE)")
+      print(res)
+    }
+  }
 }
 ##flowstate parameters (data.table) to vector (string); function
 parameters.to.string<-function(fs.obj){

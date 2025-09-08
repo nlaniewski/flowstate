@@ -25,9 +25,11 @@ list.files(full.names = TRUE, pattern = "BLOCK.*.fcs")
 fs <- read.flowstate(
   fcs.file.paths,
   colnames.type="S",
-  cofactor = 5000,
   concatenate = TRUE
 )
+
+#transform
+flowstate.transform(fs,c('CD4','CD8'))
 
 #row index; CD4 vs CD8
 index<-which(names(fs$spill) \%in\% c('CD4','CD8'))

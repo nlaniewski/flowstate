@@ -50,7 +50,6 @@ spill.matrix.from.controls<-function(
   fs<-read.flowstate(
     batch.specific.control.paths,
     colnames.type = "N",
-    cofactor = NULL,
     sample.id = sample.id,
     concatenate = TRUE
   )

@@ -194,6 +194,8 @@ spill.to.data.table<-function(keywords,add.PROJ.identifier=TRUE){
     data.table::setattr(dt.spill,name = "applied",value = FALSE)
     ##
     return(dt.spill)
+  }else{
+    data.table::data.table()
   }
 }
 
@@ -272,11 +274,11 @@ flowstate.from.file.path<-function(fcs.file.path,S.func=NULL){
 #'   \item `"N"` -- `[['data']]` columns are named by using only their respective $PN (name) keyword value.
 #' }
 #' @param S.func a function; default `NULL`. If a function is supplied, it will be used to modify/split `"S"`; e.g. `function(j){strsplit(j," ")[[1]][1]}` will be applied to `"S"` to return the first split element ("CD4 PE" --> "CD4").
-#' @param cofactor Numeric; default `5000`. Any/all parameters with a `$PnTYPE` of 'Raw_Fluorescence' or 'Unmixed_Fluorescence' will be transformed using \link{asinh} and the defined cofactor value (`asinh(x/cofactor)`).
 #' @param sample.id Character string; the keyword label defined through `sample.id` (default `TUBENAME`) will be used to add respective keyword values from `[['keywords']]` as an identifier to `[['data']]`.
 #' @param concatenate Logical; if `TRUE`, the list of flowstate objects will be combined into a single flowstate object.
 #'
-#' @returns For a single file: an object of class flowstate; for multiple files: a list of flowstate objects
+#' @returns For a single file: an object of class flowstate; for multiple files: a list of flowstate objects.
+#' @seealso [flowstate.transform()]
 #' @export
 #'
 #' @examples
@@ -286,8 +288,7 @@ flowstate.from.file.path<-function(fcs.file.path,S.func=NULL){
 #' #read a single .fcs file as a flowstate object
 #' fs <- read.flowstate(
 #'   fcs.file.paths[1],
-#'   colnames.type="S",
-#'   cofactor = 5000
+#'   colnames.type="S"
 #' )
 #' class(fs)
 #'
@@ -302,17 +303,16 @@ flowstate.from.file.path<-function(fcs.file.path,S.func=NULL){
 #' fs <- read.flowstate(
 #'   fcs.file.paths,
 #'   colnames.type="S",
-#'   cofactor = 5000,
 #'   concatenate = TRUE
 #' )
 #' class(fs)
 #' fs$keywords
+#' fs$data[,levels(sample.id)]
 #'
 read.flowstate<-function(
     fcs.file.paths,
     colnames.type=c("S_N","S","N"),
     S.func=NULL,
-    cofactor=5000,
     sample.id='TUBENAME',
     concatenate=FALSE
 )
@@ -346,29 +346,6 @@ read.flowstate<-function(
       )
     })
   )
-  ##transform [['data']]
-  if(!is.null(cofactor)){
-    invisible(
-      lapply(fs,function(fs.obj){
-        ##Cytek Aurora; spectral keyword/value; $PnTYPE/Unmixed_Fluorescence
-        cols.transform<-fs.obj$parameters[grep("[RawUnmixed]_Fluorescence",TYPE)][[colnames.type]]
-        ##
-        message(paste(fs.obj$keywords[,`$FIL`],"-->","transforming..."))
-        for(j in cols.transform){
-          data.table::set(
-            x = fs.obj$data,
-            j = j,
-            value = asinh(fs.obj$data[[j]]/cofactor)
-          )
-        }
-        ##
-        fs.obj$parameters[
-          i = fs.obj$parameters[[colnames.type]] %in% cols.transform,
-          j = c('transform','cofactor'):=list('asinh',cofactor)
-        ]
-      })
-    )
-  }
   ##add an identifier to [['data']]
   invisible(
     lapply(fs,function(fs.obj){

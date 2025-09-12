@@ -1,6 +1,6 @@
 #' @title Plot flowstate data
 #'
-#' @param x A flowstate object as returned from [flowstate].
+#' @param x A flowstate object as returned from [read.flowstate].
 #' @param ... ... \link[ggplot2]{aes} arguments (unquoted variables); essentially x and y. If a `z` aesthetic is defined, the plot will switch to \link[ggplot2]{stat_summary_hex}, using this defined third variable as a 'color-by'.
 #' @param bins \link[ggplot2]{geom_hex} argument; numeric giving the number of bins in both vertical and horizontal directions.
 #' @param limits \link[ggplot2]{continuous_scale} argument.

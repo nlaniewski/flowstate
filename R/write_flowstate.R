@@ -17,7 +17,7 @@ data.cols.to.numeric <- function(flowstate.object){
       data.table::set(
         x = flowstate.object$data,
         j = j,
-        value = as.numeric(flowstate.object$data[[j]])
+        value = as.numeric(flowstate.object$data[[j]])#returns factor levels
       )
     }
   }else{
@@ -65,7 +65,8 @@ keywords.to.character<-function(flowstate.object){
     message("No columns identified for conversion to character.")
   }
 }
-##a few checks with some verbose output; eventually update with automatic execution of the individually named functions within the check
+##a few checks with some verbose output;
+##eventually update with automatic execution of the individually named functions within the check
 write.flowstate.check <- function(flowstate.object,verbose=TRUE){
   ##
   j.match <- j.match.parameters.to.data(flowstate.object)
@@ -150,7 +151,51 @@ spill.to.string<-function(fs.obj){
   ##
   return(spill.string)
 }
-write.flowstate<-function(flowstate.object,new.fil=NULL,file.dir,endianness = c('little','big')){
+write.flowstate <- function(
+    flowstate.object,
+    new.fil=NULL,
+    add.fil.mod=TRUE,
+    file.dir,
+    endianness = c('little','big')
+)
+{
+  ##PREPARE flowstate.object START
+  j.match <- j.match.parameters.to.data(flowstate.object)
+  ##inverse transformation of [['data']] columns
+  res <- flowstate.object$parameters[,any(!is.na(transform))]
+  if(res){
+    flowstate.transform.inverse(flowstate.object)
+  }
+  ##convert non-numeric (factored) [['data']] columns
+  res <- flowstate.object$data[
+    ,
+    any(sapply(.SD,class)!="numeric"),
+    .SDcols = !'sample.id'
+  ]
+  if(res){
+    suppressMessages(
+      data.cols.to.numeric(flowstate.object)
+    )
+  }
+  ##convert non-character (factored/numeric) [['keyword']] columns
+  res <- any(flowstate.object$keywords[,sapply(.SD,class)!="character"])
+  if(res){
+    suppressMessages(
+      keywords.to.character(flowstate.object)
+    )
+  }
+  ##update [['parameters']] to match [['data']]; derived columns
+  res <-any(
+    !flowstate.object$data[,names(.SD),.SDcols = !'sample.id'] %in%
+      flowstate.object$parameters[[j.match]]
+  )
+  if(res){
+    ##needs re-assignment
+    flowstate.object$parameters <- parameters.dt.update(flowstate.object)
+  }
+  ##PREPARE flowstate.object END
+
+  ##
   byteord<-switch(
     match.arg(endianness),
     little = "1,2,3,4",
@@ -160,8 +205,6 @@ write.flowstate<-function(flowstate.object,new.fil=NULL,file.dir,endianness = c(
   ##identifiers will have a class of factor
   cols.null<-flowstate.object$data[,names(.SD),.SDcols = is.factor]
   flowstate.object$data[,(cols.null):=NULL]
-  ##reverse any transformations
-  flowstate.transform.inverse(flowstate.object)
   ##required FCS keywords
   keywords.required<-fcs.text.primary.required.keywords
   keywords.required<-stats::setNames(nm=keywords.required,rep("0",length(keywords.required)))
@@ -182,6 +225,12 @@ write.flowstate<-function(flowstate.object,new.fil=NULL,file.dir,endianness = c(
   keyword.list[['$PAR']]<-as.character(ncol(flowstate.object$data))
   ##update '$FIL'
   if(!is.null(new.fil)){
+    if(add.fil.mod){
+      new.fil <- sprintf("%s_flowstateMOD",new.fil)
+    }
+    if(!grepl(".fcs$",new.fil)){
+      new.fil <- paste0(new.fil,".fcs")
+    }
     keyword.list[['$FIL']]<-new.fil
   }
   ##TEXT segment
@@ -240,6 +289,7 @@ write.flowstate<-function(flowstate.object,new.fil=NULL,file.dir,endianness = c(
     stop("HEADER segment does not match expected byte length/nchar of 58")
   }
   ##
+  if(!dir.exists(file.dir)){dir.create(file.dir,recursive = T)}
   filename<-file.path(file.dir,keyword.list[['$FIL']])
   con <- file(filename, open = "wb")
   on.exit(close(con))

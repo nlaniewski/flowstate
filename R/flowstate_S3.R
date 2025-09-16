@@ -3,9 +3,7 @@ new_flowstate <- function(
     data = data.table::data.table(),
     parameters = data.table::data.table(),
     keywords = data.table::data.table(),
-    spill = data.table::data.table(),
-    meta = data.table::data.table(),
-    conc = data.table::data.table()
+    spill = data.table::data.table()
 ){
   #validate
   sapply(ls(environment()),function(arg){

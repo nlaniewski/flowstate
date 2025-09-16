@@ -19,6 +19,7 @@ concatenate.test<-function(flowstate.objects){
   }else{
     colnames.data<-colnames.data[[1]]
   }
+  ##
   message("Concatenating 'flowstate.ojects'...")
 }
 
@@ -83,35 +84,27 @@ parameters.unique<-function(flowstate.objects){
 #' fs$data
 #' fs$parameters
 #' fs$keywords
+#' fs$spill
 concatenate.flowstate<-function(flowstate.objects){
   ##test if objects can be concatenated
   concatenate.test(flowstate.objects)
-
+  ##is there [['spill']]"
+  res.spill <- any(sapply(flowstate.objects,function(fs) 'spill' %in% names(fs)))
   ##create a flowstate (fs) S3 object ; class 'flowstate'
   fs <- flowstate(
     data = data.table::rbindlist(lapply(flowstate.objects,'[[','data')),
     parameters = parameters.unique(flowstate.objects),
     keywords = data.table::rbindlist(lapply(flowstate.objects,'[[','keywords'),fill=TRUE),
-    spill = unique(lapply(flowstate.objects,'[[','spill'))[[1]],#needs more testing,
-    meta = data.table::rbindlist(lapply(flowstate.objects,'[[','meta'))
+    spill = if(res.spill){
+      unique(lapply(flowstate.objects,'[[','spill'))[[1]]#needs more testing
+    }else{
+      data.table::data.table()
+    }
   )
-  # ##S3 'flowstate' object structure; NULL
-  # fs<-structure(
-  #   list(
-  #     data = NULL,
-  #     parameters = NULL,
-  #     keywords = NULL,
-  #     spill = NULL,
-  #     meta = NULL
-  #   ),
-  #   class = 'flowstate'
-  # )
-  # ##populate the object
-  # fs[['data']] <- data.table::rbindlist(lapply(flowstate.objects,'[[','data'))
-  # fs[['parameters']] <- parameters.unique(flowstate.objects)
-  # fs[['keywords']] <- data.table::rbindlist(lapply(flowstate.objects,'[[','keywords'))
-  # fs[['spill']] <- unique(lapply(flowstate.objects,'[[','spill'))[[1]]#needs more testing
-  # fs[['meta']] <- data.table::rbindlist(lapply(flowstate.objects,'[[','meta'))
+  ##any/all concatenated .fcs files should return:
+  ##[['data']], [['parameters']], and [['keywords']]
+  ##may not have spill (mass cytometry)
+  if(fs[['spill']][,.N]==0){fs[['spill']] <- NULL}
   ##return
   return(fs)
 }

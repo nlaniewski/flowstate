@@ -21,38 +21,6 @@ raw.fluorescence.check<-function(fcs.file.path){
     )
   }
 }
-peak.height.cut<-function(j,height.value=.5,plot=F){
-  ##density
-  d<-stats::density(j)
-  ##peak values
-  i <- which.max(d$y)
-  peak.max.y <- d$y[i]
-  peak.max.x <- d$x[i]
-  ##height adjust
-  i.height <- which.min(abs(d$y - peak.max.y*height.value))
-  i.adjust<-abs(i-i.height)
-  bins<-c(i-i.adjust,i+i.adjust)
-  if(plot){
-    ##plot derivatives
-    plot(d)
-    graphics::abline(v=peak.max.x)
-    graphics::abline(v=d$x[bins],col='red',lty='dotted')
-    graphics::abline(h=d$y[i.height],col = 'blue',lty = 'dashed')
-  }
-  ##return bin values
-  d$x[bins]
-}
-peak.values<-function(j,return.n.peaks=2,plot=F){
-  d<-stats::density(j)
-  peaks.i<-which(diff(sign(diff(d$y)))==-2)+1
-  peaks.i<-peaks.i[order(d$y[peaks.i],decreasing = T)][seq(return.n.peaks)]
-  peaks.values<-d$x[peaks.i]
-  if(plot){
-    plot(d)
-    graphics::abline(v=peaks.values)
-  }
-  return(peaks.values)
-}
 
 spectral.signature.medians <- function(fcs.file.path,subtract.internal.negative=FALSE){
   ##test;

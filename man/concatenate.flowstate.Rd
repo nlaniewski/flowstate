@@ -36,4 +36,5 @@ class(fs)
 fs$data
 fs$parameters
 fs$keywords
+fs$spill
 }

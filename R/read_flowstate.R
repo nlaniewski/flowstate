@@ -260,6 +260,10 @@ flowstate.from.file.path<-function(fcs.file.path,S.func=NULL){
     keywords = keywords.to.data.table(keywords,drop.primary = TRUE,drop.spill = TRUE),
     spill = spill.to.data.table(keywords)
   )
+  ##any/all .fcs files should return:
+  ##[['data']], [['parameters']], and [['keywords']]
+  ##may not have spill (mass cytometry)
+  if(fs[['spill']][,.N]==0){fs[['spill']] <- NULL}
   ##
   return(fs)
 }
@@ -340,10 +344,12 @@ read.flowstate<-function(
   ##update [['spill']] to match
   invisible(
     lapply(fs,function(fs.obj){
-      data.table::setnames(
-        x = fs.obj$spill,
-        new = fs.obj$parameters[[colnames.type]][match(names(fs.obj$spill),fs.obj$parameters[['N']])]
-      )
+      if('spill' %in% names(fs.obj)){#[['spill']] may not be present (mass cytometry)
+        data.table::setnames(
+          x = fs.obj$spill,
+          new = fs.obj$parameters[[colnames.type]][match(names(fs.obj$spill),fs.obj$parameters[['N']])]
+        )
+      }
     })
   )
   ##add an identifier to [['data']]

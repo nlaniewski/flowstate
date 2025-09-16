@@ -215,9 +215,15 @@ write.flowstate <- function(
   keyword.string<-c(
     keywords.required,
     parameters.to.string(flowstate.object),
-    unlist(flowstate.object$keywords),
-    spill.to.string(flowstate.object)
+    unlist(flowstate.object$keywords)
+    # flowstate:::spill.to.string(flowstate.object)
   )
+  if('spill' %in% names(flowstate.object)){
+    keyword.string<-c(
+      keyword.string,
+      spill.to.string(flowstate.object)
+    )
+  }
   keyword.list<-as.list(keyword.string)
   keyword.list<-keyword.list[order(names(keyword.list))]
   ##update; flowstate.object-specific

@@ -4,18 +4,24 @@
 \alias{add.keywords.to.data}
 \title{Add keyword values to \code{flowstate[['data']]}}
 \usage{
-add.keywords.to.data(flowstate.object, keywords)
+add.keywords.to.data(flowstate.object, keywords, type.convert = TRUE)
 }
 \arguments{
 \item{flowstate.object}{A flowstate object as returned from \link{read.flowstate}.}
 
 \item{keywords}{Character string; keyword names in \code{flowstate[['keywords']]} whose factored values will be added to \code{flowstate[['data']]}.}
+
+\item{type.convert}{Logical; default \code{TRUE}. For any \code{keywords} of class \code{character}, conversion to \code{factor} will take place before addition to \verb{[['data']]}.}
 }
 \value{
-UPDATES \code{flowstate[['data']]} BY REFERENCE.
+UPDATES BY REFERENCE:
+\itemize{
+\item \code{flowstate[['data']]}; factored \code{keywords} are added as additional columns.
+\item \code{flowstate[['keywords']]}; if \code{type.convert}, \code{keywords} are converted to class \code{factor}.
+}
 }
 \description{
-Used for fast addition of factored keyword values to \code{flowstate[['data']]}; updates by reference.
+Used for efficient addition of factored keyword values to \code{flowstate[['data']]}; updates by reference.
 }
 \examples{
 fcs.file.paths <- system.file("extdata", package = "flowstate") |>
@@ -40,4 +46,9 @@ add.keywords.to.data(fs,c('block.id','block.aliquot'))
 
 fs$data[,.(block.id,block.aliquot)]
 
+#add to keyword [['data']] using type.convert argument
+add.keywords.to.data(fs,c('$DATE','$PROJ'),type.convert=TRUE)
+
+fs$data[,.(`$DATE`,`$PROJ`)]
+fs$keywords[,.(`$DATE`,`$PROJ`)]
 }

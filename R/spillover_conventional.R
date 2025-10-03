@@ -36,13 +36,15 @@ spill.matrix.from.controls<-function(
   }
   ##density distributions to find singlet bead population;
   ##assumes singlet beads are represented by the highest/most dense peak;
-  ##cut FSC and SSC peaks (at % height = x) to isolate singlet beads using 'peak.height.cuts' function
+  ##cut FSC and SSC peaks (at % height = x) to isolate singlet beads using 'peak.height.cut' function
   ##works for all but 'ARC LIVEDEAD (Violet G)' beads
+  cols.scatter <- c('FSC_A','SSC_A')
   fs$data[
     # i = sample.id != "VioletG550/40",
-    j = scatter.select :=
-      data.table::`%between%`(FSC_A,peak.height.cuts(FSC_A,height.value = 0.25,which.peak = 1)[[1]]) &
-      data.table::`%between%`(SSC_A,peak.height.cuts(SSC_A,height.value = 0.25,which.peak = 1)[[1]]),
+    j = sapply(.SD,function(j){
+      data.table::`%between%`(j,peak.height.cut(j,height.cut = 0.25))
+    }) |> rowSums() == length(cols.scatter),
+    .SDcols = cols.scatter,
     by = sample.id
   ]
   ##scatter select override for the case where a 'dominant/singular' bead peak cannot be defined
@@ -58,14 +60,14 @@ spill.matrix.from.controls<-function(
           j = 'scatter.select',
           value = fs$data[
             i = grepl(detector,sample.id),
-            j = data.table::`%between%`(j,peak.height.cuts(j,height.value = 0.25,which.peak = 1)[[1]]),
+            j = data.table::`%between%`(j,peak.height.cut(j,height.value = 0.25,which.peak = 1)),
             env = list(j = scatter)
           ]
         )
       }
     }
   }
-  ##plot results for 'peak.height.cuts'
+  ##plot results for 'peak.height.cut'
   if(plot){
     dt.melt <- data.table::melt(
       fs$data[,.(sample.id,scatter.select,FSC_A,SSC_A)],
@@ -111,7 +113,7 @@ spill.matrix.from.controls<-function(
   if(!res){stop("Control names do not match peak detector names.")}
   ##density distribution of peak detector using selected scatter events (singlets);
   ##assumes two major peaks (negative/positive);
-  ##bisect positive peak using return value from 'peak.height.cuts' function; second peak
+  ##bisect positive peak using return value from 'peak.height.cut' function; second peak
   fs$data[,detector.select := FALSE]
   for(fluor in fluors){
     data.table::set(
@@ -120,7 +122,7 @@ spill.matrix.from.controls<-function(
       j = 'detector.select',
       value =fs$data[
         i = sample.id %in% fluor & (scatter.select),
-        j = data.table::`%between%`(j,peak.height.cuts(j,which.peak = 2)[[1]]),
+        j = data.table::`%between%`(j,peak.height.cut(j,which.peak = 2)),
         env = list(j = fluor)
       ]
     )

@@ -82,121 +82,148 @@ plot_pairs<-function (plot.dims)
   }
   pair.list <- mapply(c, pair.1, pair.2, SIMPLIFY = F, USE.NAMES = F)
 }
-
-plot_samples.barcode.assigned<-function(
-    flowstate.object,
-    col.pattern = "CD45BC",
-    bins.N=200,
-    metadata.include=c('sample.id','batch.name','block.id','well'))
-{
-  ##barcode columns
-  barcode.dims<-grep(col.pattern,names(flowstate.object$data),value = T)
-  ##plot metadata
-  plot.metadata <- flowstate.object$data[
-    barcode!=0 & cut == FALSE,
-    j = list(
-      total.events = .N,
-      nodes.assigned = node_barcode |> unique() |> sort() |> paste0(collapse = ",")
+nxn <- function(x){
+  dt.melt <- data.table::melt(
+    data = x[,id := seq(.N)],
+    id.vars = 'id',
+    value.name = 'value.x',
+    variable.name = 'variable.x'
+  )
+  dt.melt <- data.table::merge.data.table(
+    x = dt.melt,
+    y = data.table::setnames(
+      data.table::copy(dt.melt),
+      c("variable.x", "value.x"),
+      c("variable.y", "value.y")
     ),
+    allow.cartesian = TRUE
+  )[,id := NULL]
+  cols.plot <- dt.melt[, levels(variable.x)]
+  cols.combn <- as.list(as.data.frame(utils::combn(cols.plot,2)))
+  dt.melt[,combn.drop := TRUE]
+  invisible(lapply(cols.combn, function(col.combn) {
+    data.table::set(
+      x = dt.melt,
+      i = dt.melt[,.I[variable.x == col.combn[1] & variable.y == col.combn[2]]],
+      j = "combn.drop",
+      value = FALSE)
+  }))
+  dt.melt <- (
+    dt.melt[combn.drop == FALSE]
+    [,combn.drop := NULL]
+  )
+  invisible(dt.melt)
+}
+plot_nxn_barcodes_assigned_samples <- function(
+    flowstate.object,
+    censor=TRUE,
+    col.pattern = "CD45BC",
+    sample.n = 5E4,
+    metadata.include = c("sample.id","batch","block.id","well")
+)
+{
+  ##
+  js <- grep(col.pattern,names(flowstate.object$data),value = T)
+  ##
+  # lims <- fs$data[
+  #   i = (!barcode.censor),
+  #   j = lapply(.SD, range),
+  #   .SDcols = cols.barcode
+  # ]
+  ##background/silhouette; aggregate data
+  background <- flowstate.object$data[
+    i = (!barcode.censor),
+    j = nxn(.SD[{set.seed(1337);sample(.N,sample.n)}]),
+    .SDcols=js
+  ]
+  ##foreground/sample-specific data; as a keyed (barcode) data.table
+  foreground <- flowstate.object$data[
+    i = (!barcode.censor),
+    j = nxn(.SD[{set.seed(1337);sample(.N,sample.n)}]),
+    .SDcols=js,
     keyby = barcode
   ]
-  plot.metadata[
+  ##metadata for plot
+  metadata.for.plot <- flowstate.object$data[
     ,
-    barcode.alias := paste0(utils::combn(length(barcode.dims),3)[,barcode],collapse = " : "),
+    .(
+      N = .N,
+      nodes.assigned = paste0(sort(unique(node_barcode)),collapse = ","),
+      barcode.alias = paste0(utils::combn(length(js),3)[, barcode], collapse = " : ")
+    ),
+    keyby = .(barcode,barcode.censor)
+  ]
+  metadata.for.plot <- metadata.for.plot[
+    ,
+    .(
+      totals = sprintf("%d (%d)",N[(!barcode.censor)],N[(barcode.censor)]),
+      nodes.assigned = unique(nodes.assigned),
+      barcode.alias = unique(barcode.alias)
+    ),
     by=barcode
   ]
-  plot.metadata <- plot.metadata[flowstate.object$meta,on='barcode']
-  cols.convert<-plot.metadata[,names(.SD),.SDcols = is.factor]
-  for(j in cols.convert){
+  metadata.for.plot <- (
+    flowstate.object$keywords[,.SD,.SDcols = c('barcode',metadata.include)]
+    [,barcode := as.numeric(barcode)]
+    [metadata.for.plot,on='barcode']
+  )
+  cols.convert <- metadata.for.plot[, names(.SD), .SDcols = is.factor]
+  for (j in cols.convert) {
     data.table::set(
-      x = plot.metadata,
+      x = metadata.for.plot,
       j = j,
-      value = as.character(plot.metadata[[j]])
+      value = as.character(metadata.for.plot[[j]])
     )
   }
-  ##axis limits
-  lims<-flowstate.object$data[
-    barcode!=0 & cut==FALSE,
-    lapply(.SD,range),.SDcols = barcode.dims
-  ]
-  ##plot pairs
-  pp<-plot_pairs(barcode.dims)
-  ##events to sample for background
-  sample.N<-floor(1E5/flowstate.object$data[barcode!=0&cut==FALSE,length(unique(barcode))])
-  ##background data
-  dt.bkgd<-flowstate.object$data[,.SD[sample(.N,sample.N)],by=barcode,.SDcols = barcode.dims][,!'barcode']
-  ##
-  plot.bodies<-lapply(pp,function(.pp){
-    ggplot2::ggplot(
-      data = dt.bkgd,
-      mapping = ggplot2::aes(
-        x = !!as.name(.pp[1]),
-        y = !!as.name(.pp[2]))
-    ) +
+  ##create ggplot object
+  plot.body <- ggplot2::ggplot(
+    data = NULL,
+    mapping = ggplot2::aes(value.x,value.y)
+  )
+  ##add background data
+  p <- plot.body +
+    ggplot2::geom_hex(
+      data = background,
+      bins = 100,
+      fill = "gray"
+    )
+  ##sample-specific plots; as a list
+  p.list <- sapply(foreground[,unique(barcode)],function(bc,mdat=metadata.for.plot[barcode == bc]){
+    ##add foreground data
+    p <- p +
       ggplot2::geom_hex(
-        fill='gray',
-        bins=bins.N
+        data = foreground[barcode == bc],
+        bins = 100,
+        show.legend = FALSE
       ) +
-      ggplot2::coord_cartesian(
-        xlim = lims[[.pp[1]]],
-        ylim = lims[[.pp[2]]]
-      ) +
-      ggplot2::theme_classic() +
-      ggplot2::guides(fill = "none")
-  })
-  ##
-  plotlist<-lapply(
-    split(
-      flowstate.object$data[
-        barcode!=0 & cut == FALSE,
-        .SD,
-        .SDcols = c(barcode.dims,'barcode')
-      ],
-      by='barcode',
-      sorted = T),
-    function(dt){
-      .barcode <- dt[,unique(barcode)]
-      plot.bodies.barcode<-lapply(plot.bodies,function(.plot){
-        .plot<-.plot +
-          ggplot2::geom_hex(
-            data = dt,
-            bins = bins.N
-          ) +
-          viridis::scale_fill_viridis(
-            option = "plasma",
-            limits = NULL,
-            oob = scales::squish
-          )
-      })
-      ##
-      patchwork::wrap_plots(plot.bodies.barcode,guides = 'collect') +
-        patchwork::plot_annotation(
-          title=paste0(
-            plot.metadata[
-              barcode == .barcode,
-              paste("Barcode:",barcode, paste0("(",barcode.alias,")"))
-            ],
-            "\n",
-            plot.metadata[
-              barcode == .barcode,
-              paste("N:", total.events)
-            ],
-            "\n",
-            plot.metadata[
-              barcode == .barcode,
-              paste("Barcode-specific Nodes:", nodes.assigned)
-            ],
-            "\n",
-            "\n",
-            plot.metadata[
-              barcode == .barcode,
-              paste(metadata.include,.SD,sep = ": ",collapse = "\n"),
-              .SDcols = metadata.include
-            ]
-          ),
-          theme = ggplot2::theme(plot.title = ggplot2::element_text(size = 12))
+      viridis::scale_fill_viridis(
+        option = "plasma",
+        limits = c(0,100),
+        oob = scales::squish
+      )
+    ##add faceting and theme
+    p <- p +
+      ggplot2::facet_grid(variable.y~variable.x,scales="free") +
+      ggplot2::theme_void()
+    ##add metadata
+    p <- p +
+      ggplot2::labs(
+        title = mdat[,sprintf("Barcode: %d  (%s)",barcode,barcode.alias)],
+        subtitle = paste0(mdat[
+          ,
+          j = paste(metadata.include, .SD, sep = ": ",collapse = "\n"),
+          .SDcols = metadata.include
+        ],'\n'),
+        caption = paste(
+          mdat[,sprintf("Barcode-specific Nodes: %s",nodes.assigned)],
+          mdat[,sprintf("Totals: %s (# = censored events)",totals)],
+          sprintf("Displayed: %d randomly sampled",sample.n),
+          sep = "     "
         )
-    })
+      )
+    ##
+    return(p)
+  },simplify = F)
   ##
-  return(plotlist)
+  return(p.list)
 }

@@ -2,6 +2,7 @@
 "_PACKAGE"
 
 ## usethis namespace: start
+#' @importFrom data.table .BY
 #' @importFrom data.table .I
 #' @importFrom data.table .N
 #' @importFrom data.table .SD

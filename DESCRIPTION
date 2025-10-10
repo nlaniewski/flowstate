@@ -11,10 +11,13 @@ RoxygenNote: 7.3.2
 Imports:
     data.table,
     ggplot2,
+    ggridges,
     graphics,
+    grDevices,
     methods,
     scales,
     stats,
+    stringr,
     utils,
     viridis
 URL: https://github.com/nlaniewski/flowstate

@@ -1,7 +1,7 @@
 #' @title Transform `flowstate[['data']]`
 #'
 #' @param flowstate.object A flowstate object as returned from [read.flowstate].
-#' @param .j Character vector; columns in `[['data']]` that are to be transformed.
+#' @param .j Default `NULL`; any/all parameters having a keyword-value pair of `TYPE/Unmixed_Fluorescence` will be transformed in `[['data']]`.  If a character vector: specific columns in `[['data']]` that are to be transformed.
 #' @param transform.type Character string; default \link{asinh}. Quoted function that will be used to transform `.j` in `[['data']]`.
 #' @param cofactor Numeric; if `transform.type` = \link{asinh} (default), the cofactor will be used to modify the transformation.
 #'
@@ -34,15 +34,30 @@
 #'   transform.type = "asinh",
 #'   cofactor = 5000
 #' )
+#' #updated parameters
+#' fs$parameters[!is.na(transform)]
 #'
 #' #plot and mean values of transformed columns from updated fs[['data']]
 #' plot(fs,CD3,CD8) + ggplot2::guides(fill = 'none')
 #' fs$data[,sapply(.SD,mean),.SDcols = c('CD3','CD4','CD8')]
 #'
+#' #transform all
+#' flowstate.transform(
+#'   fs,
+#'   .j = NULL,
+#'   transform.type = "asinh",
+#'   cofactor = 5000
+#' )
+#'
 #' #updated parameters
 #' fs$parameters[!is.na(transform)]
 #'
-flowstate.transform<-function(flowstate.object,.j,transform.type="asinh",cofactor=5000){
+flowstate.transform<-function(flowstate.object,.j = NULL,transform.type="asinh",cofactor=5000){
+  ##name of [['parameters']] column that matches [['data']]
+  j.match <- j.match.parameters.to.data(flowstate.object)
+  if(is.null(.j)){
+    .j <- flowstate.object$parameters[TYPE == 'Unmixed_Fluorescence'][[j.match]]
+  }
   if(!all(.j %in% names(flowstate.object$data))){
     stop(paste(
       paste0(.j[!.j %in% names(flowstate.object$data)],collapse = ", "),
@@ -50,11 +65,15 @@ flowstate.transform<-function(flowstate.object,.j,transform.type="asinh",cofacto
     )
   }
   ##
-  j.match <- j.match.parameters.to.data(flowstate.object)
-  ##
   if('transform' %in% names(flowstate.object$parameters)){
     if(any(.j %in% flowstate.object$parameters[!is.na(transform)][[j.match]])){
-      stop("Transformation has already been applied to .j!")
+      .j <- .j[!.j %in% flowstate.object$parameters[!is.na(transform)][[j.match]]]
+      # stop("Transformation has already been applied to .j!")
+      if(length(.j)==0){
+        return(
+          message("Transformation has already been applied to .j!")
+        )
+      }
     }
   }
   ##

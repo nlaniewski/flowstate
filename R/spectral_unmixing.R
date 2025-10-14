@@ -1,3 +1,26 @@
+raw.fluorescence.check<-function(fcs.file.path){
+  pars<-readFCStext(fcs.file.path) |>
+    parameters.to.data.table()
+  if("TYPE" %in% names(pars)){
+    if(!"Raw_Fluorescence" %in% pars[['TYPE']]){
+      stop(
+        paste(
+          fcs.file.path,
+          "'Raw_Fluorescence' value not found in 'TYPE' keyword; is this a reference control?",
+          sep = "\n"
+        )
+      )
+    }
+  }else{
+    stop(
+      paste(
+        fcs.file.path,
+        "'TYPE' keyword not found; is this a full spectrum .fcs file (version 3.1)?",
+        sep = "\n"
+      )
+    )
+  }
+}
 reference.group.keywords <- function(
     flowstate.object,
     internal.negative = NULL
@@ -140,13 +163,6 @@ select.detector <- function(
   }
   ##
   if(plot){
-    # plot(.SD[[detector.peak]],type = 'p',ylab = detector.peak,
-    #      col = scales::alpha(ifelse(vec,'red','black'),0.3),pch=19)
-    # graphics::title(
-    #   main = sprintf("%s\nDetector (Peak): %s",sample.id,detector.peak),
-    #   sub = sprintf("%d 'spectral' events selected in %s for calculating per-detector (n = %d) medians.",
-    #                 length(which(vec)), detector.peak, length(.SD))
-    # )
     p <- ggplot2::ggplot() +
       ggplot2::geom_hex(
         data = NULL,
@@ -179,7 +195,47 @@ select.detector <- function(
   ##
   list(detector.peak,vec)
 }
-##
+#' @title A flowstate containing spectrally-associated bead/cellular events.
+#' @description
+#' This function is entirely dependent on the following:
+#' \itemize{
+#'   \item Spectroflo software raw reference controls  -- tested using SpectroFlo 3.3.0.
+#'   \item Spectroflo software naming convention:
+#'   \itemize{
+#'     \item Directory -- './Raw/Reference Group/...'
+#'     \item File names -- 'MARKER FLUOR (Beads|Cells).fcs' (literal space characters separating)
+#'     \item Quality reference controls -- well resolved, dominant scatter populations
+#'   }
+#' }
+#'
+#' @param raw.reference.group.directory Character vector; a file path to a SpectroFlo Raw Reference Group directory.
+#' @param internal.negative Character vector; spectral events associated with an internal negative population will be generated for any named reference controls.
+#' @param n Numeric; default 500. Orders the top `n` expressing events and aids in auto-detection of peak detector; used by an internal helper function.
+#' @param plot.select Logical; default `FALSE`. Plots diagnostic/QC output for evaluating function performance.
+#' @param plot.select.dir Character vector; a file path for storing plot output.
+#'
+#' @returns A flowstate containing spectrally-associated bead/cellular events. `[['data']]` will contain appended columns/metadata.
+#' @export
+#'
+#' @examples
+#' raw.ref.dir <- system.file("extdata", package = "flowstate") |>
+#' list.dirs() |>
+#' grep('Reference Group', x = _, value = TRUE)
+#'
+#' ref <- reference.group.spectral.events(
+#' raw.reference.group.directory = raw.ref.dir,
+#' internal.negative = NULL,
+#' n = 500,
+#' plot.select = TRUE,
+#' plot.select.dir = tempdir()
+#' )
+#'
+#' #plot output
+#' list.files(tempdir(),pattern = "select.*.pdf")
+#'
+#' #spectral events
+#' ref$data
+#'
 reference.group.spectral.events <- function(
     raw.reference.group.directory,
     internal.negative = NULL,
@@ -352,4 +408,73 @@ plot_spectral.ridges <- function(flowstate.object.reference,plot.dir=tempdir()){
     .SDcols = cols.detector,
     by = cols.by
   ]
+}
+##
+reference.group.medians <- function(flowstate.object.reference){
+  j.match <- j.match.parameters.to.data(flowstate.object.reference)
+  cols.detector <- flowstate.object.reference$parameters[TYPE == "Raw_Fluorescence"][[j.match]]
+  cols.by <- flowstate.object.reference$data[,names(.SD),.SDcols = !is.numeric]
+  ##generate medians
+  res.medians <- flowstate.object.reference$data[
+    ,
+    j = lapply(.SD,stats::median),
+    .SDcols = cols.detector,
+    by = cols.by
+  ]
+  ##ids for controls using an internal subtrahend
+  ids.internal <- res.medians[
+    i = subtract.type == 'internal',
+    as.character(sample.id)
+  ]
+  ##subtract subtrahend from internals
+  for(.sample.id in ids.internal){
+    ##subtraction vector
+    subtrahend <- res.medians[
+      i = (sample.id == .sample.id
+           & subtract.type == 'subtrahend'),
+      j = unlist(.SD),
+      .SDcols = cols.detector
+    ]
+    ##sweep out the subtrahend
+    res.medians[
+      i = sample.id == .sample.id,
+      j = (cols.detector) := sweep(.SD,2,subtrahend, `-`),
+      .SDcols = cols.detector
+    ]
+  }
+  ##subtract subtrahend from externals
+  for(.group.type in res.medians[,levels(group.type)]){
+    ##subtraction vector
+    subtrahend <- res.medians[
+      i = (group.type == .group.type
+           & reference.type == 'universal negative'
+           & subtract.type == 'subtrahend'),
+      j = unlist(.SD),
+      .SDcols = cols.detector
+    ]
+    ##sweep out the subtrahend
+    res.medians[
+      i = (group.type == .group.type
+           & subtract.type %in% c('external','subtrahend')
+           & !(autofluorescence )
+           & !sample.id %in% ids.internal),
+      j = (cols.detector) := sweep(.SD,2,subtrahend, `-`),
+      .SDcols = cols.detector
+    ]
+  }
+  ##drop subtrahends
+  res.medians <- res.medians[res.medians[,.SD |> rowSums() != 0,.SDcols = cols.detector]]
+  ##normalize
+  res.medians[
+    ,
+    j = (cols.detector) := {
+      j <- .SD/max(.SD)
+      j[j<0]<-0
+      j
+    },
+    .SDcols = cols.detector,
+    by = cols.by
+  ]
+  ##return the normalized medians
+  res.medians[]
 }

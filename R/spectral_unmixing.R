@@ -410,42 +410,42 @@ plot_spectral.ridges <- function(flowstate.object.reference,plot.dir=tempdir()){
   ]
 }
 ##
-reference.group.medians <- function(flowstate.object.reference){
+reference.group.medians <- function(flowstate.object.reference,name.fix=NULL){
   j.match <- j.match.parameters.to.data(flowstate.object.reference)
   cols.detector <- flowstate.object.reference$parameters[TYPE == "Raw_Fluorescence"][[j.match]]
   cols.by <- flowstate.object.reference$data[,names(.SD),.SDcols = !is.numeric]
   ##generate medians
-  res.medians <- flowstate.object.reference$data[
+  ref.medians <- flowstate.object.reference$data[
     ,
     j = lapply(.SD,stats::median),
     .SDcols = cols.detector,
     by = cols.by
   ]
   ##ids for controls using an internal subtrahend
-  ids.internal <- res.medians[
+  ids.internal <- ref.medians[
     i = subtract.type == 'internal',
     as.character(sample.id)
   ]
   ##subtract subtrahend from internals
   for(.sample.id in ids.internal){
     ##subtraction vector
-    subtrahend <- res.medians[
+    subtrahend <- ref.medians[
       i = (sample.id == .sample.id
            & subtract.type == 'subtrahend'),
       j = unlist(.SD),
       .SDcols = cols.detector
     ]
     ##sweep out the subtrahend
-    res.medians[
+    ref.medians[
       i = sample.id == .sample.id,
       j = (cols.detector) := sweep(.SD,2,subtrahend, `-`),
       .SDcols = cols.detector
     ]
   }
   ##subtract subtrahend from externals
-  for(.group.type in res.medians[,levels(group.type)]){
+  for(.group.type in ref.medians[,levels(group.type)]){
     ##subtraction vector
-    subtrahend <- res.medians[
+    subtrahend <- ref.medians[
       i = (group.type == .group.type
            & reference.type == 'universal negative'
            & subtract.type == 'subtrahend'),
@@ -453,7 +453,7 @@ reference.group.medians <- function(flowstate.object.reference){
       .SDcols = cols.detector
     ]
     ##sweep out the subtrahend
-    res.medians[
+    ref.medians[
       i = (group.type == .group.type
            & subtract.type %in% c('external','subtrahend')
            & !(autofluorescence )
@@ -463,9 +463,9 @@ reference.group.medians <- function(flowstate.object.reference){
     ]
   }
   ##drop subtrahends
-  res.medians <- res.medians[res.medians[,.SD |> rowSums() != 0,.SDcols = cols.detector]]
+  ref.medians <- ref.medians[ref.medians[,.SD |> rowSums() != 0,.SDcols = cols.detector]]
   ##normalize
-  res.medians[
+  ref.medians[
     ,
     j = (cols.detector) := {
       j <- .SD/max(.SD)
@@ -475,6 +475,31 @@ reference.group.medians <- function(flowstate.object.reference){
     .SDcols = cols.detector,
     by = cols.by
   ]
-  ##return the normalized medians
-  res.medians[]
+  ##modify 'ref.medians' for eventual use in an OLS fit as an overdetermined 'mix matrix'
+  ref.medians[
+    ,
+    j = c('N','S') := {
+      i <- sub(" \\(\\w+\\)","",as.character(.BY$sample.id))#subs out '(Beads|Cells)'
+      splits <- strsplit(i," ")
+      S <- sapply(splits,'[[',1)#marker
+      N <- trimws(sub(S,"",i))#fluor
+      N[grep("Unstained",S)] <- 'AF'
+      S[grep("Unstained",S)] <- NA
+      list(N,S)
+    },
+    by=sample.id
+  ]
+  ref.medians[,ord := seq(.N)]
+  ref.medians[N=='AF',ord := max(ref.medians[['ord']]) + 1]
+  data.table::setorder(ref.medians,ord)[,ord := NULL]#AF in last position
+  if(!is.null(name.fix)){
+    for(i in seq_along(name.fix)){
+      ref.medians[N == names(name.fix[i]), N := name.fix[[i]]]
+    }
+  }
+  ref.medians[is.na(S), alias := N]
+  ref.medians[!is.na(S),alias := paste(S,N)]
+  ##return the normalized reference control medians
+  ref.medians[]
 }
+##

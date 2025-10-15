@@ -15,6 +15,7 @@ fcs.text.primary.required.keywords<-
 flowstate.parameter.keywords<-
   c(
     'B',
+    'DETECTOR',
     'DISPLAY',
     'E',
     'N',

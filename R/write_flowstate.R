@@ -71,11 +71,13 @@ write.flowstate.check <- function(flowstate.object,verbose=TRUE){
   ##
   j.match <- j.match.parameters.to.data(flowstate.object)
   ##
-  res <- flowstate.object$parameters[!is.na(transform)][[j.match]]
-  if(length(res)>0){
-    if(verbose){
-      message("Inverse transform the following columns in [['data']] using flowstate:::flowstate.transform.inverse():")
-      print(res)
+  if('transform' %in% names(flowstate.object$parameters)){
+    res <- flowstate.object$parameters[!is.na(transform)][[j.match]]
+    if(length(res)>0){
+      if(verbose){
+        message("Inverse transform the following columns in [['data']] using flowstate:::flowstate.transform.inverse():")
+        print(res)
+      }
     }
   }
   ##
@@ -162,9 +164,11 @@ write.flowstate <- function(
   ##PREPARE flowstate.object START
   j.match <- j.match.parameters.to.data(flowstate.object)
   ##inverse transformation of [['data']] columns
-  res <- flowstate.object$parameters[,any(!is.na(transform))]
-  if(res){
-    flowstate.transform.inverse(flowstate.object)
+  if('transform' %in% names(flowstate.object$parameters)){
+    res <- flowstate.object$parameters[,any(!is.na(transform))]
+    if(res){
+      flowstate.transform.inverse(flowstate.object)
+    }
   }
   ##convert non-numeric (factored) [['data']] columns
   res <- flowstate.object$data[

@@ -1,0 +1,63 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# flowstate
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+`flowstate` provides a system for processing, analyzing, and visualizing Flow Cytometry Standard (FCS) data.
+
+The primary features of `flowstate`:
+* Read and parse .fcs files as flowstate objects (S3)
+* Perform spectral unmixing (Full Spectrum Cytometry/Spectral Cytometry)
+* Perform spillover compensation
+* Transform expression values (MFI/ion counts)
+* Visualize primary data
+* Write FCS version 3.1 compliant files
+
+## Installation
+
+You can install the development version of flowstate from [GitHub](https://github.com/) with:
+
+``` r
+# install.packages("pak")
+pak::pak("nlaniewski/flowstate")
+```
+
+## `flowstate` Generalized Workflow
+
+Paths to previously acquired .fcs files:
+
+```{r fcs.file.paths}
+fcs.file.paths <- system.file("extdata", package = "flowstate") |>
+  list.files(full.names = TRUE, pattern = "BLOCK.*.fcs")
+```
+
+Read/concatenate:
+
+```{r read.flowstate}
+fs <- flowstate::read.flowstate(fcs.file.paths,colnames.type = "S",concatenate = TRUE)
+```
+
+Transform:
+```{r flowstate.transform}
+flowstate::flowstate.transform(fs,transform.type = 'asinh',cofactor = 5000)
+```
+
+Visualize:
+```{r plot_CD3_Viability}
+plot(fs,CD3,Viability) + ggplot2::guides(fill = 'none')
+```

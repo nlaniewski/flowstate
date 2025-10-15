@@ -1,6 +1,6 @@
 Package: flowstate
 Title: Flow Cytometry Standard (FCS) Processing, Analysis, and Visualization
-Version: 0.9.2
+Version: 0.9.2.9000
 Authors@R: 
     person("Nathan", "Laniewski", email = "nathan_laniewski@urmc.rochester.edu", role = c("aut", "cre"))
 Description: Flow cytometry standard (.fcs) files are S3 structured to facilitate efficient processing, analysis, and visualization of data -- acheive your flow state.

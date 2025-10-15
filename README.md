@@ -10,11 +10,14 @@
 `flowstate` provides a system for processing, analyzing, and visualizing
 Flow Cytometry Standard (FCS) data.
 
-The primary features of `flowstate`: \* Read and parse .fcs files as
-flowstate objects (S3) \* Perform spectral unmixing (Full Spectrum
-Cytometry/Spectral Cytometry) \* Perform spillover compensation \*
-Transform expression values (MFI/ion counts) \* Visualize primary data
-\* Write FCS version 3.1 compliant files
+The primary features of `flowstate`:
+
+- Read and parse .fcs files as flowstate objects (S3)
+- Perform spectral unmixing (Full Spectrum Cytometry/Spectral Cytometry)
+- Perform spillover compensation/correction
+- Transform expression values (MFI/ion counts)
+- Visualize primary data
+- Write FCS version 3.1 compliant files
 
 ## Installation
 
@@ -58,7 +61,26 @@ flowstate::flowstate.transform(fs,transform.type = 'asinh',cofactor = 5000)
 Visualize:
 
 ``` r
-plot(fs,CD3,Viability) + ggplot2::guides(fill = 'none')
+plot(fs,CD3,Viability) + ggplot2::guides(fill = 'none') + ggplot2::facet_wrap(~sample.id)
 ```
 
 <img src="man/figures/README-plot_CD3_Viability-1.png" width="100%" />
+
+``` r
+##needs compensation correction
+plot(fs,CD4,CD8) + ggplot2::guides(fill = 'none')
+```
+
+<img src="man/figures/README-plot_CD4_CD8-1.png" width="100%" />
+
+``` r
+##update [['spill']] with a correction value
+flowstate::spillover.update.value(fs,CD8,CD4,0.03)
+##apply spillover correction
+flowstate::spillover.apply(fs)
+#> flowstate.object --> transforming...
+##compensated data
+plot(fs,CD4,CD8) + ggplot2::guides(fill = 'none')
+```
+
+<img src="man/figures/README-plot_CD4_CD8-2.png" width="100%" />

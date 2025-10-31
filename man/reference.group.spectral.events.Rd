@@ -2,29 +2,47 @@
 % Please edit documentation in R/spectral_unmixing.R
 \name{reference.group.spectral.events}
 \alias{reference.group.spectral.events}
-\title{A flowstate containing spectrally-associated bead/cellular events.}
+\title{A \code{flowstate} containing spectrally-associated bead/cellular events.}
 \usage{
 reference.group.spectral.events(
   raw.reference.group.directory,
-  internal.negative = NULL,
-  n = 500,
+  cluster.types = c("beads", "lymphocytes", "monocytes"),
+  detection.method = c("var", "mean"),
+  n.detector.events = 100,
+  detector.override = NULL,
+  n.spectral.events = 250,
+  n.spectral.events.unstained = 1000,
+  n.spectral.events.override = NULL,
   plot.select = FALSE,
-  plot.select.dir = tempdir()
+  plot.select.dir = tempdir(),
+  verbose = FALSE
 )
 }
 \arguments{
 \item{raw.reference.group.directory}{Character vector; a file path to a SpectroFlo Raw Reference Group directory.}
 
-\item{internal.negative}{Character vector; spectral events associated with an internal negative population will be generated for any named reference controls.}
+\item{cluster.types}{Character vector; some combination of \code{c('beads','lymphocytes','monocytes')}.  An attempt will be made to auto-detect these scatter-based populations based on some rudimentary \link[stats:kmeans]{clustering}.}
 
-\item{n}{Numeric; default 500. Orders the top \code{n} expressing events and aids in auto-detection of peak detector; used by an internal helper function.}
+\item{detection.method}{Character vector \code{1L}; one of \link[stats]{var} or \link[base]{mean}.  The defined statistical method will be used to auto-detect reference control-specific peak detectors.}
+
+\item{n.detector.events}{Numeric -- default \code{100}; the number of maximally expressing events (sorted vector) used to auto-detect reference control-specific peak detectors.}
+
+\item{detector.override}{Named character vector -- default \code{NULL}; if defined, the supplied detector name (value) will override the auto-detected peak detector on a reference control-specific (name) basis. See example.}
+
+\item{n.spectral.events}{Numeric -- default \code{250}; the number of maximally expressing events (sorted vector) used to define 'spectral events'.}
+
+\item{n.spectral.events.unstained}{Numeric -- default \code{1000}; the number of maximally expressing events (sorted vector) used to define '(universal) negative' events.}
+
+\item{n.spectral.events.override}{Named numeric vector -- default \code{NULL}; if defined, the supplied numeric (value) will override \code{n.spectral.events} on a sample-specific (name) basis. See example.}
 
 \item{plot.select}{Logical; default \code{FALSE}. Plots diagnostic/QC output for evaluating function performance.}
 
 \item{plot.select.dir}{Character vector; a file path for storing plot output.}
+
+\item{verbose}{Logical; default \code{FALSE}. Print messages to the console.}
 }
 \value{
-A flowstate containing spectrally-associated bead/cellular events. \verb{[['data']]} will contain appended columns/metadata.
+A \code{flowstate} containing spectrally-associated bead/cellular events.
 }
 \description{
 This function is entirely dependent on the following:
@@ -39,22 +57,57 @@ This function is entirely dependent on the following:
 }
 }
 \examples{
-raw.ref.dir <- system.file("extdata", package = "flowstate") |>
-list.dirs() |>
-grep('Reference Group', x = _, value = TRUE)
+##single-color reference controls
+raw.ref.files <- system.file("extdata", package = "flowstate") |>
+list.files(full.names = TRUE, pattern = "Beads")
 
+##simulate a SpectroFlo directory structure
+raw.ref.dir <- file.path(tempdir(),"Raw","Reference Group")
+if(!dir.exists(raw.ref.dir)) dir.create(raw.ref.dir,recursive = TRUE)
+file.copy(
+  from = raw.ref.files,
+  to = file.path(raw.ref.dir,basename(raw.ref.files))
+) |> invisible()
+
+##generate spectral events
 ref <- reference.group.spectral.events(
-raw.reference.group.directory = raw.ref.dir,
-internal.negative = NULL,
-n = 500,
-plot.select = TRUE,
-plot.select.dir = tempdir()
+  raw.reference.group.directory = raw.ref.dir,
+  cluster.types = 'beads',
+  plot.select = TRUE,
+  verbose = TRUE
 )
 
-#plot output
-list.files(tempdir(),pattern = "select.*.pdf")
+##a flowstate containing spectral events
+class(ref)
+ref[['data']]
 
-#spectral events
-ref$data
+##peak detectors
+ref$data[,.SD,.SDcols = is.factor] |> unique()
+
+##number of spectral events as defined using defaults
+ref$data[,.N,by = sample.id]
+
+##saved plot output
+list.files(tempdir()) |> grep(pattern = "select.*.pdf",value = TRUE)
+
+##detector.override
+##for the sake of example
+ref <- reference.group.spectral.events(
+  raw.reference.group.directory = raw.ref.dir,
+  cluster.types = 'beads',
+  detector.override = c("Unstained (Beads)" = "UV7")
+)
+ref$data[,.SD,.SDcols = is.factor] |> unique()
+
+##n.spectral.events.override
+##for the sake of example
+ref <- reference.group.spectral.events(
+  raw.reference.group.directory = raw.ref.dir,
+  cluster.types = 'beads',
+  n.spectral.events.override = c("TNFa PE (Beads)" = 500)
+)
+
+##number of spectral events as defined using n.spectral.events.override
+ref$data[,.N,by = sample.id]
 
 }

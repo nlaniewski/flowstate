@@ -131,7 +131,7 @@ parameters.to.data.table<-function(
     }
   }
   ##return the data.table
-  dt.parameters[]
+  invisible(dt.parameters)#dt.parameters[]
 }
 
 keywords.to.data.table<-function(keywords,drop.primary=TRUE,drop.spill=TRUE){
@@ -163,7 +163,7 @@ keywords.to.data.table<-function(keywords,drop.primary=TRUE,drop.spill=TRUE){
   dt.keywords[,'$LAST_MODIFIER' := Sys.getenv("USERNAME")]
 
   ##return the data.table
-  dt.keywords[]
+  invisible(dt.keywords)#dt.keywords[]
 }
 
 spill.to.data.table<-function(keywords,add.PROJ.identifier=TRUE){
@@ -246,7 +246,7 @@ readFCSdata<-function(fcs.file.path,con=NULL,offsets=NULL){
     )
   )
   ##return the data.table
-  dt[]
+  invisible(dt)#dt[]
 }
 
 flowstate.from.file.path<-function(fcs.file.path,S.func=NULL){

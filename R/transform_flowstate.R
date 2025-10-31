@@ -1,7 +1,7 @@
 #' @title Transform `flowstate[['data']]`
 #'
 #' @param flowstate.object A flowstate object as returned from [read.flowstate].
-#' @param .j Default `NULL`; any/all parameters having a keyword-value pair of `TYPE/Unmixed_Fluorescence` will be transformed in `[['data']]`.  If a character vector: specific columns in `[['data']]` that are to be transformed.
+#' @param .j Default `NULL`; any/all parameters having a keyword-value pair of `TYPE/Raw|Unmixed_Fluorescence` will be transformed in `[['data']]`.  If a character vector: specific columns in `[['data']]` that are to be transformed.
 #' @param transform.type Character string; default \link{asinh}. Quoted function that will be used to transform `.j` in `[['data']]`.
 #' @param cofactor Numeric; if `transform.type` = \link{asinh} (default), the cofactor will be used to modify the transformation.
 #'
@@ -56,7 +56,7 @@ flowstate.transform<-function(flowstate.object,.j = NULL,transform.type="asinh",
   ##name of [['parameters']] column that matches [['data']]
   j.match <- j.match.parameters.to.data(flowstate.object)
   if(is.null(.j)){
-    .j <- flowstate.object$parameters[TYPE == 'Unmixed_Fluorescence'][[j.match]]
+    .j <- flowstate.object$parameters[TYPE %in% flowstate.transform.types][[j.match]]
   }
   if(!all(.j %in% names(flowstate.object$data))){
     stop(paste(

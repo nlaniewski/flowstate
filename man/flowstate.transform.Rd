@@ -14,7 +14,7 @@ flowstate.transform(
 \arguments{
 \item{flowstate.object}{A flowstate object as returned from \link{read.flowstate}.}
 
-\item{.j}{Default \code{NULL}; any/all parameters having a keyword-value pair of \code{TYPE/Unmixed_Fluorescence} will be transformed in \verb{[['data']]}.  If a character vector: specific columns in \verb{[['data']]} that are to be transformed.}
+\item{.j}{Default \code{NULL}; any/all parameters having a keyword-value pair of \code{TYPE/Raw|Unmixed_Fluorescence} will be transformed in \verb{[['data']]}.  If a character vector: specific columns in \verb{[['data']]} that are to be transformed.}
 
 \item{transform.type}{Character string; default \link{asinh}. Quoted function that will be used to transform \code{.j} in \verb{[['data']]}.}
 

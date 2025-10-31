@@ -22,3 +22,8 @@ Imports:
     viridis
 URL: https://github.com/nlaniewski/flowstate
 BugReports: https://github.com/nlaniewski/flowstate/issues
+Suggests: 
+    knitr,
+    rmarkdown,
+    usethis
+VignetteBuilder: knitr

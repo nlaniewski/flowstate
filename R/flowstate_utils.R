@@ -1,4 +1,4 @@
-fcs.text.primary.required.keywords<-
+fcs.text.primary.required.keywords <-
   c(
     '$BEGINANALYSIS',
     '$BEGINDATA',
@@ -12,7 +12,7 @@ fcs.text.primary.required.keywords<-
     '$NEXTDATA'
   )
 
-flowstate.parameter.keywords<-
+flowstate.parameter.keywords <-
   c(
     'B',
     'DETECTOR',
@@ -23,6 +23,12 @@ flowstate.parameter.keywords<-
     'S',
     'TYPE',
     'V'
+  )
+
+flowstate.transform.types <-
+  c(
+    "Raw_Fluorescence",
+    "Unmixed_Fluorescence"
   )
 
 j.match.parameters.to.data <- function(flowstate.object){
@@ -147,3 +153,26 @@ add.keywords.to.data <- function(flowstate.object,keywords,type.convert=TRUE){
 #   res <- length(which(zeroes>0))/length(zeroes)
 #   isTRUE(res>threshold.val)
 # }
+check.keyword <- function(fcs.file.paths,keyword=NULL,value=NULL){
+  all(sapply(fcs.file.paths,function(i){
+    grepl(value,readFCStext(i)[[keyword]])
+  }))
+}
+select.nonsaturating <- function(flowstate.object,saturating = 4194304){
+  ##alias column
+  j.match <- j.match.parameters.to.data(flowstate.object)
+  ##scatter and fluors
+  cols <- flowstate.object$parameters[!TYPE %in% ('Time')][[j.match]]
+  ##initialize a logical
+  flowstate.object$data[,select.nonsaturating := TRUE]
+  ##loop through and set to FALSE any event in any col that is saturating
+  for(j in cols){
+    data.table::set(
+      x = flowstate.object$data,
+      i = which(flowstate.object$data[[j]]>=saturating),
+      j = 'select.nonsaturating',
+      value = FALSE
+    )
+  }
+  invisible(flowstate.object)
+}

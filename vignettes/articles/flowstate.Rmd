@@ -1,0 +1,123 @@
+---
+title: "1.) flowstate"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Structure
+
+[Flow Cytometry Standard](https://pmc.ncbi.nlm.nih.gov/articles/PMC2892967/ "FCS 3.1") files are read and parsed into a `flowstate` (S3 object). A `flowstate` is primarily comprised of the following parsed (named list) elements:
+
+| Name | Value |
+| :- | :- |
+| `data`       | expression values |
+| `parameters` | instrument-specific measurement parameters |
+| `keywords`   | instrument/sample-specific metadata |
+| `spill`      | instrument/sample-specific spillover matrix (if encoded in the file) |
+
+Included with the package -- for the purpose of example(s) -- are a few (subsampled) .fcs files acquired on a Cytek Aurora (5L) using SpectroFlo software.
+
+Read/parse them as a `flowstate` using `flowstate::read.flowstate()`.
+
+```{r read.flowstate}
+##paths to example .fcs files
+fcs.files <- system.file("extdata", package = "flowstate") |> 
+  list.files(full.names = T) |>
+  grep(pattern = "BLOCK.*.fcs",value = T)
+fcs.files |> basename() |> print()
+
+##read them in and concatenate; a flowstate object
+fs <- flowstate::read.flowstate(
+  fcs.file.paths = fcs.files,
+  colnames.type = "S_N",
+  concatenate = TRUE
+)
+
+##S3 object of class "flowstate"
+class(fs)
+##flowstate structure
+names(fs)
+```
+
+## `[['data']]`
+
+Data can be accessed by name via: `fs$data` or `fs[['data']]`.
+
+`[['data']]` contains events as rows and scatter, time, and fluorescent measurements as columns. By design, no transformation is applied to the linear measurement values during reading. In addition, a unique sample identifier (factored) is added for workflow purposes.
+
+```{r flowstate.data}
+##
+fs$data |> head()
+
+##variable names
+names(fs$data)
+
+##sample identifiers
+fs$data[,levels(sample.id)]
+
+```
+
+## `[['parameters']]`
+
+Parameters can be accessed by name via: `fs$parameters` or `fs[['parameters']]`.
+
+`[['parameters']]` contains instrument-specific measurement...parameters.
+
+```{r flowstate.parameters}
+##
+fs$parameters
+
+##internal flowstate functions add a few 'alias' columns;
+##they serve the purpose of renaming the columns in [['data']];
+##the colnames.type argument in read.flowstate uses these alias columns;
+##some combination of N and S -- made syntactically valid
+
+##original (encoded) parameters: N and S
+fs$parameters[,.(N,S)]
+
+##alias columns used to rename [['data']] columns
+fs$parameters[,.(N.alias,S.alias)]
+
+```
+
+## `[['keywords']]`
+
+Keywords can be accessed by name via: `fs$keywords` or `fs[['keywords']]`.
+
+`[['keywords']]` contains instrument/sample-specific metadata. The information contained here is leveraged for a number of different actions, such as: platform/cytometer identification; extracting and adding unique identifiers to `[['data']]`; adding/constructing new keywords for the purpose of analysis/workflow; QC/diagnostics.
+
+Following best practices as laid out by the Flow Cytometry Standard, a series of keywords are added to mark any `flowstate` object(s) as being modified -- no longer source data.  The inclusion of these keywords (`'$LAST_MODIFIED'`, `'$LAST_MODIFIER'`, `'$ORIGINALITY'`) ensures transparency and the indication that they are explicitly modified.
+
+```{r flowstate.keywords}
+##
+fs$keywords
+
+##some identifiers
+fs$keywords[,.(`$CYT`,TUBENAME)]
+
+##keywords to indicate/track modification
+fs$keywords[,.(`$LAST_MODIFIED`,`$LAST_MODIFIER`,`$ORIGINALITY`)]
+```
+
+## `[['spill']]`
+
+Spill can be accessed by name via: `fs$spill` or `fs[['spill']]`.
+
+`[['spill']]` contains an instrument/sample-specific spill(over) matrix -- if encoded.  It can be modified with correction values that are then applied to `[['data']]` to (try to) fix unmixing/compensation errors.  Unless explicitly modified by a user, the default matrix should not contain any correction values.
+
+*N.B.: software manufacturers -- at least SpectroFlo -- write a small value (1E-6) to the first matrix pair; I think this is to overcome a bug with how FlowJo handles the matrix...*
+
+```{r flowstate.spill}
+##
+fs$spill |> head()
+
+##small value; there in the source data
+fs$spill[2,1]
+
+```
+

@@ -12,6 +12,7 @@ Flow cytometry standard (.fcs) files are S3 structured to facilitate efficient p
 Useful links:
 \itemize{
   \item \url{https://github.com/nlaniewski/flowstate}
+  \item \url{https://nlaniewski.github.io/flowstate/}
   \item Report bugs at \url{https://github.com/nlaniewski/flowstate/issues}
 }
 

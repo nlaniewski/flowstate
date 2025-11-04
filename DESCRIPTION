@@ -21,10 +21,11 @@ Imports:
     stringr,
     utils,
     viridis
-URL: https://github.com/nlaniewski/flowstate
+URL: https://github.com/nlaniewski/flowstate, https://nlaniewski.github.io/flowstate/
 BugReports: https://github.com/nlaniewski/flowstate/issues
 Suggests: 
     knitr,
     rmarkdown,
     usethis
 VignetteBuilder: knitr
+Config/Needs/website: rmarkdown

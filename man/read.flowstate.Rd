@@ -8,7 +8,7 @@ read.flowstate(
   fcs.file.paths,
   colnames.type = c("S_N", "S", "N"),
   S.func = NULL,
-  sample.id = "TUBENAME",
+  sample.id = NULL,
   concatenate = FALSE
 )
 }
@@ -22,14 +22,19 @@ read.flowstate(
 \item \code{"N"} -- \verb{[['data']]} columns are named by using only their respective $PN (name) keyword value.
 }}
 
-\item{S.func}{a function; default \code{NULL}. If a function is supplied, it will be used to modify/split \code{"S"}; e.g. \code{function(j){strsplit(j," ")[[1]][1]}} will be applied to \code{"S"} to return the first split element ("CD4 PE" --> "CD4").}
+\item{S.func}{A function -- default \code{NULL}; if a function is supplied, it will be used to modify/split \code{"S"}; e.g. \code{function(j){strsplit(j," ")[[1]][1]}} will be applied to \code{"S"} to return the first split element ("CD4 PE" --> "CD4").}
 
-\item{sample.id}{Character string; the keyword label defined through \code{sample.id} (default \code{TUBENAME}) will be used to add respective keyword values from \verb{[['keywords']]} as an identifier to \verb{[['data']]}.}
+\item{sample.id}{Keyword name -- default \code{NULL}; based on cytometer platform, the keyword name for \code{sample.id} will be automatically set and the respective keyword values will be added to \verb{[['data']]} as a factored sample identifier. One of:
+\itemize{
+\item Aurora (Cytek) -- \code{sample.id} = \code{'TUBENAME'}
+\item ID7000 (Sony)  -- \code{sample.id} = \code{'$CELLS'}
+\item Unspecified    -- \code{sample.id} = \code{'$FIL'}
+}}
 
-\item{concatenate}{Logical; if \code{TRUE}, the list of flowstate objects will be combined into a single flowstate object.}
+\item{concatenate}{Logical -- default \code{FALSE}; if \code{TRUE}, the list of flowstate objects will be combined into a single flowstate object.}
 }
 \value{
-For a single file: an object of class flowstate; for multiple files: a list of flowstate objects.
+For a single file: an object of class \code{flowstate}; for multiple files: a named list of \verb{flowstate objects}; for concatenated files: an object of class \code{flowstate}
 }
 \description{
 flowstate: read, process, and store .fcs data
@@ -44,6 +49,7 @@ fs <- read.flowstate(
   colnames.type="S"
 )
 class(fs)
+names(fs)
 
 #.fcs DATA segment as a data.table
   fs$data
@@ -52,6 +58,18 @@ class(fs)
   fs$keywords #instrument/sample-specific metadata
   fs$spill #instrument/sample-specific spillover
 
+#read all .fcs files as a named list containing individial flowstate objects
+fs <- read.flowstate(
+  fcs.file.paths,
+  colnames.type="S",
+  concatenate = FALSE
+)
+class(fs);class(fs[[1]])
+names(fs);names(fs[[1]])
+
+fs[[1]]$keywords
+fs[[1]]$data[,levels(sample.id)]
+
 #read all .fcs files as flowstate objects; concatenate into a single object
 fs <- read.flowstate(
   fcs.file.paths,
@@ -59,6 +77,7 @@ fs <- read.flowstate(
   concatenate = TRUE
 )
 class(fs)
+names(fs)
 fs$keywords
 fs$data[,levels(sample.id)]
 

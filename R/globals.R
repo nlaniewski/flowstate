@@ -9,7 +9,7 @@ utils::globalVariables(
     "detector", "detector.peak", "detector.select", "emission", "emission.normalized",
     "fluor", "FSC_A", "group.type", "i", "id", "index", "j", "js",
     "marker", "means", "N", "N.alias", "node_barcode", "nodes.assigned",
-    "ord", "peak.values", "population", "PROJ", "R", "ref", "reference.type",
+    "ord", "peak.values", "population", "PROJ", "R", "reference.type",
     "S", "S.alias", "S_N.alias", "sample.id", "scatter.population",
     "scatter.select", "select.detector", "select.nonsaturating",
     "select.population", "select.scatter", "select.spectral", "SSC_A",

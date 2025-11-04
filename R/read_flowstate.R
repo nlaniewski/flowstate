@@ -1,13 +1,14 @@
-FCSoffsets<-function(fcs.file.path){
+FCSoffsets<-function(fcs.file.path,return.version=FALSE){
   if(grepl(".fcs$",fcs.file.path) & file.exists(fcs.file.path)){
     ##open a connection to the file (.fcs); read binary mode
     con <- file(fcs.file.path, open = "rb")
     on.exit(close(con))
     ##first six bytes contain "FCS#.#"; version identifier
     version <- readChar(con, 6)
+    if(return.version) return(version)
     ##version test
-    if(!version %in% sprintf("FCS3.%d",0:1)){#sprintf("FCS3.%d",0:2)
-      stop("Is this a .fcs file (version 3.0 or 3.1)? flowstate has only been tested using FCS 3.0/3.1 files.")
+    if(!version %in% sprintf("FCS3.%d",0:2)){#sprintf("FCS3.%d",0:2)
+      stop("Is this a .fcs file (version 3.0, 3.1, or 3.2)? flowstate has only been tested using FCS 3.0/3.1/3.2 files.")
     }
   }else{
     stop("Need a valid '.fcs' file path/file.")
@@ -105,6 +106,16 @@ parameters.to.data.table<-function(
     par.vec<-par.types[[j]]
     par.i<-as.integer(gsub("\\D+","",names(par.vec)))
     data.table::set(dt.parameters,i=par.i,j=j,value = par.vec)
+  }
+  ##add 'TYPE' keyword-value pair; encoded in CyteK/SpectroFlo files;
+  ##add for other platforms
+  if(!'TYPE' %in% names(dt.parameters)){
+    ##if SONY ID7000; '$CYT/LE-ID7000C';
+    ##grep for '[0-9]{3}CH[0-9]+-A'
+    dt.parameters[grep('[0-9]{3}CH[0-9]+-A',N), TYPE := "Raw_Fluorescence"]
+    dt.parameters[grep("FSC",N), TYPE := "Forward_Scatter"]
+    dt.parameters[grep("SSC",N), TYPE := "Side_Scatter"]
+    dt.parameters[grep("Time",N,ignore.case = T), TYPE := "Time"]
   }
   ##add '$PROJ' identifier; if not found, use '$DATE' instead
   if(add.PROJ.identifier){
@@ -277,11 +288,16 @@ flowstate.from.file.path<-function(fcs.file.path,S.func=NULL){
 #'   \item `"S"` -- `[['data']]` columns are named by using only their respective $PS (stain) keyword value.
 #'   \item `"N"` -- `[['data']]` columns are named by using only their respective $PN (name) keyword value.
 #' }
-#' @param S.func a function; default `NULL`. If a function is supplied, it will be used to modify/split `"S"`; e.g. `function(j){strsplit(j," ")[[1]][1]}` will be applied to `"S"` to return the first split element ("CD4 PE" --> "CD4").
-#' @param sample.id Character string; the keyword label defined through `sample.id` (default `TUBENAME`) will be used to add respective keyword values from `[['keywords']]` as an identifier to `[['data']]`.
-#' @param concatenate Logical; if `TRUE`, the list of flowstate objects will be combined into a single flowstate object.
+#' @param S.func A function -- default `NULL`; if a function is supplied, it will be used to modify/split `"S"`; e.g. `function(j){strsplit(j," ")[[1]][1]}` will be applied to `"S"` to return the first split element ("CD4 PE" --> "CD4").
+#' @param sample.id Keyword name -- default `NULL`; based on cytometer platform, the keyword name for `sample.id` will be automatically set and the respective keyword values will be added to `[['data']]` as a factored sample identifier. One of:
+#' \itemize{
+#'   \item Aurora (Cytek) -- `sample.id` = `'TUBENAME'`
+#'   \item ID7000 (Sony)  -- `sample.id` = `'$CELLS'`
+#'   \item Unspecified    -- `sample.id` = `'$FIL'`
+#' }
+#' @param concatenate Logical -- default `FALSE`; if `TRUE`, the list of flowstate objects will be combined into a single flowstate object.
 #'
-#' @returns For a single file: an object of class flowstate; for multiple files: a list of flowstate objects.
+#' @returns For a single file: an object of class `flowstate`; for multiple files: a named list of `flowstate objects`; for concatenated files: an object of class `flowstate`
 #' @seealso [flowstate.transform()]
 #' @export
 #'
@@ -295,6 +311,7 @@ flowstate.from.file.path<-function(fcs.file.path,S.func=NULL){
 #'   colnames.type="S"
 #' )
 #' class(fs)
+#' names(fs)
 #'
 #' #.fcs DATA segment as a data.table
 #'   fs$data
@@ -303,6 +320,18 @@ flowstate.from.file.path<-function(fcs.file.path,S.func=NULL){
 #'   fs$keywords #instrument/sample-specific metadata
 #'   fs$spill #instrument/sample-specific spillover
 #'
+#' #read all .fcs files as a named list containing individial flowstate objects
+#' fs <- read.flowstate(
+#'   fcs.file.paths,
+#'   colnames.type="S",
+#'   concatenate = FALSE
+#' )
+#' class(fs);class(fs[[1]])
+#' names(fs);names(fs[[1]])
+#'
+#' fs[[1]]$keywords
+#' fs[[1]]$data[,levels(sample.id)]
+#'
 #' #read all .fcs files as flowstate objects; concatenate into a single object
 #' fs <- read.flowstate(
 #'   fcs.file.paths,
@@ -310,6 +339,7 @@ flowstate.from.file.path<-function(fcs.file.path,S.func=NULL){
 #'   concatenate = TRUE
 #' )
 #' class(fs)
+#' names(fs)
 #' fs$keywords
 #' fs$data[,levels(sample.id)]
 #'
@@ -317,7 +347,7 @@ read.flowstate<-function(
     fcs.file.paths,
     colnames.type=c("S_N","S","N"),
     S.func=NULL,
-    sample.id='TUBENAME',
+    sample.id=NULL,
     concatenate=FALSE
 )
 {
@@ -352,7 +382,11 @@ read.flowstate<-function(
       }
     })
   )
-  ##add an identifier to [['data']]
+  ##get keyword identifier for use in defining 'sample.id' argument
+  if(is.null(sample.id)){
+    sample.id <- cytometer.identifier(fcs.file.paths)
+  }
+  ##add the identifier from [['keywords']] to [['data']]
   invisible(
     lapply(fs,function(fs.obj){
       if(!sample.id %in% names(fs.obj$keywords)){

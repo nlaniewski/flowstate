@@ -1,5 +1,5 @@
 ---
-title: "1.) flowstate"
+title: "flowstate -- Structure"
 ---
 
 ```{r, include = FALSE}
@@ -11,7 +11,7 @@ knitr::opts_chunk$set(
 
 # Structure
 
-[Flow Cytometry Standard](https://pmc.ncbi.nlm.nih.gov/articles/PMC2892967/ "FCS 3.1") files are read and parsed into a `flowstate` (S3 object). A `flowstate` is primarily comprised of the following parsed (named list) elements:
+[Flow Cytometry Standard](https://pmc.ncbi.nlm.nih.gov/articles/PMC2892967/ "FCS 3.1") files are read and parsed into a `flowstate` (S3 object). A `flowstate` is primarily comprised of the following parsed (named list) elements -- each a `data.table::data.table()`:
 
 | Name | Value |
 | :- | :- |

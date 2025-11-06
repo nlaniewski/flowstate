@@ -1,15 +1,17 @@
 #' @title Transform `flowstate[['data']]`
 #'
 #' @param flowstate.object A flowstate object as returned from [read.flowstate].
-#' @param .j Default `NULL`; any/all parameters having a keyword-value pair of `TYPE/Raw|Unmixed_Fluorescence` will be transformed in `[['data']]`.  If a character vector: specific columns in `[['data']]` that are to be transformed.
-#' @param transform.type Character string; default \link{asinh}. Quoted function that will be used to transform `.j` in `[['data']]`.
-#' @param cofactor Numeric; if `transform.type` = \link{asinh} (default), the cofactor will be used to modify the transformation.
+#' @param .j  Character vector -- default `NULL`; any/all parameters having a keyword-value pair of `TYPE/Raw|Unmixed_Fluorescence` will be transformed in `[['data']]`.  If a character vector: specific columns in `[['data']]` that are to be transformed.
+#' @param transform.type Character string -- default \link{asinh}; quoted function that will be used to transform `.j` in `[['data']]`.
+#' @param cofactor Numeric -- default 5000; if `transform.type` = \link{asinh} (default), the cofactor will be used to modify the transformation.
 #'
 #' @returns UPDATES BY REFERENCE:
 #' \itemize{
 #'    \item `flowstate[['data']]`; transformed values
 #'    \item `flowstate[['parameters']]`; adds two columns ('transform' and 'cofactor')
 #' }
+#'
+#' Invisibly returns the `flowstate.object`.
 #' @export
 #'
 #' @examples
@@ -99,7 +101,64 @@ flowstate.transform<-function(flowstate.object,.j = NULL,transform.type="asinh",
   }
   ##
 }
-
+#' @title Transform `flowstate[['data']]` -- Inverse
+#'
+#' @param flowstate.object A flowstate object as returned from [read.flowstate].
+#' @param .j Character vector -- default `NULL`; any/all parameters having a keyword-value pair of `transform/asinh` will be inverse transformed in `[['data']]` using [base::sinh()].  If a character vector: specific columns in `[['data']]` that are to be inverse transformed.
+#'
+#' @returns UPDATES BY REFERENCE:
+#' \itemize{
+#'    \item `flowstate[['data']]`; inverse transformed values -- linear
+#'    \item `flowstate[['parameters']]`; modifies two columns ('transform' and 'cofactor') -- sets to `NA`
+#' }
+#'
+#' Invisibly returns the `flowstate.object`.
+#' @export
+#'
+#' @examples
+#' fcs.file.paths <- system.file("extdata", package = "flowstate") |>
+#' list.files(full.names = TRUE, pattern = "BLOCK.*.fcs")
+#'
+#' #read .fcs files as a flowstate object; concatenate
+#' fs <- read.flowstate(
+#'   fcs.file.paths,
+#'   colnames.type="S",
+#'   concatenate = TRUE
+#' )
+#'
+#' #plot and mean values of linear columns
+#' plot(fs,CD3,CD8) + ggplot2::guides(fill = 'none')
+#' res1.linear <- fs$data[,sapply(.SD,mean),.SDcols = c('CD3','CD8')]
+#' print(res1.linear)
+#'
+#' #transform
+#' flowstate.transform(
+#'   fs,
+#'   .j = c('CD3','CD8'),
+#'   transform.type = "asinh",
+#'   cofactor = 5000
+#' )
+#' #updated parameters
+#' fs$parameters[!is.na(transform)]
+#'
+#' #plot and mean values of transformed columns from updated fs[['data']]
+#' plot(fs,CD3,CD8) + ggplot2::guides(fill = 'none')
+#' fs$data[,sapply(.SD,mean),.SDcols = c('CD3','CD8')]
+#'
+#' #inverse transformation
+#' flowstate.transform.inverse(fs)
+#'
+#' #updated parameters; transform and cofactor set to NA
+#' fs$parameters[S %in% c('CD3','CD8')]
+#'
+#' #plot and mean values of linear columns
+#' plot(fs,CD3,CD8) + ggplot2::guides(fill = 'none')
+#' res2.linear <- fs$data[,sapply(.SD,mean),.SDcols = c('CD3','CD8')]
+#' print(res2.linear)
+#'
+#' #linear --> transformed --> inverse --> linear
+#' res1.linear == res2.linear
+#'
 flowstate.transform.inverse<-function(flowstate.object,.j=NULL){
   ##name of [['parameters']] column that matches [['data']]
   j.match <- j.match.parameters.to.data(flowstate.object)

@@ -1,4 +1,33 @@
-reference.group.medians <- function(flowstate.object.reference,name.fix=NULL,syntactically.valid=FALSE){
+#' @title Generate normalized medians/spectra from reference group 'spectral events'
+#' @description
+#' The 'spectral events' returned from [reference.group.spectral.events] are used to generate normalized `[0,1]` medians/spectra for use in spectral unmixing.
+#'
+#'
+#' @param flowstate.object.reference A `flowstate` object as returned from [reference.group.spectral.events].
+#' @param name.fix Named character vector -- default `NULL`; if defined, vector names should match to `sample.id`(s) and their respective values name replacements.
+#' * e.g., `c('Cd8 BV786 (Cells)' = 'CD8 BV786')`.
+#' @param syntactically.valid Logical -- default `FALSE`; if `TRUE`, spaces, dashes, and dots are removed from strings.
+#'
+#' @returns A [data.table][data.table::data.table] containing normalized reference control medians.
+#' @export
+#'
+reference.group.medians <- function(
+    flowstate.object.reference,
+    name.fix=NULL,
+    syntactically.valid=FALSE
+)
+{
+  ##name fixes
+  if(!is.null(name.fix)){
+    for(i in names(name.fix)){
+      data.table::set(
+        x = flowstate.object.reference$data,
+        i = flowstate.object.reference$data[,.I[sample.id == i]],
+        j = 'sample.id',
+        value = name.fix[[i]]
+      )
+    }
+  }
   j.match <- j.match.parameters.to.data(flowstate.object.reference)
   cols.detector <- flowstate.object.reference$parameters[TYPE == "Raw_Fluorescence"][[j.match]]
   cols.by <- flowstate.object.reference$data[,names(.SD),.SDcols = !is.numeric]
@@ -56,11 +85,6 @@ reference.group.medians <- function(flowstate.object.reference,name.fix=NULL,syn
   ref.medians[,ord := seq(.N)]
   ref.medians[grepl('AF',N), ord := ref.medians[,.N] + seq(.N)]
   data.table::setorder(ref.medians,ord)[,ord := NULL]#AF in last position
-  if(!is.null(name.fix)){
-    for(i in seq_along(name.fix)){
-      ref.medians[N == names(name.fix[i]), N := name.fix[[i]]]
-    }
-  }
   if(syntactically.valid){
     ref.medians[!grepl('AF',N),N := tolower(gsub(" |-|\\.","",N))]
     ref.medians[,S := gsub("-","",S)]
@@ -70,7 +94,15 @@ reference.group.medians <- function(flowstate.object.reference,name.fix=NULL,syn
   ##return the normalized reference control medians
   ref.medians[]
 }
-##
+#' @title Plot Spectral Traces
+#' @description
+#' Plots a 'spectral trace' -- normalized `[0,1]` emission for all detectors.
+#'
+#' @param ref.medians The return of [reference.group.medians].
+#'
+#' @returns A list of [ggplot][ggplot2::ggplot] objects.
+#' @export
+#'
 plot_spectral.trace <- function(ref.medians){
   cols.detector <- ref.medians[,names(.SD),.SDcols = is.numeric]
   cols.by <- ref.medians[,names(.SD),.SDcols = !is.numeric]

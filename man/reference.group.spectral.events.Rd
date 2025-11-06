@@ -71,7 +71,7 @@ The defined \code{population.markers} will be used as 'cellular anchors': top ex
 A \code{flowstate} containing spectrally-associated bead/cellular events.
 }
 \description{
-This function is entirely dependent on the following:
+This function is entirely dependent -- as of now -- on the following:
 \itemize{
 \item Spectroflo software raw reference controls  -- tested using SpectroFlo 3.3.0.
 \item Spectroflo software naming convention:

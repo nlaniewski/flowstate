@@ -337,61 +337,9 @@ select.spectral.events <- function(
   ##update [['data']]
   flowstate.object$data[select.i,select.spectral := TRUE]
 }
-plot_spectral.events <- function(flowstate.object){
-  ##alias column
-  j.match <- j.match.parameters.to.data(flowstate.object)
-  ##detector columns
-  cols.detector <- flowstate.object$parameters[TYPE == "Raw_Fluorescence"][[j.match]]
-  ##factor columns
-  cols.by <- flowstate.object$data[,names(.SD),.SDcols = is.factor]
-  ##subset to detector.peak-specific values
-  dt <- flowstate.object$data[
-    ,
-    j = {
-      detector.peak <- as.character(.BY$detector.peak)
-      list(value = .SD[[detector.peak]],select.spectral)
-    },
-    by = cols.by
-  ]
-  ##add an index for plotting purposes
-  dt[,index := seq(.N),by=cols.by]
-  ##split the data.table and plot
-  splits <- split(dt,by=c('sample.id','population'),sorted = F,drop = T)
-  splits <- lapply(splits,droplevels)
-  p <- lapply(splits,function(.dt){
-    .dt
-    ggplot2::ggplot(data = NULL) +
-      ggplot2::geom_hex(
-        data = .dt[(select.spectral)],
-        mapping = ggplot2::aes(x = index, y = value),
-        bins = 100,
-        fill = "red"
-      ) +
-      ggplot2::geom_hex(
-        data = .dt[!(select.spectral)],
-        mapping = ggplot2::aes(x = index, y = value),
-        bins = 100,
-        show.legend = FALSE
-      ) +
-      ggplot2::scale_fill_gradient(low = 'lightgray',high = 'darkgray') +
-      ggplot2::theme_light() +
-      ggplot2::theme(
-        panel.grid = ggplot2::element_blank()
-      ) +
-      ggplot2::labs(
-        title = sprintf("%s\nDetector (Peak): %s\nScatter Population: %s",
-                        .dt[,levels(sample.id)],.dt[,levels(detector.peak)],.dt[,levels(population)]),
-        caption = sprintf("%d 'spectral' events (out of %d) selected in %s for calculating per-detector (n = %d) medians.",
-                          .dt[(select.spectral),.N], .dt[,.N], .dt[,levels(detector.peak)], length(cols.detector)),
-        x = 'Index',
-        y = .dt[,levels(detector.peak)]
-      )
-  })
-  return(p)
-}
 #' @title A `flowstate` containing spectrally-associated bead/cellular events.
 #' @description
-#' This function is entirely dependent on the following:
+#' This function is entirely dependent -- as of now -- on the following:
 #' \itemize{
 #'   \item Spectroflo software raw reference controls  -- tested using SpectroFlo 3.3.0.
 #'   \item Spectroflo software naming convention:
@@ -646,6 +594,67 @@ reference.group.spectral.events <- function(
   ##return -- invisibly -- the spectral events
   if(verbose) message("Returning 'spectral events'.")
   invisible(ref)
+}
+#' @title Plot Spectral Events
+#' @description
+#' Plot the results of [reference.group.spectral.events]; visual assessment of selected 'spectral events' is used to gauge function performance.
+#'
+#' @param flowstate.object.reference A `flowstate` object as returned from [reference.group.spectral.events].
+#'
+#' @returns A list of [ggplot][ggplot2::ggplot] objects.
+#' @export
+#'
+plot_spectral.events <- function(flowstate.object.reference){
+  ##alias column
+  j.match <- j.match.parameters.to.data(flowstate.object.reference)
+  ##detector columns
+  cols.detector <- flowstate.object.reference$parameters[TYPE == "Raw_Fluorescence"][[j.match]]
+  ##factor columns
+  cols.by <- flowstate.object.reference$data[,names(.SD),.SDcols = is.factor]
+  ##subset to detector.peak-specific values
+  dt <- flowstate.object.reference$data[
+    ,
+    j = {
+      detector.peak <- as.character(.BY$detector.peak)
+      list(value = .SD[[detector.peak]],select.spectral)
+    },
+    by = cols.by
+  ]
+  ##add an index for plotting purposes
+  dt[,index := seq(.N),by=cols.by]
+  ##split the data.table and plot
+  splits <- split(dt,by=c('sample.id','population'),sorted = F,drop = T)
+  splits <- lapply(splits,droplevels)
+  p <- lapply(splits,function(.dt){
+    .dt
+    ggplot2::ggplot(data = NULL) +
+      ggplot2::geom_hex(
+        data = .dt[(select.spectral)],
+        mapping = ggplot2::aes(x = index, y = value),
+        bins = 100,
+        fill = "red"
+      ) +
+      ggplot2::geom_hex(
+        data = .dt[!(select.spectral)],
+        mapping = ggplot2::aes(x = index, y = value),
+        bins = 100,
+        show.legend = FALSE
+      ) +
+      ggplot2::scale_fill_gradient(low = 'lightgray',high = 'darkgray') +
+      ggplot2::theme_light() +
+      ggplot2::theme(
+        panel.grid = ggplot2::element_blank()
+      ) +
+      ggplot2::labs(
+        title = sprintf("%s\nDetector (Peak): %s\nScatter Population: %s",
+                        .dt[,levels(sample.id)],.dt[,levels(detector.peak)],.dt[,levels(population)]),
+        caption = sprintf("%d 'spectral' events (out of %d) selected in %s for calculating per-detector (n = %d) medians.",
+                          .dt[(select.spectral),.N], .dt[,.N], .dt[,levels(detector.peak)], length(cols.detector)),
+        x = 'Index',
+        y = .dt[,levels(detector.peak)]
+      )
+  })
+  return(p)
 }
 ##
 plot_spectral.ridges <- function(flowstate.object.reference,plot.dir=tempdir()){

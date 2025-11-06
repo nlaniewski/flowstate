@@ -14,11 +14,11 @@ flowstate.transform(
 \arguments{
 \item{flowstate.object}{A flowstate object as returned from \link{read.flowstate}.}
 
-\item{.j}{Default \code{NULL}; any/all parameters having a keyword-value pair of \code{TYPE/Raw|Unmixed_Fluorescence} will be transformed in \verb{[['data']]}.  If a character vector: specific columns in \verb{[['data']]} that are to be transformed.}
+\item{.j}{Character vector -- default \code{NULL}; any/all parameters having a keyword-value pair of \code{TYPE/Raw|Unmixed_Fluorescence} will be transformed in \verb{[['data']]}.  If a character vector: specific columns in \verb{[['data']]} that are to be transformed.}
 
-\item{transform.type}{Character string; default \link{asinh}. Quoted function that will be used to transform \code{.j} in \verb{[['data']]}.}
+\item{transform.type}{Character string -- default \link{asinh}; quoted function that will be used to transform \code{.j} in \verb{[['data']]}.}
 
-\item{cofactor}{Numeric; if \code{transform.type} = \link{asinh} (default), the cofactor will be used to modify the transformation.}
+\item{cofactor}{Numeric -- default 5000; if \code{transform.type} = \link{asinh} (default), the cofactor will be used to modify the transformation.}
 }
 \value{
 UPDATES BY REFERENCE:
@@ -26,6 +26,8 @@ UPDATES BY REFERENCE:
 \item \code{flowstate[['data']]}; transformed values
 \item \code{flowstate[['parameters']]}; adds two columns ('transform' and 'cofactor')
 }
+
+Invisibly returns the \code{flowstate.object}.
 }
 \description{
 Transform \code{flowstate[['data']]}

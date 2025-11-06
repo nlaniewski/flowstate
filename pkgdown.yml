@@ -4,7 +4,7 @@ pkgdown_sha: ~
 articles:
   articles/flowstate: flowstate.html
   prepare_analysis: prepare_analysis.html
-last_built: 2025-11-04T23:27Z
+last_built: 2025-11-06T15:19Z
 urls:
   reference: https://nlaniewski.github.io/flowstate/reference
   article: https://nlaniewski.github.io/flowstate/articles

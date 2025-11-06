@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">flowstate</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.12.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.13.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -60,22 +60,23 @@
 
 
 <dt id="arg--j">.j<a class="anchor" aria-label="anchor" href="#arg--j"></a></dt>
-<dd><p>Default <code>NULL</code>; any/all parameters having a keyword-value pair of <code>TYPE/Raw|Unmixed_Fluorescence</code> will be transformed in <code>[['data']]</code>.  If a character vector: specific columns in <code>[['data']]</code> that are to be transformed.</p></dd>
+<dd><p>Character vector – default <code>NULL</code>; any/all parameters having a keyword-value pair of <code>TYPE/Raw|Unmixed_Fluorescence</code> will be transformed in <code>[['data']]</code>.  If a character vector: specific columns in <code>[['data']]</code> that are to be transformed.</p></dd>
 
 
 <dt id="arg-transform-type">transform.type<a class="anchor" aria-label="anchor" href="#arg-transform-type"></a></dt>
-<dd><p>Character string; default <a href="https://rdrr.io/r/base/Hyperbolic.html" class="external-link">asinh</a>. Quoted function that will be used to transform <code>.j</code> in <code>[['data']]</code>.</p></dd>
+<dd><p>Character string – default <a href="https://rdrr.io/r/base/Hyperbolic.html" class="external-link">asinh</a>; quoted function that will be used to transform <code>.j</code> in <code>[['data']]</code>.</p></dd>
 
 
 <dt id="arg-cofactor">cofactor<a class="anchor" aria-label="anchor" href="#arg-cofactor"></a></dt>
-<dd><p>Numeric; if <code>transform.type</code> = <a href="https://rdrr.io/r/base/Hyperbolic.html" class="external-link">asinh</a> (default), the cofactor will be used to modify the transformation.</p></dd>
+<dd><p>Numeric – default 5000; if <code>transform.type</code> = <a href="https://rdrr.io/r/base/Hyperbolic.html" class="external-link">asinh</a> (default), the cofactor will be used to modify the transformation.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>UPDATES BY REFERENCE:</p><ul><li><p><code>flowstate[['data']]</code>; transformed values</p></li>
 <li><p><code>flowstate[['parameters']]</code>; adds two columns ('transform' and 'cofactor')</p></li>
-</ul></div>
+</ul><p>Invisibly returns the <code>flowstate.object</code>.</p>
+    </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>

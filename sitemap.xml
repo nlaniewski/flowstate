@@ -12,6 +12,7 @@
 <url><loc>https://nlaniewski.github.io/flowstate/reference/flowstate-package.html</loc></url>
 <url><loc>https://nlaniewski.github.io/flowstate/reference/flowstate.transform.html</loc></url>
 <url><loc>https://nlaniewski.github.io/flowstate/reference/flowstate.transform.inverse.html</loc></url>
+<url><loc>https://nlaniewski.github.io/flowstate/reference/flowstate.unmix.html</loc></url>
 <url><loc>https://nlaniewski.github.io/flowstate/reference/index.html</loc></url>
 <url><loc>https://nlaniewski.github.io/flowstate/reference/plot.flowstate.html</loc></url>
 <url><loc>https://nlaniewski.github.io/flowstate/reference/plot_spectral.events.html</loc></url>
@@ -23,5 +24,6 @@
 <url><loc>https://nlaniewski.github.io/flowstate/reference/spillover.update.value.html</loc></url>
 <url><loc>https://nlaniewski.github.io/flowstate/reference/split.flowstate.html</loc></url>
 <url><loc>https://nlaniewski.github.io/flowstate/reference/subset.flowstate.html</loc></url>
+<url><loc>https://nlaniewski.github.io/flowstate/reference/write.flowstate.html</loc></url>
 </urlset>
 

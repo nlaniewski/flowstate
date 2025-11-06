@@ -2,7 +2,7 @@
 % Please edit documentation in R/read_flowstate.R
 \name{read.flowstate}
 \alias{read.flowstate}
-\title{flowstate: read, process, and store .fcs data}
+\title{\code{flowstate}: read, parse, and store .fcs data}
 \usage{
 read.flowstate(
   fcs.file.paths,
@@ -37,7 +37,26 @@ read.flowstate(
 For a single file: an object of class \code{flowstate}; for multiple files: a named list of \verb{flowstate objects}; for concatenated files: an object of class \code{flowstate}
 }
 \description{
-flowstate: read, process, and store .fcs data
+\href{https://pmc.ncbi.nlm.nih.gov/articles/PMC2892967/}{Flow Cytometry Standard} files are read, parsed and stored as objects (S3) of \link{class} \code{'flowstate'}.
+
+The individual segments (\code{TEXT} and \code{DATA}) of the FCS file are parsed and stored as follows:
+\itemize{
+\item \verb{[['data']]} -- a \link[data.table:data.table]{data.table} containing raw/linear measurement values (scatter, MFI, Time, etc.).
+\item \verb{[['parameters']]} -- a \link[data.table:data.table]{data.table} containing instrument-specific parameters ('$PnN','$PnS', etc.).
+\item \verb{[['keywords']]} -- a \link[data.table:data.table]{data.table} containing instrument/sample-specific keyword-value pairs (metadata).
+\item \verb{[['spill']]} -- a \link[data.table:data.table]{data.table} containing (if present) spillover values.
+}
+}
+\details{
+Access the individual named list elements as follows (assuming \code{flowstate} object is named \code{fs}):
+\itemize{
+\item \code{fs$data} or \code{fs[['data']]}
+\item \code{fs$parameters} or \code{fs[['parameters']]}
+\item \code{fs$keywords} or \code{fs[['keywords']]}
+\item \code{fs$spill} or \code{fs[['spill']]}
+}
+
+Other \code{flowstate} functions operate on the entire object (\code{fs}) and access the individual slots as needed.
 }
 \examples{
 fcs.file.paths <- system.file("extdata", package = "flowstate") |>
@@ -81,6 +100,20 @@ names(fs)
 fs$keywords
 fs$data[,levels(sample.id)]
 
+}
+\references{
+Directly/heavily-inspired by:
+
+\link[flowCore:flowFrame-class]{flowCore}:
+
+Ellis B, Haaland P, Hahne F, Le Meur N, Gopalakrishnan N, Spidlen J, Jiang M, Finak G (2024). \emph{flowCore: flowCore: Basic
+structures for flow cytometry data}. doi:10.18129/B9.bioc.flowCore \url{https://doi.org/10.18129/B9.bioc.flowCore}, R package
+version 2.22.0, \url{https://bioconductor.org/packages/flowCore}.
+
+\link[data.table:data.table]{data.table}:
+
+Barrett T, Dowle M, Srinivasan A, Gorecki J, Chirico M, Hocking T, Schwendinger B, Krylov I (2025).
+data.table: Extension of 'data.frame'. R package version 1.17.99, https://r-datatable.com.
 }
 \seealso{
 \code{\link[=flowstate.transform]{flowstate.transform()}}

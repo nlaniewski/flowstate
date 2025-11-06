@@ -243,6 +243,9 @@ plot_populations <- function(flowstate.object,pattern.scatter = c('A','AH'),bins
   p <- p + ggplot2::facet_grid(
     variable.y ~ variable.x,
     scales = "free")
+  p <- p +
+    ggplot2::scale_x_continuous(labels = scales::scientific) +
+    ggplot2::scale_y_continuous(labels = scales::scientific)
   p <- p + ggplot2::labs(
     title = sprintf(
       "Populations (Anchored): %s",

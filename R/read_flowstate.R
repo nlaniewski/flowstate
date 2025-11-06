@@ -279,7 +279,24 @@ flowstate.from.file.path<-function(fcs.file.path,S.func=NULL){
   return(fs)
 }
 
-#' @title flowstate: read, process, and store .fcs data
+#' @title `flowstate`: read, parse, and store .fcs data
+#' @description
+#' [Flow Cytometry Standard](https://pmc.ncbi.nlm.nih.gov/articles/PMC2892967/) files are read, parsed and stored as objects (S3) of [class] `'flowstate'`.
+#'
+#' The individual segments (`TEXT` and `DATA`) of the FCS file are parsed and stored as follows:
+#' * `[['data']]` -- a [data.table][data.table::data.table] containing raw/linear measurement values (scatter, MFI, Time, etc.).
+#' * `[['parameters']]` -- a [data.table][data.table::data.table] containing instrument-specific parameters ('$PnN','$PnS', etc.).
+#' * `[['keywords']]` -- a [data.table][data.table::data.table] containing instrument/sample-specific keyword-value pairs (metadata).
+#' * `[['spill']]` -- a [data.table][data.table::data.table] containing (if present) spillover values.
+#'
+#' @details
+#' Access the individual named list elements as follows (assuming `flowstate` object is named `fs`):
+#' * `fs$data` or `fs[['data']]`
+#' * `fs$parameters` or `fs[['parameters']]`
+#' * `fs$keywords` or `fs[['keywords']]`
+#' * `fs$spill` or `fs[['spill']]`
+#'
+#' Other `flowstate` functions operate on the entire object (`fs`) and access the individual slots as needed.
 #'
 #' @param fcs.file.paths Character string; path(s) returned from `list.files(...,full.names=T,pattern=".fcs")`.
 #' @param colnames.type Character string; one of:
@@ -299,6 +316,21 @@ flowstate.from.file.path<-function(fcs.file.path,S.func=NULL){
 #'
 #' @returns For a single file: an object of class `flowstate`; for multiple files: a named list of `flowstate objects`; for concatenated files: an object of class `flowstate`
 #' @seealso [flowstate.transform()]
+#' @references Directly/heavily-inspired by:
+#'
+#' [flowCore][flowCore::flowFrame]:
+#'
+#' Ellis B, Haaland P, Hahne F, Le Meur N, Gopalakrishnan N, Spidlen J, Jiang M, Finak G (2024). _flowCore: flowCore: Basic
+#' structures for flow cytometry data_. doi:10.18129/B9.bioc.flowCore <https://doi.org/10.18129/B9.bioc.flowCore>, R package
+#' version 2.22.0, <https://bioconductor.org/packages/flowCore>.
+#'
+#' [data.table][data.table::data.table]:
+#'
+#' Barrett T, Dowle M, Srinivasan A, Gorecki J, Chirico M, Hocking T, Schwendinger B, Krylov I (2025).
+#' data.table: Extension of 'data.frame'. R package version 1.17.99, https://r-datatable.com.
+#'
+#'
+#'
 #' @export
 #'
 #' @examples

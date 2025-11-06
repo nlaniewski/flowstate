@@ -225,6 +225,18 @@ flowstate.unmixed.object <- function(flowstate.object.raw,ref.medians){
   ##
   invisible(fs.unmixed)
 }
+#' @title Unmix a `flowstate`
+#' @description
+#' A raw/overdetermined `flowstate` is unmixed using a corresponding `ref.medians`. Data is unmixed using [Ordinary Least Squares][stats::lsfit].
+#'
+#'
+#' @param flowstate.object.raw A `flowstate` -- the return of [read.flowstate]; the `flowstate` must be raw/overdetermined.
+#' @param ref.medians A [data.table][data.table::data.table] containing normalized `[0,1]` reference control medians -- the return of [reference.group.medians].
+#' @param hash.historic Character string -- default `NULL`; for internal/reproducibility purposes, a hash string of the 'unmixing matrix' can be defined.
+#'
+#' @returns A `flowstate` containing unmixed data.
+#' @export
+#'
 flowstate.unmix <- function(
     flowstate.object.raw,
     ref.medians,

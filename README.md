@@ -45,9 +45,6 @@ fs <- flowstate::read.flowstate(fcs.file.paths,colnames.type = "S",concatenate =
 #> COVAIL_002_CYTOKINE_BLOCK1_1.fcs --> flowstate
 #> COVAIL_002_CYTOKINE_BLOCK1_2.fcs --> flowstate
 #> COVAIL_002_CYTOKINE_BLOCK1_3.fcs --> flowstate
-#> COVAIL_002_CYTOKINE_BLOCK1_4.fcs --> flowstate
-#> COVAIL_002_CYTOKINE_BLOCK1_5.fcs --> flowstate
-#> COVAIL_002_CYTOKINE_BLOCK1_6.fcs --> flowstate
 #> Concatenating 'flowstate.ojects'...
 ```
 

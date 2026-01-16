@@ -298,6 +298,7 @@ data.table: Extension of 'data.frame'. R package version 1.17.99, https://r-data
 <span class="r-out co"><span class="r-pr">#&gt;</span> 42:   $P42     32     LOG    0,0            APC-H7-A 4194304      CD27</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 43:   $P43     32     LOG    0,0      APC-Fire 810-A 4194304     KLRG1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        par      B DISPLAY      E                   N       R         S</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     &lt;char&gt; &lt;char&gt;  &lt;char&gt; &lt;char&gt;              &lt;char&gt;  &lt;char&gt;    &lt;char&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                     TYPE      V                           PROJ         N.alias</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                   &lt;char&gt; &lt;char&gt;                         &lt;fctr&gt;          &lt;char&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  1:                 Time   &lt;NA&gt; COVAIL_002_CYTOKINE_2025-02-27            Time</span>
@@ -344,6 +345,7 @@ data.table: Extension of 'data.frame'. R package version 1.17.99, https://r-data
 <span class="r-out co"><span class="r-pr">#&gt;</span> 42: Unmixed_Fluorescence    388 COVAIL_002_CYTOKINE_2025-02-27           APCH7</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 43: Unmixed_Fluorescence    264 COVAIL_002_CYTOKINE_2025-02-27      APCFire810</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                     TYPE      V                           PROJ         N.alias</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   &lt;char&gt; &lt;char&gt;                         &lt;fctr&gt;          &lt;char&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       S.alias                 S_N.alias</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        &lt;char&gt;                    &lt;char&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  1:      Time                      Time</span>
@@ -390,13 +392,14 @@ data.table: Extension of 'data.frame'. R package version 1.17.99, https://r-data
 <span class="r-out co"><span class="r-pr">#&gt;</span> 42:      CD27                CD27_APCH7</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 43:     KLRG1          KLRG1_APCFire810</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       S.alias                 S_N.alias</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        &lt;char&gt;                    &lt;char&gt;</span>
 <span class="r-in"><span>  <span class="va">fs</span><span class="op">$</span><span class="va">keywords</span> <span class="co">#instrument/sample-specific metadata</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          $BTIM   $CYT $CYTSN       $DATE       $ETIM</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;char&gt; &lt;char&gt; &lt;char&gt;      &lt;char&gt;      &lt;char&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1: 09:22:51.62 Aurora  V0299 27-Feb-2025 09:33:47.32</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                $FIL $FLOWRATE    $INST          $LAST_MODIFIED</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                              &lt;char&gt;    &lt;char&gt;   &lt;char&gt;                  &lt;char&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1: COVAIL_002_CYTOKINE_BLOCK1_1.fcs    Medium Cytekbio 06-NOV-2025 21:11:12.95</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1: COVAIL_002_CYTOKINE_BLOCK1_1.fcs    Medium Cytekbio 16-JAN-2026 18:46:32.83</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    $LAST_MODIFIER         $OP $ORIGINALITY   $PAR</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            &lt;char&gt;      &lt;char&gt;       &lt;char&gt; &lt;char&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1:                aurora user DataModified     43</span>
@@ -458,6 +461,7 @@ data.table: Extension of 'data.frame'. R package version 1.17.99, https://r-data
 <span class="r-out co"><span class="r-pr">#&gt;</span> 32:  0e+00      0     0       0     0     0     0       0       0     0     0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 33:  0e+00      0     0       0     0     0     0       0       0     0     0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     CD45RA CD45RO TCRgd CD45BC1   IL2   CD8 CD197 CD45BC2 CD45BC3  CD57 CD193</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      &lt;num&gt;  &lt;num&gt; &lt;num&gt;   &lt;num&gt; &lt;num&gt; &lt;num&gt; &lt;num&gt;   &lt;num&gt;   &lt;num&gt; &lt;num&gt; &lt;num&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     CD45BC4 CD127  CD56 CD199 CD49a GranzymeB CD45BC5  CD95   CD3   CD4  CD69</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;num&gt; &lt;num&gt; &lt;num&gt; &lt;num&gt; &lt;num&gt;     &lt;num&gt;   &lt;num&gt; &lt;num&gt; &lt;num&gt; &lt;num&gt; &lt;num&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  1:       0     0     0     0     0         0       0     0     0     0     0</span>
@@ -494,6 +498,7 @@ data.table: Extension of 'data.frame'. R package version 1.17.99, https://r-data
 <span class="r-out co"><span class="r-pr">#&gt;</span> 32:       0     0     0     0     0         0       0     0     0     0     0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 33:       0     0     0     0     0         0       0     0     0     0     0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     CD45BC4 CD127  CD56 CD199 CD49a GranzymeB CD45BC5  CD95   CD3   CD4  CD69</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;num&gt; &lt;num&gt; &lt;num&gt; &lt;num&gt; &lt;num&gt;     &lt;num&gt;   &lt;num&gt; &lt;num&gt; &lt;num&gt; &lt;num&gt; &lt;num&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      TNFa CD183  IFNg CD103 CD45BC6 CD122 ia4b7 CD45BC7 Viability  CD27 KLRG1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     &lt;num&gt; &lt;num&gt; &lt;num&gt; &lt;num&gt;   &lt;num&gt; &lt;num&gt; &lt;num&gt;   &lt;num&gt;     &lt;num&gt; &lt;num&gt; &lt;num&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  1:     0     0     0     0       0     0     0       0         0     0     0</span>
@@ -530,6 +535,7 @@ data.table: Extension of 'data.frame'. R package version 1.17.99, https://r-data
 <span class="r-out co"><span class="r-pr">#&gt;</span> 32:     0     0     0     0       0     0     0       0         0     1     0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 33:     0     0     0     0       0     0     0       0         0     0     1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      TNFa CD183  IFNg CD103 CD45BC6 CD122 ia4b7 CD45BC7 Viability  CD27 KLRG1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     &lt;num&gt; &lt;num&gt; &lt;num&gt; &lt;num&gt;   &lt;num&gt; &lt;num&gt; &lt;num&gt;   &lt;num&gt;     &lt;num&gt; &lt;num&gt; &lt;num&gt;</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#read all .fcs files as a named list containing individial flowstate objects</span></span></span>
 <span class="r-in"><span><span class="va">fs</span> <span class="op">&lt;-</span> <span class="fu">read.flowstate</span><span class="op">(</span></span></span>
@@ -554,7 +560,7 @@ data.table: Extension of 'data.frame'. R package version 1.17.99, https://r-data
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1: 09:22:51.62 Aurora  V0299 27-Feb-2025 09:33:47.32</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                $FIL $FLOWRATE    $INST          $LAST_MODIFIED</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                              &lt;char&gt;    &lt;char&gt;   &lt;char&gt;                  &lt;char&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1: COVAIL_002_CYTOKINE_BLOCK1_1.fcs    Medium Cytekbio 06-NOV-2025 21:11:12.99</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1: COVAIL_002_CYTOKINE_BLOCK1_1.fcs    Medium Cytekbio 16-JAN-2026 18:46:32.87</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    $LAST_MODIFIER         $OP $ORIGINALITY   $PAR</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            &lt;char&gt;      &lt;char&gt;       &lt;char&gt; &lt;char&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1:                aurora user DataModified     43</span>
@@ -604,9 +610,9 @@ data.table: Extension of 'data.frame'. R package version 1.17.99, https://r-data
 <span class="r-out co"><span class="r-pr">#&gt;</span> 3: 09:50:46.94 Aurora  V0299 27-Feb-2025 10:03:26.16</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                $FIL $FLOWRATE    $INST          $LAST_MODIFIED</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                              &lt;char&gt;    &lt;char&gt;   &lt;char&gt;                  &lt;char&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1: COVAIL_002_CYTOKINE_BLOCK1_1.fcs    Medium Cytekbio 06-NOV-2025 21:11:13.03</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2: COVAIL_002_CYTOKINE_BLOCK1_2.fcs    Medium Cytekbio 06-NOV-2025 21:11:13.04</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3: COVAIL_002_CYTOKINE_BLOCK1_3.fcs    Medium Cytekbio 06-NOV-2025 21:11:13.05</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1: COVAIL_002_CYTOKINE_BLOCK1_1.fcs    Medium Cytekbio 16-JAN-2026 18:46:32.92</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2: COVAIL_002_CYTOKINE_BLOCK1_2.fcs    Medium Cytekbio 16-JAN-2026 18:46:32.93</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3: COVAIL_002_CYTOKINE_BLOCK1_3.fcs    Medium Cytekbio 16-JAN-2026 18:46:32.94</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    $LAST_MODIFIER         $OP $ORIGINALITY   $PAR</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            &lt;char&gt;      &lt;char&gt;       &lt;char&gt; &lt;char&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1:                aurora user DataModified     43</span>
@@ -662,7 +668,7 @@ data.table: Extension of 'data.frame'. R package version 1.17.99, https://r-data
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>

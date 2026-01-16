@@ -305,6 +305,7 @@ measurement…parameters.</p>
 <span><span class="co">#&gt; 42:   $P42     32     LOG    0,0            APC-H7-A 4194304      CD27</span></span>
 <span><span class="co">#&gt; 43:   $P43     32     LOG    0,0      APC-Fire 810-A 4194304     KLRG1</span></span>
 <span><span class="co">#&gt;        par      B DISPLAY      E                   N       R         S</span></span>
+<span><span class="co">#&gt;     &lt;char&gt; &lt;char&gt;  &lt;char&gt; &lt;char&gt;              &lt;char&gt;  &lt;char&gt;    &lt;char&gt;</span></span>
 <span><span class="co">#&gt;                     TYPE      V                           PROJ         N.alias</span></span>
 <span><span class="co">#&gt;                   &lt;char&gt; &lt;char&gt;                         &lt;fctr&gt;          &lt;char&gt;</span></span>
 <span><span class="co">#&gt;  1:                 Time   &lt;NA&gt; COVAIL_002_CYTOKINE_2025-02-27            Time</span></span>
@@ -351,6 +352,7 @@ measurement…parameters.</p>
 <span><span class="co">#&gt; 42: Unmixed_Fluorescence    388 COVAIL_002_CYTOKINE_2025-02-27           APCH7</span></span>
 <span><span class="co">#&gt; 43: Unmixed_Fluorescence    264 COVAIL_002_CYTOKINE_2025-02-27      APCFire810</span></span>
 <span><span class="co">#&gt;                     TYPE      V                           PROJ         N.alias</span></span>
+<span><span class="co">#&gt;                   &lt;char&gt; &lt;char&gt;                         &lt;fctr&gt;          &lt;char&gt;</span></span>
 <span><span class="co">#&gt;       S.alias                 S_N.alias</span></span>
 <span><span class="co">#&gt;        &lt;char&gt;                    &lt;char&gt;</span></span>
 <span><span class="co">#&gt;  1:      Time                      Time</span></span>
@@ -397,6 +399,7 @@ measurement…parameters.</p>
 <span><span class="co">#&gt; 42:      CD27                CD27_APCH7</span></span>
 <span><span class="co">#&gt; 43:     KLRG1          KLRG1_APCFire810</span></span>
 <span><span class="co">#&gt;       S.alias                 S_N.alias</span></span>
+<span><span class="co">#&gt;        &lt;char&gt;                    &lt;char&gt;</span></span>
 <span></span>
 <span><span class="co">##internal flowstate functions add a few 'alias' columns;</span></span>
 <span><span class="co">##they serve the purpose of renaming the columns in [['data']];</span></span>
@@ -451,6 +454,7 @@ measurement…parameters.</p>
 <span><span class="co">#&gt; 42:            APC-H7-A      CD27</span></span>
 <span><span class="co">#&gt; 43:      APC-Fire 810-A     KLRG1</span></span>
 <span><span class="co">#&gt;                       N         S</span></span>
+<span><span class="co">#&gt;                  &lt;char&gt;    &lt;char&gt;</span></span>
 <span></span>
 <span><span class="co">##alias columns used to rename [['data']] columns</span></span>
 <span><span class="va">fs</span><span class="op">$</span><span class="va">parameters</span><span class="op">[</span>,<span class="fu">.</span><span class="op">(</span><span class="va">N.alias</span>,<span class="va">S.alias</span><span class="op">)</span><span class="op">]</span></span>
@@ -499,7 +503,8 @@ measurement…parameters.</p>
 <span><span class="co">#&gt; 41: LIVEDEADScarlet Viability</span></span>
 <span><span class="co">#&gt; 42:           APCH7      CD27</span></span>
 <span><span class="co">#&gt; 43:      APCFire810     KLRG1</span></span>
-<span><span class="co">#&gt;             N.alias   S.alias</span></span></code></pre></div>
+<span><span class="co">#&gt;             N.alias   S.alias</span></span>
+<span><span class="co">#&gt;              &lt;char&gt;    &lt;char&gt;</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="keywords">
@@ -529,9 +534,9 @@ transparency and the indication that they are explicitly modified.</p>
 <span><span class="co">#&gt; 3: 09:50:46.94 Aurora  V0299 27-Feb-2025 10:03:26.16</span></span>
 <span><span class="co">#&gt;                                $FIL $FLOWRATE    $INST          $LAST_MODIFIED</span></span>
 <span><span class="co">#&gt;                              &lt;char&gt;    &lt;char&gt;   &lt;char&gt;                  &lt;char&gt;</span></span>
-<span><span class="co">#&gt; 1: COVAIL_002_CYTOKINE_BLOCK1_1.fcs    Medium Cytekbio 06-NOV-2025 21:11:16.59</span></span>
-<span><span class="co">#&gt; 2: COVAIL_002_CYTOKINE_BLOCK1_2.fcs    Medium Cytekbio 06-NOV-2025 21:11:16.60</span></span>
-<span><span class="co">#&gt; 3: COVAIL_002_CYTOKINE_BLOCK1_3.fcs    Medium Cytekbio 06-NOV-2025 21:11:16.61</span></span>
+<span><span class="co">#&gt; 1: COVAIL_002_CYTOKINE_BLOCK1_1.fcs    Medium Cytekbio 16-JAN-2026 18:46:36.80</span></span>
+<span><span class="co">#&gt; 2: COVAIL_002_CYTOKINE_BLOCK1_2.fcs    Medium Cytekbio 16-JAN-2026 18:46:36.82</span></span>
+<span><span class="co">#&gt; 3: COVAIL_002_CYTOKINE_BLOCK1_3.fcs    Medium Cytekbio 16-JAN-2026 18:46:36.84</span></span>
 <span><span class="co">#&gt;    $LAST_MODIFIER         $OP $ORIGINALITY   $PAR</span></span>
 <span><span class="co">#&gt;            &lt;char&gt;      &lt;char&gt;       &lt;char&gt; &lt;char&gt;</span></span>
 <span><span class="co">#&gt; 1:                aurora user DataModified     43</span></span>
@@ -585,9 +590,9 @@ transparency and the indication that they are explicitly modified.</p>
 <span><span class="va">fs</span><span class="op">$</span><span class="va">keywords</span><span class="op">[</span>,<span class="fu">.</span><span class="op">(</span><span class="va">`$LAST_MODIFIED`</span>,<span class="va">`$LAST_MODIFIER`</span>,<span class="va">`$ORIGINALITY`</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co">#&gt;             $LAST_MODIFIED $LAST_MODIFIER $ORIGINALITY</span></span>
 <span><span class="co">#&gt;                     &lt;char&gt;         &lt;char&gt;       &lt;char&gt;</span></span>
-<span><span class="co">#&gt; 1: 06-NOV-2025 21:11:16.59                DataModified</span></span>
-<span><span class="co">#&gt; 2: 06-NOV-2025 21:11:16.60                DataModified</span></span>
-<span><span class="co">#&gt; 3: 06-NOV-2025 21:11:16.61                DataModified</span></span></code></pre></div>
+<span><span class="co">#&gt; 1: 16-JAN-2026 18:46:36.80                DataModified</span></span>
+<span><span class="co">#&gt; 2: 16-JAN-2026 18:46:36.82                DataModified</span></span>
+<span><span class="co">#&gt; 3: 16-JAN-2026 18:46:36.84                DataModified</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="spill">
@@ -681,7 +686,7 @@ a bug with how FlowJo handles the matrix…</em></p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>

@@ -7,7 +7,7 @@ utils::globalVariables(
   c("$FIL", "$TOT", ".", ".mean", "alias", "autofluorescence",
     "barcode", "barcode.alias", "barcode.censor", "cluster", "combn.drop",
     "detector", "detector.peak", "detector.select", "emission", "emission.normalized",
-    "fluor", "FSC_A", "group.type", "i", "id", "index", "j", "js",
+    "fluor", "FSC_A", "group.type", "i", "id", "index", "j", "js", "k",
     "marker", "means", "N", "N.alias", "node_barcode", "nodes.assigned",
     "ord", "peak.values", "population", "PROJ", "R", "reference.type",
     "S", "S.alias", "S_N.alias", "sample.id", "scatter.population",

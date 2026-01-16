@@ -28,19 +28,20 @@ flowstate.parameter.keywords <-
 flowstate.transform.types <-
   c(
     "Raw_Fluorescence",
-    "Unmixed_Fluorescence"
+    "Unmixed_Fluorescence",
+    "Ion_Count"
   )
 cytometer.identifier.types <- c(
   "Aurora" = "TUBENAME",
-  "ID7000" = "$CELLS"
+  "ID7000" = "$CELLS",
+  "DVS|FLUIDIGM|CYTOF" = "$FIL"
 )
 
 cytometer.identifier <- function(fcs.file.paths){
   cyt <- check.keyword(fcs.file.paths,keyword = '$CYT')
   i <- which(sapply(names(cytometer.identifier.types),function(i){grepl(i,cyt)}))
   if(length(i) != 1){
-    message("Cytometer keyword 'identifier' could not be resolved;\n,
-         is the cytometer indexed in 'flowstate:::cytometer.identifer.types()'?")
+    message("Cytometer keyword 'identifier' could not be resolved;\nis the cytometer indexed in 'flowstate:::cytometer.identifer.types()'?")
     id <- '$FIL'
   }else{
     id <- cytometer.identifier.types[[i]]

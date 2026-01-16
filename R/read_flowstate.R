@@ -1,5 +1,5 @@
 FCSoffsets<-function(fcs.file.path,return.version=FALSE){
-  if(grepl(".fcs$",fcs.file.path) & file.exists(fcs.file.path)){
+  if(grepl("fcs",tools::file_ext(fcs.file.path),ignore.case = T) & file.exists(fcs.file.path)){
     ##open a connection to the file (.fcs); read binary mode
     con <- file(fcs.file.path, open = "rb")
     on.exit(close(con))
@@ -110,12 +110,23 @@ parameters.to.data.table<-function(
   ##add 'TYPE' keyword-value pair; encoded in CyteK/SpectroFlo files;
   ##add for other platforms
   if(!'TYPE' %in% names(dt.parameters)){
+    dt.parameters[grep("Time",N,ignore.case = T), TYPE := "Time"]
+    dt.parameters[grep("FSC",N), TYPE := "Forward_Scatter"]
+    dt.parameters[grep("SSC",N), TYPE := "Side_Scatter"]
     ##if SONY ID7000; '$CYT/LE-ID7000C';
     ##grep for '[0-9]{3}CH[0-9]+-A'
     dt.parameters[grep('[0-9]{3}CH[0-9]+-A',N), TYPE := "Raw_Fluorescence"]
-    dt.parameters[grep("FSC",N), TYPE := "Forward_Scatter"]
-    dt.parameters[grep("SSC",N), TYPE := "Side_Scatter"]
-    dt.parameters[grep("Time",N,ignore.case = T), TYPE := "Time"]
+    ##if CYTOF|DVS|FLUIDIGM;
+    ##grep for 'Di$' ; "Center|Offset|Width|Residual" ; "Event_length"
+    dt.parameters[grep('Di$',N), TYPE := "Ion_Count"]
+    dt.parameters[
+      i = grep("Center|Offset|Width|Residual",N),
+      TYPE := "Gaussian"
+    ]
+    dt.parameters[
+      i = grep("Event_length",N),
+      TYPE := "Event_Length"
+    ]
   }
   ##add '$PROJ' identifier; if not found, use '$DATE' instead
   if(add.PROJ.identifier){

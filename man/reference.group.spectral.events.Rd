@@ -10,14 +10,15 @@ reference.group.spectral.events(
   quantiles = NULL,
   population.markers = NULL,
   top.N.percent = 1,
-  height.cut.scatter = 0.5,
-  n.detector.events = 200,
+  height.cut.scatter = 0.25,
+  n.detector.events = 100,
   detector.override = NULL,
   n.spectral.events = 200,
   n.spectral.events.unstained = 1000,
   n.spectral.events.override = NULL,
   plot = FALSE,
   plot.dir = "$PROJ",
+  return.spectral.events = TRUE,
   verbose = FALSE
 )
 }
@@ -49,13 +50,13 @@ The defined \code{population.markers} will be used as 'cellular anchors': top ex
 
 \item{top.N.percent}{Numeric -- default \code{1}; defines the number of top expressing events (peak detector) used in conjunction with \code{population.markers} for detecting and assigning the named populations.}
 
-\item{height.cut.scatter}{Numeric -- default \code{0.5}; defines the value at which scatter peak heights will be cut for fine tuning selected populations (as defined through \code{population.markers}).}
+\item{height.cut.scatter}{Numeric -- default \code{0.25}; defines the value at which scatter peak heights will be cut for fine tuning selected populations (as defined through \code{population.markers}).}
 
 \item{n.detector.events}{Numeric -- default \code{100}; the number of maximally expressing events (sorted vector) used to auto-detect reference control-specific peak detectors.}
 
 \item{detector.override}{Named character vector -- default \code{NULL}; if defined, the supplied detector name (value) will override the auto-detected peak detector on a reference control-specific (name) basis. See example.}
 
-\item{n.spectral.events}{Numeric -- default \code{250}; the number of maximally expressing events (sorted vector) used to define 'spectral events'.}
+\item{n.spectral.events}{Numeric -- default \code{200}; the number of maximally expressing events (sorted vector) used to define 'spectral events'.}
 
 \item{n.spectral.events.unstained}{Numeric -- default \code{1000}; the number of maximally expressing events (sorted vector) used to define '(universal) negative' events.}
 
@@ -64,6 +65,8 @@ The defined \code{population.markers} will be used as 'cellular anchors': top ex
 \item{plot}{Logical -- default \code{FALSE}; plots diagnostic/QC output for evaluating function performance.}
 
 \item{plot.dir}{Character vector -- default \code{'$PROJ'}; the value associated with the keyword '$PROJ' (experiment name) will be used to construct a plot output directory.}
+
+\item{return.spectral.events}{Logical -- default \code{TRUE}; the returned \code{flowstate} will be subset to include only 'spectral events' -- top expressing events used to calculate medians to define spectra. If \code{FALSE}, the returned \code{flowstate} will contain both 'spectral events' and non-'spectral events' -- useful for diagnostic/QC purposes.}
 
 \item{verbose}{Logical -- default \code{FALSE}; print function-associated messages to the console.}
 }

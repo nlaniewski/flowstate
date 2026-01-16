@@ -115,13 +115,13 @@ write.flowstate.check <- function(flowstate.object,verbose=TRUE){
   }
 }
 ##flowstate parameters (data.table) to vector (string); function
-parameters.to.string<-function(fs.obj){
-  cols.parameters<-names(fs.obj$parameters)[
-    names(fs.obj$parameters) %in% flowstate.parameter.keywords
+parameters.to.string<-function(flowstate.object){
+  cols.parameters<-names(flowstate.object$parameters)[
+    names(flowstate.object$parameters) %in% flowstate.parameter.keywords
   ]
-  parms<-lapply(cols.parameters,function(p,par.n=fs.obj$parameters[,.N]){
+  parms<-lapply(cols.parameters,function(p,par.n=flowstate.object$parameters[,.N]){
     vec<-stats::setNames(
-      fs.obj$parameters[[p]],
+      as.character(flowstate.object$parameters[[p]]),
       nm=paste0(ifelse(p=='DISPLAY',"P","$P"),seq(par.n),p)
     )
     return(vec)

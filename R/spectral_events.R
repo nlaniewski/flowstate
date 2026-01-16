@@ -159,6 +159,14 @@ cellular.anchors <- function(
             which.peak = 1,
             height.cut = height.cut.scatter,
             plot = plot,
+            xlim = c(
+              0,
+              flowstate.object$parameters[
+                i == scatter,
+                j = as.numeric(R),
+                env = list(i = j.match)
+              ]
+            ),
             main = sprintf("Scatter: %s",scatter),
             # main = sprintf("Population: %s\nSample: %s\nScatter: %s",.population,.BY$sample.id,scatter),
             sub = sprintf("Peak height cut: %s",height.cut.scatter)
@@ -260,54 +268,48 @@ detector.peak <- function(flowstate.object,top.n=150){
   ##detector columns
   cols.detector <- flowstate.object$parameters[TYPE == "Raw_Fluorescence"][[j.match]]
   ##variance -- per-detector/per-sample/per-population;
-  ##returns peak detector
-  detectors.variance <- flowstate.object$data[
-    ,
-    j = .(detector.peak = sapply(.SD,stats::var) |> which.max() |> names()),
-    .SDcols = cols.detector,
-    keyby = .(sample.id,population)
-  ]
-  ##test returned peak detectors using sorted vectors;
-  ##mean of top n expressing events
-  ##helps resolve to maximally expressing, population-specific events
-  detectors.mean <- flowstate.object$data[
+  ##mean -- sorted vector (peak detector)/max (top n) expressing events
+  ##return peak detector, variance, and mean per sample/per-population
+  detector.variance.mean <- flowstate.object$data[
     ,
     j = {
-      detector <- detectors.variance[
-        sample.id == .BY$sample.id][['detector.peak']] |> unique()
+      vars <- sapply(.SD,stats::var)
+      v <- vars |> which.max()
+      detector.peak <- v |> names()
+      m <- mean(sort(.SD[[detector.peak]],decreasing = T)[1:top.n])
       list(
-        detector.peak = detector,
-        .mean = sapply(detector,function(.detector){
-          sort(.SD[[.detector]],decreasing = T)[1:top.n] |> mean()
-        })
+        detector.peak = factor(detector.peak,levels=cols.detector),
+        variance = max(vars),
+        mean = m
       )
     },
-    keyby = .(sample.id,population)
+    .SDcols = cols.detector,
+    keyby = c(flowstate.object$data[,names(.SD),.SDcols = is.factor])
   ]
-  ##a single peak detector per sample;
-  ##population-specific;
+  ##a single population/peak detector per sample;
   ##retain all 'Unstained' populations for use as negative controls and autofluorescence
-  unstained <- detectors.mean[grepl("Unstained",sample.id)]
-  i <- detectors.mean[
+  i <- detector.variance.mean[
     i = !grepl("Unstained",sample.id),
-    j = .I[which.max(.mean)],
-    by=sample.id
+    j = .I[which.max(mean)],
+    by = sample.id
   ][['V1']]
-  detectors.mean <- rbind(detectors.mean[i],unstained)
-  ##factor detectors
-  detectors.mean[,detector.peak:=factor(detector.peak,levels=cols.detector)]
+
+  detector.variance.mean <- rbind(
+    detector.variance.mean[i][order(detector.peak)],
+    detector.variance.mean[grepl("Unstained",sample.id)][order(detector.peak)]
+  )
   ##add to [['data']]
-  for(i in detectors.mean[,seq(.N)]){
+  for(i in detector.variance.mean[,seq(.N)]){
     data.table::set(
       x = flowstate.object$data,
       i = flowstate.object$data[
         ,
-        .I[sample.id == detectors.mean[i,as.character(sample.id)] &
-             population == detectors.mean[i,as.character(population)]
+        .I[sample.id == detector.variance.mean[i,as.character(sample.id)] &
+             population == detector.variance.mean[i,as.character(population)]
         ]
       ],
       j = c('detector.peak','select.detector'),
-      value = list(detectors.mean[i,detector.peak],TRUE)
+      value = list(detector.variance.mean[i,detector.peak],TRUE)
     )
   }
 }
@@ -375,14 +377,15 @@ select.spectral.events <- function(
 #' }
 #' The defined `population.markers` will be used as 'cellular anchors': top expressing events (peak detector) in the named sample will be used to 'anchor' scatter distributions for proper assignment of the named population.
 #' @param top.N.percent Numeric -- default `1`; defines the number of top expressing events (peak detector) used in conjunction with `population.markers` for detecting and assigning the named populations.
-#' @param height.cut.scatter Numeric -- default `0.5`; defines the value at which scatter peak heights will be cut for fine tuning selected populations (as defined through `population.markers`).
+#' @param height.cut.scatter Numeric -- default `0.25`; defines the value at which scatter peak heights will be cut for fine tuning selected populations (as defined through `population.markers`).
 #' @param n.detector.events Numeric -- default `100`; the number of maximally expressing events (sorted vector) used to auto-detect reference control-specific peak detectors.
 #' @param detector.override Named character vector -- default `NULL`; if defined, the supplied detector name (value) will override the auto-detected peak detector on a reference control-specific (name) basis. See example.
-#' @param n.spectral.events Numeric -- default `250`; the number of maximally expressing events (sorted vector) used to define 'spectral events'.
+#' @param n.spectral.events Numeric -- default `200`; the number of maximally expressing events (sorted vector) used to define 'spectral events'.
 #' @param n.spectral.events.unstained Numeric -- default `1000`; the number of maximally expressing events (sorted vector) used to define '(universal) negative' events.
 #' @param n.spectral.events.override Named numeric vector -- default `NULL`; if defined, the supplied numeric (value) will override `n.spectral.events` on a sample-specific (name) basis. See example.
 #' @param plot Logical -- default `FALSE`; plots diagnostic/QC output for evaluating function performance.
 #' @param plot.dir Character vector -- default `'$PROJ'`; the value associated with the keyword '$PROJ' (experiment name) will be used to construct a plot output directory.
+#' @param return.spectral.events Logical -- default `TRUE`; the returned `flowstate` will be subset to include only 'spectral events' -- top expressing events used to calculate medians to define spectra. If `FALSE`, the returned `flowstate` will contain both 'spectral events' and non-'spectral events' -- useful for diagnostic/QC purposes.
 #' @param verbose Logical -- default `FALSE`; print function-associated messages to the console.
 #'
 #' @returns A `flowstate` containing spectrally-associated bead/cellular events.
@@ -450,14 +453,15 @@ reference.group.spectral.events <- function(
     quantiles = NULL,
     population.markers = NULL,
     top.N.percent = 1,
-    height.cut.scatter = 0.5,
-    n.detector.events = 200,
+    height.cut.scatter = 0.25,
+    n.detector.events = 100,
     detector.override = NULL,
     n.spectral.events = 200,
     n.spectral.events.unstained = 1000,
     n.spectral.events.override = NULL,
     plot = FALSE,
     plot.dir = '$PROJ',
+    return.spectral.events = TRUE,
     verbose = FALSE
 )
 {
@@ -528,20 +532,34 @@ reference.group.spectral.events <- function(
   }
   ##population-specific scatter selection; outputs diagnostic plots
   if(plot){
-    plot.dir <- ref$keywords[[plot.dir]] |> unique()
-    if(length(plot.dir)==1){
-      plot.dir <- file.path("./data_results",plot.dir)
-      if(!dir.exists(plot.dir)) dir.create(plot.dir,recursive = T)
-    }else{
-      message("Could not resolve 'plot.dir' to a unique directory path;\n
+    if(plot.dir == '$PROJ'){
+      plot.dir <- ref$keywords[[plot.dir]] |> unique()
+      if(length(plot.dir)==1){
+        plot.dir <- file.path("./data_results",plot.dir)
+      }else{
+        message("Could not resolve 'plot.dir' to a unique directory path;\n
               defaulting to tempdir().")
-      plot.dir <- tempdir()
+        plot.dir <- tempdir()
+      }
     }
+    if(!dir.exists(plot.dir)) dir.create(plot.dir,recursive = T)
   }
+  # if(plot){
+  #   plot.dir <- ref$keywords[[plot.dir]] |> unique()
+  #   if(length(plot.dir)==1){
+  #     plot.dir <- file.path("./data_results",plot.dir)
+  #     if(!dir.exists(plot.dir)) dir.create(plot.dir,recursive = T)
+  #   }else{
+  #     message("Could not resolve 'plot.dir' to a unique directory path;\n
+  #             defaulting to tempdir().")
+  #     plot.dir <- tempdir()
+  #   }
+  # }
   if(plot){
-    file.out <- file.path(
+     file.out <- file.path(
       plot.dir,
-      sprintf("%s_%s_select_population_density_cuts.pdf",basename(plot.dir),Sys.Date())
+      sprintf("%s_flowstate_population_density_cuts_%s.pdf",
+              basename(plot.dir),Sys.Date())
     )
     grDevices::pdf(file.out,width = 8, height = 8)
   }
@@ -562,11 +580,12 @@ reference.group.spectral.events <- function(
   if(plot){
     file.out <- file.path(
       plot.dir,
-      sprintf("%s_%s_select_population_NxN.pdf",basename(plot.dir),Sys.Date())
+      sprintf("%s_flowstate_population_NxN_%s.pdf",
+              basename(plot.dir),Sys.Date())
     )
     grDevices::pdf(file.out,width = 8, height = 8)
-    print(plot_populations(ref,pattern.scatter = "AH",sample.n = 1E4))
     if(verbose) message(sprintf("Saving %s",file.out))
+    print(plot_populations(ref,pattern.scatter = "AH",sample.n = 1E4))
     grDevices::dev.off()
   }
   ##subset the flowstate.object to retain selected populations;
@@ -574,6 +593,17 @@ reference.group.spectral.events <- function(
   if(verbose) message("Subsetting to retain sample-specific scatter populations...")
   ref <- subset(ref,!is.na(population))
   invisible(gc())
+  if(plot){
+    file.out <- file.path(
+      plot.dir,
+      sprintf("%s_flowstate_population_NxN_subset_%s.pdf",
+              basename(plot.dir),Sys.Date())
+    )
+    grDevices::pdf(file.out,width = 8, height = 8)
+    if(verbose) message(sprintf("Saving %s",file.out))
+    print(plot_populations(ref,pattern.scatter = "AH",sample.n = 1E4))
+    grDevices::dev.off()
+  }
   ##assign sample-specific/population-specific peak detectors
   ##use variance to detect peak detector;
   ##mean of sorted vectors within peak detector to resolve to specific population (max expressing)
@@ -594,6 +624,35 @@ reference.group.spectral.events <- function(
     n.spectral.events.unstained = n.spectral.events.unstained,
     n.spectral.events.override = n.spectral.events.override
   )
+  if(plot){
+    file.out <- file.path(
+      plot.dir,
+      sprintf("%s_flowstate_ref_spectral_events_%s.pdf",
+              basename(plot.dir),Sys.Date())
+    )
+    flowstate.transform(ref) |> suppressMessages()
+    p <- plot_spectral.events(ref)
+    grDevices::pdf(file.out,width = 8,height = 6)
+    if(verbose) message(sprintf("Saving %s",file.out))
+    for(i in names(p)){
+      print(p[[i]])
+    }
+    grDevices::dev.off()
+  }
+  if(return.spectral.events){
+    ##subset
+    ref <- subset(ref,select.spectral);ref$data[,select.spectral := NULL]
+  }
+  ##
+  if('transform' %in% names(ref$parameters)){
+    flowstate.transform.inverse(ref) |> invisible()
+    if(all(is.na(ref$parameters$transform))){
+      ref$parameters[
+        ,
+        c('transform','cofactor') := NULL
+      ]
+    }
+  }
   ##return -- invisibly -- the spectral events
   if(verbose) message("Returning 'spectral events'.")
   invisible(ref)

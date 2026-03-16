@@ -22,19 +22,20 @@ list.files(full.names = TRUE, pattern = "BLOCK.*.fcs")
 #read all .fcs files as flowstate objects
 fs <- read.flowstate(
   fcs.file.paths,
-  colnames.type="S"
+  colnames.type = "S"
 )
 
 #a list of flowstate objects
 class(fs)
-sapply(fs,class)
+sapply(fs, class)
 
 #concatenate into a single flowstate object
-fs<-concatenate.flowstate(fs)
+fs <- concatenate.flowstate(fs)
 class(fs)
 
 fs$data
-fs$parameters
+fs$parameters ; attr(fs$parameters, 'alias')
 fs$keywords
 fs$spill
+
 }

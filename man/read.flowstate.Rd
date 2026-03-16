@@ -6,8 +6,7 @@
 \usage{
 read.flowstate(
   fcs.file.paths,
-  colnames.type = c("S_N", "S", "N"),
-  S.func = NULL,
+  colnames.type = c("N", "S", "S_N"),
   sample.id = NULL,
   concatenate = FALSE
 )
@@ -17,12 +16,10 @@ read.flowstate(
 
 \item{colnames.type}{Character string; one of:
 \itemize{
-\item \code{"S_N"} -- \verb{[['data']]} columns are named by combining $PS (stain) and $PN (name), separated by an underscore.
-\item \code{"S"} -- \verb{[['data']]} columns are named by using only their respective $PS (stain) keyword value.
 \item \code{"N"} -- \verb{[['data']]} columns are named by using only their respective $PN (name) keyword value.
+\item \code{"S"} -- \verb{[['data']]} columns are named by using only their respective $PS (stain) keyword value.
+\item \code{"S_N"} -- \verb{[['data']]} columns are named by combining $PS (stain) and $PN (name), separated by an underscore.
 }}
-
-\item{S.func}{A function -- default \code{NULL}; if a function is supplied, it will be used to modify/split \code{"S"}; e.g. \code{function(j){strsplit(j," ")[[1]][1]}} will be applied to \code{"S"} to return the first split element ("CD4 PE" --> "CD4").}
 
 \item{sample.id}{Keyword name -- default \code{NULL}; based on cytometer platform, the keyword name for \code{sample.id} will be automatically set and the respective keyword values will be added to \verb{[['data']]} as a factored sample identifier. One of:
 \itemize{
@@ -56,7 +53,7 @@ Access the individual named list elements as follows (assuming \code{flowstate} 
 \item \code{fs$spill} or \code{fs[['spill']]}
 }
 
-Other \code{flowstate} functions operate on the entire object (\code{fs}) and access the individual slots as needed.
+Other \code{flowstate} functions operate on the entire object (\code{fs}) and access specific list elements as needed.
 }
 \examples{
 fcs.file.paths <- system.file("extdata", package = "flowstate") |>
@@ -65,7 +62,7 @@ list.files(full.names = TRUE, pattern = "BLOCK.*.fcs")
 #read a single .fcs file as a flowstate object
 fs <- read.flowstate(
   fcs.file.paths[1],
-  colnames.type="S"
+  colnames.type = "S"
 )
 class(fs)
 names(fs)
@@ -77,28 +74,28 @@ names(fs)
   fs$keywords #instrument/sample-specific metadata
   fs$spill #instrument/sample-specific spillover
 
-#read all .fcs files as a named list containing individial flowstate objects
+#read all .fcs files as a named list containing individual flowstate objects
 fs <- read.flowstate(
   fcs.file.paths,
-  colnames.type="S",
+  colnames.type = "S",
   concatenate = FALSE
 )
 class(fs);class(fs[[1]])
 names(fs);names(fs[[1]])
 
 fs[[1]]$keywords
-fs[[1]]$data[,levels(sample.id)]
+fs[[1]]$data[, levels(sample.id)]
 
 #read all .fcs files as flowstate objects; concatenate into a single object
 fs <- read.flowstate(
   fcs.file.paths,
-  colnames.type="S",
+  colnames.type = "S",
   concatenate = TRUE
 )
 class(fs)
 names(fs)
 fs$keywords
-fs$data[,levels(sample.id)]
+fs$data[, levels(sample.id)]
 
 }
 \references{

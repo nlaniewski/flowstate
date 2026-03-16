@@ -12,13 +12,11 @@ Imports:
     data.table,
     digest,
     ggplot2,
-    ggridges,
     graphics,
     grDevices,
     methods,
     scales,
     stats,
-    stringr,
     utils,
     viridis
 URL: https://github.com/nlaniewski/flowstate, https://nlaniewski.github.io/flowstate/

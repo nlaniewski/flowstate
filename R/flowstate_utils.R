@@ -48,11 +48,21 @@ cytometer.identifier <- function(fcs.file.paths){
   }
 }
 
-j.match.parameters.to.data <- function(flowstate.object){
-  names(which.max(flowstate.object$parameters[
+j.match.parameters.to.data <- function(flowstate){
+  alias <- attr(flowstate[['parameters']], which = 'alias', exact = TRUE)
+  res <- alias[
     ,
-    sapply(.SD,function(j){sum(j %in% names(flowstate.object$data),na.rm = TRUE)})
-  ]))[1]
+    sapply(.SD, function(j){sum(j %in% names(flowstate$data), na.rm = TRUE)})
+  ]
+  j.match <- names(which.max(res))
+  ##
+  parameters.alias <- merge(
+    flowstate$parameters,
+    alias[,.SD,.SDcols = c('N',j.match)],
+    sort = F
+  )
+  data.table::setattr(parameters.alias,'j.match',j.match)
+  ##
 }
 j.match.keyword.to.data.sample.id <- function(flowstate.object){
   flowstate.object$keywords[
@@ -63,18 +73,17 @@ j.match.keyword.to.data.sample.id <- function(flowstate.object){
   ] |> which.max() |> names()
 }
 
-#' @title Add keyword values to `flowstate[['data']]`
+#' @title Add keyword values to `[['data']]`
 #' @description
-#' Used for efficient addition of factored keyword values to `flowstate[['data']]`; updates by reference.
+#' Used for efficient addition of factored keyword values to `[['data']]`; updates by reference.
 #'
-#' @param flowstate.object A flowstate object as returned from [read.flowstate].
-#' @param keywords Character string; keyword names in `flowstate[['keywords']]` whose factored values will be added to `flowstate[['data']]`.
-#' @param type.convert Logical; default `TRUE`. For any `keywords` of class `character`, conversion to `factor` will take place before addition to `[['data']]`.
+#' @param flowstate A flowstate object as returned from [read.flowstate].
+#' @param keywords Character string; keyword names in `[['keywords']]` whose factored values will be added to `[['data']]`.
 #'
 #' @returns UPDATES BY REFERENCE:
 #' \itemize{
-#'   \item `flowstate[['data']]`; factored `keywords` are added as additional columns.
-#'   \item `flowstate[['keywords']]`; if `type.convert`, `keywords` are converted to class `factor`.
+#'   \item `[['data']]`; factored `keywords` are added as additional columns.
+#'   \item `[['keywords']]`; `keywords` are converted to class `factor`.
 #' }
 #' @export
 #'
@@ -85,7 +94,7 @@ j.match.keyword.to.data.sample.id <- function(flowstate.object){
 #' #read all .fcs files as flowstate objects; concatenate into a single object
 #' fs <- read.flowstate(
 #'   fcs.file.paths,
-#'   colnames.type="S",
+#'   colnames.type = "S",
 #'   concatenate = TRUE
 #' )
 #'
@@ -93,7 +102,7 @@ j.match.keyword.to.data.sample.id <- function(flowstate.object){
 #' fs$keywords[
 #' ,
 #' j = c('block.id','block.aliquot') := data.table::tstrsplit(
-#' TUBENAME,"_",type.convert = factor,keep=4:5)
+#' sample.id,"_",keep=4:5)
 #' ]
 #'
 #' #add the factored keyword values to fs[['data']]
@@ -101,29 +110,22 @@ j.match.keyword.to.data.sample.id <- function(flowstate.object){
 #'
 #' fs$data[,.(block.id,block.aliquot)]
 #'
-#' #add to keyword [['data']] using type.convert argument
-#' add.keywords.to.data(fs,c('$DATE','$PROJ'),type.convert=TRUE)
+#' #add additional keywords to [['data']]
+#' add.keywords.to.data(fs,c('$DATE','$PROJ'))
 #'
 #' fs$data[,.(`$DATE`,`$PROJ`)]
 #' fs$keywords[,.(`$DATE`,`$PROJ`)]
-add.keywords.to.data <- function(flowstate.object,keywords,type.convert=TRUE){
+add.keywords.to.data <- function(flowstate,keywords){
   ##
-  if(type.convert){
-    cols.convert <- flowstate.object$keywords[
-      ,
-      names(which(sapply(.SD,is.character))),
-      .SDcols = keywords
-    ]
-    for(j in cols.convert){
-      data.table::set(
-        x = flowstate.object$keywords,
-        j = j,
-        value = factor(flowstate.object$keywords[[j]])
-      )
-    }
+  for(j in keywords){
+    data.table::set(
+      x = flowstate$keywords,
+      j = j,
+      value = factor(flowstate$keywords[[j]])
+    )
   }
   ##
-  res <- names(which(flowstate.object$keywords[
+  res <- names(which(flowstate$keywords[
     ,
     sapply(.SD,function(j){anyNA(suppressWarnings(as.numeric(j)))}),
     .SDcols = keywords
@@ -133,32 +135,32 @@ add.keywords.to.data <- function(flowstate.object,keywords,type.convert=TRUE){
       paste(
         "Adding the following keywords to [['data']] will be problematic:",
         paste0(res,collapse = ", "),
-        "Eventual conversion to numeric is expected.",
+        "Eventual conversion to numeric (levels) is expected.",
         sep = "\n"
       )
     )
   }
   ##
-  ids<-flowstate.object$data[,levels(sample.id)]
+  ids<-flowstate$data[,levels(sample.id)]
   col.id <- names(which(
-    flowstate.object$keywords[,sapply(.SD,function(j){all(j %in% ids)})]
+    flowstate$keywords[,sapply(.SD,function(j){all(j %in% ids)})]
   ))
   if(length(col.id)==0){
     col.id <- names(which(
-      flowstate.object$keywords[,sapply(.SD,function(j){all(sub(".fcs","",j) %in% ids)})]
+      flowstate$keywords[,sapply(.SD,function(j){all(sub(".fcs","",j) %in% ids)})]
     ))
   }
   if(length(col.id) == 0){
     stop("Expect a single identifier column ('sample.id') in [['data']] to match to a single identifier column in [['keywords']]")
   }
   ##
-  totals<-flowstate.object$data[,.N,by=sample.id]
+  totals<-flowstate$data[,.N,by=sample.id]
   for(j in keywords){
     data.table::set(
-      x = flowstate.object$data,
+      x = flowstate$data,
       i = NULL,
       j = j,
-      value = rep(flowstate.object$keywords[[j]],totals[['N']])
+      value = rep(flowstate$keywords[[j]],totals[['N']])
     )
   }
 }
@@ -183,31 +185,83 @@ check.keyword <- function(fcs.file.paths,keyword=NULL,value=NULL){
   }
 }
 
-select.nonsaturating <- function(flowstate.object){
-  ##alias column
-  j.match <- j.match.parameters.to.data(flowstate.object)
-  ##scatter and fluors; '$PnR/n1' value to get detector upper limit;
-  ##as to why values exist above this upper limit in raw data...?
-  type.string <- c(sprintf("%s_Scatter",c("Forward","Side")),'Raw_Fluorescence')
-  ranges <- flowstate.object$parameters[
+#' @title Create a column (logical) for selecting against saturating events
+#' @description
+#' A new column (logical) named `select.nonsaturating` is created in `[['data']]` and any/all events that are at detector limits -- as defined by the '$PnR' value in `[['parameters']]` -- will be marked as `FALSE` with non-saturating events marked as `TRUE`.
+#'
+#' Detection of saturating events requires linear (non-transformed) values and as such should be performed before [flowstate.transform].
+#'
+#' @param flowstate A flowstate object as returned from [read.flowstate].
+#'
+#' @returns UPDATES BY REFERENCE:
+#' \itemize{
+#'    \item `flowstate[['data']]`; adds a column (logical) named `select.nonsaturating`
+#' }
+#'
+#' Invisibly returns `flowstate`.
+#' @export
+#'
+#' @examples
+#'
+#' fcs.file.paths <- system.file("extdata", package = "flowstate") |>
+#' list.files(full.names = TRUE, pattern = "BLOCK.*.fcs")
+#'
+#' #read all .fcs files as flowstate objects; concatenate into a single object
+#' fs <- read.flowstate(
+#'   fcs.file.paths,
+#'   colnames.type = "S",
+#'   concatenate = TRUE
+#' )
+#'
+#' #UPDATES BY REFERENCE -- adds a new column named 'select.nonsaturating'
+#' select.nonsaturating(fs)
+#' fs$data[, .N, by = select.nonsaturating]
+#'
+#' #visualize
+#' plot(fs,FSC_A,SSC_A) + ggplot2::facet_wrap(~select.nonsaturating)
+#'
+#' #subset to retain only non-saturating events
+#' fs <- subset(fs,select.nonsaturating)
+#' fs$data[, .N, by = select.nonsaturating]
+#'
+#' #after the subset, the column is now redundant
+#' all(fs$data[['select.nonsaturating']])
+#'
+#' #NULL it out
+#' fs$data[,'select.nonsaturating' := NULL]
+#'
+select.nonsaturating <- function(flowstate){
+  ## merged parameters; alias column
+  parameters.matched <- j.match.parameters.to.data(flowstate)
+  ## alias that matches parameters to data
+  j.match <- attr(parameters.matched,'j.match')
+  ## scatter and raw/unmixed fluorescence (linear values);
+  ## '$PnR/n1' value to get detector upper limit
+  type.string <- c(
+    sprintf("%s_Scatter",c("Forward","Side")),
+    sprintf("%s_Fluorescence",c("Raw","Unmixed"))
+  )
+  ranges <- parameters.matched[
     i = TYPE %in% type.string,
     j = .SD,
     .SDcols = c('R',j.match)
   ][,R := as.numeric(R)]
-  ##initialize a logical
-  flowstate.object$data[,select.nonsaturating := TRUE]
-  ##loop through and set to FALSE any event in any j that is saturating
-  for(i in ranges[,seq(.N)]){
-    j <- ranges[i][[j.match]]
-    r <- ranges[i][['R']]
+  ## initialize a logical
+  flowstate$data[, select.nonsaturating := TRUE]
+  ## loop through and set to FALSE any event in any j that is saturating
+  for(j in ranges[[j.match]]){
     data.table::set(
-      x = flowstate.object$data,
-      i = flowstate.object$data[,.I[.SD[[j]]>=r]],
+      x = flowstate$data,
+      i = flowstate$data[
+        ,
+        .I[.SD[[j]] >= ranges[i == j, R, env = list(i = j.match)]]
+      ],
       j = 'select.nonsaturating',
       value = FALSE
     )
   }
-  invisible(flowstate.object)
+  ##
+  invisible(flowstate)
 }
 
 select.quantile <- function(flowstate.object,type=c('scatter','fluor'),probs=c(0,0.995)){
@@ -237,3 +291,5 @@ select.quantile <- function(flowstate.object,type=c('scatter','fluor'),probs=c(0
   }
   invisible(flowstate.object)
 }
+
+cosine.similarity <- function(x,y){crossprod(x,y)/sqrt(crossprod(x) * crossprod(y))}

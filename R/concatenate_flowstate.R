@@ -1,59 +1,69 @@
-concatenate.test<-function(flowstate.objects){
-  ##test to make sure 'flowstate.objects' is a list
+concatenate.test <- function(flowstate.objects){
+  ## test to make sure 'flowstate.objects' is a list
   if(!isa(flowstate.objects,"list")){
     stop("For concatenation: need a list of 'flowstate.objects'.")
   }
-  ##test to make sure that each list element is a 'flowstate.object'
+  ## test to make sure that each list element is a 'flowstate.object'
   if(!all(sapply(flowstate.objects,isa,'flowstate'))){
     stop("For concatenation: each list element of 'flowstate.objects' must be of class 'flowstate'.")
   }
-  ##does each 'flowstate.object' have the same number of [['data']] columns?
-  ncol.data<-unique(sapply(flowstate.objects,function(fs.obj){ncol(fs.obj[['data']])}))
-  if(length(ncol.data)!=1){
+  ## does each 'flowstate.object' have the same number of [['data']] columns?
+  ncol.data <- unique(sapply(flowstate.objects, function(fs.obj){ncol(fs.obj[['data']])}))
+  if(length(ncol.data) != 1){
     stop("For concatenation: each 'flowstate.object' must have the same number of data columns.")
   }
-  ##does each 'flowstate.object' have the same [['data']] column names?
-  colnames.data<-unique(lapply(flowstate.objects,function(fs.obj){names(fs.obj[['data']])}))
-  if(length(colnames.data)!=1){
+  ## does each 'flowstate.object' have the same [['data']] column names?
+  colnames.data <- unique(lapply(flowstate.objects,function(fs.obj){names(fs.obj[['data']])}))
+  if(length(colnames.data) != 1){
     stop("For concatenation: each 'flowstate.object' must have the same data column names.")
   }else{
-    colnames.data<-colnames.data[[1]]
+    colnames.data <- colnames.data[[1]]
   }
   ##
   message("Concatenating 'flowstate.ojects'...")
 }
 
-parameters.unique<-function(flowstate.objects){
-  ##if 'concatenate.test(flowstate.objects)' passes then parameters will be non-unique due to range ('R') differences in 'Time'
-  parameters<-unique(data.table::rbindlist(lapply(flowstate.objects,'[[','parameters')))
-  ##the names ('N') of parameters due to differing range ('R') values; 'Time'
-  pars.rangefix<-parameters[,names(which(table(N)>1))]
-  ##placeholder column; logical
-  parameters[,drop := FALSE]
-  ##for each parameter name in 'pars.rangefix', retain the row with max 'R' value;
-  ##drop the rest
-  for(par in pars.rangefix){
-    i<-which(parameters[['N']] %in% par)
-    pars.drop<-i[!i %in% i[parameters[i,which.max(R)]]]
-    data.table::set(
-      x = parameters,
-      i = pars.drop,
-      j = 'drop',
-      value = TRUE
-    )
+parameters.unique <- function(flowstate.objects){
+  ## if 'concatenate.test(flowstate.objects)' passes then parameters will be non-unique due to possible differences in:
+  ## 'R' (range -- 'Time');
+  ## 'V' (volts/gain);
+
+  ## copy aliases; resolve to a unique 'alias'
+  aliases <- unique(lapply(flowstate.objects, function(fs){
+    attr(fs[['parameters']], which = 'alias', exact = TRUE)
+  }))
+  if(length(aliases) == 1){
+    alias <- aliases[[1]]
+  }else{
+    stop("Could not resolve a unique `alias` data.table.")
   }
-  ##drop
-  parameters<-parameters[drop == FALSE][,drop := NULL]
-  ##reorder based on 'par'
+  ## resolve to a unique [['parameters']]
+  parameters <- unique(data.table::rbindlist(lapply(flowstate.objects, '[[', 'parameters')))
+  ## duplicate names ('N') of parameters due to differing range ('R') values; 'Time'
+  pars.rangefix <- parameters[, names(which(table(N) > 1))]
+  ## placeholder column; logical
+  parameters[, drop := FALSE]
+  ## for each parameter name in 'pars.rangefix', retain the row with max 'R' value;
+  ## drop the rest
+  for(par in pars.rangefix) {
+    i <- which(parameters[['N']] %in% par)
+    pars.drop <- i[!i %in% i[parameters[i, which.max(R)]]]
+    data.table::set(x = parameters,
+                    i = pars.drop,
+                    j = 'drop',
+                    value = TRUE)
+  }
+  ## drop
+  parameters <- parameters[drop == FALSE][, drop := NULL]
+  ## reorder based on 'par'
   data.table::setorder(
-    x = parameters[
-      ,
-      ord := match(par,paste0("$P",seq(.N)))
-    ],
+    x = parameters[, ord := match(par, paste0("$P", seq(.N)))],
     "ord"
   )[,ord := NULL]
-  ##return the data.table
-  parameters[]
+  ##
+  data.table::setattr(parameters, name = "alias", alias)
+  ## return the data.table
+  invisible(parameters)
 }
 
 #' @title Concatenate a list of flowstate objects
@@ -70,40 +80,41 @@ parameters.unique<-function(flowstate.objects){
 #' #read all .fcs files as flowstate objects
 #' fs <- read.flowstate(
 #'   fcs.file.paths,
-#'   colnames.type="S"
+#'   colnames.type = "S"
 #' )
 #'
 #' #a list of flowstate objects
 #' class(fs)
-#' sapply(fs,class)
+#' sapply(fs, class)
 #'
 #' #concatenate into a single flowstate object
-#' fs<-concatenate.flowstate(fs)
+#' fs <- concatenate.flowstate(fs)
 #' class(fs)
 #'
 #' fs$data
-#' fs$parameters
+#' fs$parameters ; attr(fs$parameters, 'alias')
 #' fs$keywords
 #' fs$spill
+#'
 concatenate.flowstate<-function(flowstate.objects){
-  ##test if objects can be concatenated
+  ## test if objects can be concatenated
   concatenate.test(flowstate.objects)
-  ##is there [['spill']]"
-  res.spill <- any(sapply(flowstate.objects,function(fs) 'spill' %in% names(fs)))
-  ##create a flowstate (fs) S3 object ; class 'flowstate'
+  ## is there [['spill']]"
+  res.spill <- any(sapply(flowstate.objects, function(fs) 'spill' %in% names(fs)))
+  ## create a flowstate (fs) S3 object ; class 'flowstate'
   fs <- flowstate(
-    data = data.table::rbindlist(lapply(flowstate.objects,'[[','data')),
+    data = data.table::rbindlist(lapply(flowstate.objects, '[[', 'data')),
     parameters = parameters.unique(flowstate.objects),
-    keywords = data.table::rbindlist(lapply(flowstate.objects,'[[','keywords'),fill=TRUE),
+    keywords = data.table::rbindlist(lapply(flowstate.objects,'[[','keywords'), fill = TRUE),
     spill = if(res.spill){
-      unique(lapply(flowstate.objects,'[[','spill'))[[1]]#needs more testing
+      unique(lapply(flowstate.objects, '[[', 'spill'))[[1]]#needs more testing
     }else{
       data.table::data.table()
     }
   )
-  ##any/all concatenated .fcs files should return:
-  ##[['data']], [['parameters']], and [['keywords']]
-  ##may not have spill (mass cytometry)
+  ## any/all concatenated .fcs files should return:
+  ## [['data']], [['parameters']], and [['keywords']]
+  ## may not have spill (mass cytometry)
   if(fs[['spill']][,.N]==0){fs[['spill']] <- NULL}
   ##return
   return(fs)

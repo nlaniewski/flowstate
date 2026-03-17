@@ -17,8 +17,8 @@ read.flowstate(
 \item{colnames.type}{Character string; one of:
 \itemize{
 \item \code{"N"} -- \verb{[['data']]} columns are named by using only their respective $PN (name) keyword value.
-\item \code{"S"} -- \verb{[['data']]} columns are named by using only their respective $PS (stain) keyword value.
-\item \code{"S_N"} -- \verb{[['data']]} columns are named by combining $PS (stain) and $PN (name), separated by an underscore.
+\item \code{"S"} -- \verb{[['data']]} columns are named by using only their respective $PS (stain/user-defined) keyword value.
+\item \code{"S_N"} -- \verb{[['data']]} columns are named by combining $PS and $PN, separated by an underscore.
 }}
 
 \item{sample.id}{Keyword name -- default \code{NULL}; based on cytometer platform, the keyword name for \code{sample.id} will be automatically set and the respective keyword values will be added to \verb{[['data']]} as a factored sample identifier. One of:
@@ -28,10 +28,10 @@ read.flowstate(
 \item Unspecified    -- \code{sample.id} = \code{'$FIL'}
 }}
 
-\item{concatenate}{Logical -- default \code{FALSE}; if \code{TRUE}, the list of flowstate objects will be combined into a single flowstate object.}
+\item{concatenate}{Logical -- default \code{FALSE}; if \code{TRUE}, the list of flowstates will be combined into a single flowstate.}
 }
 \value{
-For a single file: an object of class \code{flowstate}; for multiple files: a named list of \verb{flowstate objects}; for concatenated files: an object of class \code{flowstate}
+For a single file: an object of class \code{flowstate}; for multiple files: a named list of \code{flowstates}; for concatenated files: an object of class \code{flowstate}
 }
 \description{
 \href{https://pmc.ncbi.nlm.nih.gov/articles/PMC2892967/}{Flow Cytometry Standard} files are read, parsed and stored as objects (S3) of \link{class} \code{'flowstate'}.
@@ -59,7 +59,7 @@ Other \code{flowstate} functions operate on the entire object (\code{fs}) and ac
 fcs.file.paths <- system.file("extdata", package = "flowstate") |>
 list.files(full.names = TRUE, pattern = "BLOCK.*.fcs")
 
-#read a single .fcs file as a flowstate object
+#read a single .fcs file as a flowstate
 fs <- read.flowstate(
   fcs.file.paths[1],
   colnames.type = "S"
@@ -74,7 +74,7 @@ names(fs)
   fs$keywords #instrument/sample-specific metadata
   fs$spill #instrument/sample-specific spillover
 
-#read all .fcs files as a named list containing individual flowstate objects
+#read all .fcs files as a named list containing individual flowstates
 fs <- read.flowstate(
   fcs.file.paths,
   colnames.type = "S",
@@ -86,7 +86,7 @@ names(fs);names(fs[[1]])
 fs[[1]]$keywords
 fs[[1]]$data[, levels(sample.id)]
 
-#read all .fcs files as flowstate objects; concatenate into a single object
+#read all .fcs files as flowstates; concatenate into a single object
 fs <- read.flowstate(
   fcs.file.paths,
   colnames.type = "S",
@@ -113,5 +113,5 @@ Barrett T, Dowle M, Srinivasan A, Gorecki J, Chirico M, Hocking T, Schwendinger 
 data.table: Extension of 'data.frame'. R package version 1.17.99, https://r-datatable.com.
 }
 \seealso{
-\code{\link[=flowstate.transform]{flowstate.transform()}}
+\link{select.nonsaturating} ; \link{flowstate.transform}
 }

@@ -2,16 +2,16 @@
 % Please edit documentation in R/plot_flowstate.R
 \name{plot.flowstate}
 \alias{plot.flowstate}
-\title{Plot flowstate data}
+\title{Visualize \code{flowstate} data}
 \usage{
 \method{plot}{flowstate}(x, ..., bins = 200, limits = NULL, sample.n = NULL)
 }
 \arguments{
 \item{x}{A flowstate object as returned from \link{read.flowstate}.}
 
-\item{...}{... \link[ggplot2]{aes} arguments (unquoted variables); essentially x and y. If a \code{z} aesthetic is defined, the plot will switch to \link[ggplot2]{stat_summary_hex}, using this defined third variable as a 'color-by'.}
+\item{...}{... \link[ggplot2]{aes} arguments (unquoted variables); essentially x and/or y. If a \code{z} aesthetic is defined, the plot will switch to \link[ggplot2]{stat_summary_hex}, using this defined third variable as a 'color-by'.}
 
-\item{bins}{\link[ggplot2]{geom_hex} argument; numeric giving the number of bins in both vertical and horizontal directions.}
+\item{bins}{\link[ggplot2]{geom_hex} argument; numeric giving the number of bins in both vertical and horizontal directions for bivariate and/or bivariate with 'color-by' plots.}
 
 \item{limits}{\link[ggplot2]{continuous_scale} argument.}
 
@@ -21,7 +21,7 @@
 A \link[ggplot2]{ggplot} object.
 }
 \description{
-Plot flowstate data
+Visualize \code{flowstate} data
 }
 \examples{
 fcs.file.paths <- system.file("extdata", package = "flowstate") |>
@@ -30,21 +30,21 @@ list.files(full.names = TRUE, pattern = "BLOCK.*.fcs")
 #read all .fcs files as flowstate objects; concatenate into a single object
 fs <- read.flowstate(
   fcs.file.paths,
-  colnames.type="S",
+  colnames.type = "S",
   concatenate = TRUE
 )
 
 #transform
-flowstate.transform(fs,c('CD3','CD4','CD8','Viability'))
+flowstate.transform(fs, c('CD3', 'CD4', 'CD8', 'Viability'))
 
 #plot title
 no.fill.legend <- ggplot2::guides(fill = 'none')
-.title1 <- paste("Batch:",fs$keywords[,unique(`$PROJ`)])
+.title1 <- paste("Batch:", fs$keywords[, unique(`$PROJ`)])
 .title2 <- paste(
   "Instrument Serial#:",
-  fs$keywords[,paste(.(unique(`$CYT`),unique(`$CYTSN`)),collapse = " ")]
+  fs$keywords[, paste(.(unique(`$CYT`), unique(`$CYTSN`)), collapse = " ")]
 )
-.title <- paste(.title1,.title2,sep = "\n")
+.title <- paste(.title1, .title2, sep = "\n")
 .title <- ggplot2::labs(title = .title)
 
 #plot: two variables

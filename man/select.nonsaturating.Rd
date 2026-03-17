@@ -7,7 +7,7 @@
 select.nonsaturating(flowstate)
 }
 \arguments{
-\item{flowstate}{A flowstate object as returned from \link{read.flowstate}.}
+\item{flowstate}{A flowstate as returned from \link{read.flowstate}.}
 }
 \value{
 UPDATES BY REFERENCE:
@@ -18,7 +18,7 @@ UPDATES BY REFERENCE:
 Invisibly returns \code{flowstate}.
 }
 \description{
-A new column (logical) named \code{select.nonsaturating} is created in \verb{[['data']]} and any/all events that are at detector limits -- as defined by '$PnR' in \verb{[['parameters']]} -- will be marked as \code{FALSE} with non-saturating events marked as \code{TRUE}.
+A new column (logical) named \code{select.nonsaturating} is created in \verb{[['data']]} and any/all events that are at detector limits -- as defined by the '$PnR' value in \verb{[['parameters']]} -- will be marked as \code{FALSE} with non-saturating events marked as \code{TRUE}.
 
 Detection of saturating events requires linear (non-transformed) values and as such should be performed before \link{flowstate.transform}.
 }
@@ -27,7 +27,7 @@ Detection of saturating events requires linear (non-transformed) values and as s
 fcs.file.paths <- system.file("extdata", package = "flowstate") |>
 list.files(full.names = TRUE, pattern = "BLOCK.*.fcs")
 
-#read all .fcs files as flowstate objects; concatenate into a single object
+#read all .fcs files as flowstates; concatenate into a single object
 fs <- read.flowstate(
   fcs.file.paths,
   colnames.type = "S",

@@ -158,31 +158,45 @@ parameters.to.data.table <- function(
     dt.parameters[i = grep("Center|Offset|Width|Residual", N), TYPE := "Gaussian"]
     dt.parameters[i = grep("Event_length", N), TYPE := "Event_Length"]
   }
-  ## add '$PROJ' identifier; if not found, use '$DATE' instead
+  ## add as attribute '$PROJ' identifier; if not found, use '$DATE' instead
   if(add.PROJ.identifier){
-    dt.parameters[, PROJ := as.factor(add.identifier.proj(keywords))]
+    data.table::setattr(
+      x = dt.parameters,
+      name = 'PROJ',
+      value = add.identifier.proj(keywords)
+    )
+    # dt.parameters[, PROJ := as.factor(add.identifier.proj(keywords))]
   }
-  ## pre-form an alias data.table for setting syntactically valid names
-  ## alias allows use of NSE without having to use back ticks on unquoted variables
-  alias <- data.table::data.table(
-    N = dt.parameters[['N']],
-    S = dt.parameters[['S']]
-  )
-  ## make N syntactically valid
-  alias[i = !grepl("[FS]SC|Time", N), N.alias := gsub(" |-|/", "", sub("-A$", "", N))]
-  alias[i = grepl("[FS]SC|Time", N), N.alias := sub("-", "_", sub("SSC-B", "SSCB", N))]
-  ## make S syntactically valid
-  if("S" %in% names(dt.parameters)){
-    alias[, S.alias := gsub(" |-|/", "", S)]
-    alias[is.na(S.alias), S.alias := N.alias]
-    ##
-    alias[!is.na(S), S_N.alias := paste(S.alias, N.alias, sep = "_")]
-    alias[is.na(S_N.alias), S_N.alias := N.alias]
-  }
-  ## add as attribute to 'dt.parameters'
-  data.table::setattr(dt.parameters, name = "alias", alias)
   ## return the data.table
   invisible(dt.parameters)
+}
+
+parameter.alias <- function(flowstate, colnames.type = c('N', 'S', 'S_N')){
+  ## make N syntactically valid
+  alias <- flowstate$parameters[, .(N, S)]
+  alias[
+    i = !grepl("[FS]SC|Time", N),
+    j = N.alias := gsub(" |-|/", "", sub("-A$", "", N))
+  ]
+  alias[
+    i = grepl("[FS]SC|Time", N),
+    j = N.alias := sub("-", "_", sub("SSC-B", "SSCB", N))
+  ]
+  ## make S syntactically valid
+  alias[, S.alias := gsub(" |-|/", "", S)]
+  alias[is.na(S.alias), S.alias := N.alias]
+  ## form S_N
+  alias[!is.na(S), S_N.alias := paste(S.alias, N.alias, sep = "_")]
+  alias[is.na(S_N.alias), S_N.alias := N.alias]
+  ## for and return alias
+  nm <- alias[['N']]
+  alias <- switch(
+    match.arg(colnames.type),
+    N = alias[['N.alias']],
+    S = alias[['S.alias']],
+    S_N = alias[['S_N.alias']]
+  )
+  return(stats::setNames(alias, nm))
 }
 
 keywords.to.data.table <- function(keywords, drop.primary = TRUE, drop.spill = TRUE){
@@ -324,8 +338,8 @@ flowstate.from.file.path <- function(fcs.file.path){
 #' @param colnames.type Character string; one of:
 #' \itemize{
 #'   \item `"N"` -- `[['data']]` columns are named by using only their respective $PN (name) keyword value.
-#'   \item `"S"` -- `[['data']]` columns are named by using only their respective $PS (stain) keyword value.
-#'   \item `"S_N"` -- `[['data']]` columns are named by combining $PS (stain) and $PN (name), separated by an underscore.
+#'   \item `"S"` -- `[['data']]` columns are named by using only their respective $PS (stain/user-defined) keyword value.
+#'   \item `"S_N"` -- `[['data']]` columns are named by combining $PS and $PN, separated by an underscore.
 #' }
 #' @param sample.id Keyword name -- default `NULL`; based on cytometer platform, the keyword name for `sample.id` will be automatically set and the respective keyword values will be added to `[['data']]` as a factored sample identifier. One of:
 #' \itemize{
@@ -333,10 +347,10 @@ flowstate.from.file.path <- function(fcs.file.path){
 #'   \item ID7000 (Sony)  -- `sample.id` = `'$CELLS'`
 #'   \item Unspecified    -- `sample.id` = `'$FIL'`
 #' }
-#' @param concatenate Logical -- default `FALSE`; if `TRUE`, the list of flowstate objects will be combined into a single flowstate object.
+#' @param concatenate Logical -- default `FALSE`; if `TRUE`, the list of flowstates will be combined into a single flowstate.
 #'
-#' @returns For a single file: an object of class `flowstate`; for multiple files: a named list of `flowstate objects`; for concatenated files: an object of class `flowstate`
-#' @seealso [flowstate.transform()]
+#' @returns For a single file: an object of class `flowstate`; for multiple files: a named list of `flowstates`; for concatenated files: an object of class `flowstate`
+#' @seealso [select.nonsaturating] ; [flowstate.transform]
 #' @references Directly/heavily-inspired by:
 #'
 #' [flowCore][flowCore::flowFrame]:
@@ -356,7 +370,7 @@ flowstate.from.file.path <- function(fcs.file.path){
 #' fcs.file.paths <- system.file("extdata", package = "flowstate") |>
 #' list.files(full.names = TRUE, pattern = "BLOCK.*.fcs")
 #'
-#' #read a single .fcs file as a flowstate object
+#' #read a single .fcs file as a flowstate
 #' fs <- read.flowstate(
 #'   fcs.file.paths[1],
 #'   colnames.type = "S"
@@ -371,7 +385,7 @@ flowstate.from.file.path <- function(fcs.file.path){
 #'   fs$keywords #instrument/sample-specific metadata
 #'   fs$spill #instrument/sample-specific spillover
 #'
-#' #read all .fcs files as a named list containing individual flowstate objects
+#' #read all .fcs files as a named list containing individual flowstates
 #' fs <- read.flowstate(
 #'   fcs.file.paths,
 #'   colnames.type = "S",
@@ -383,7 +397,7 @@ flowstate.from.file.path <- function(fcs.file.path){
 #' fs[[1]]$keywords
 #' fs[[1]]$data[, levels(sample.id)]
 #'
-#' #read all .fcs files as flowstate objects; concatenate into a single object
+#' #read all .fcs files as flowstates; concatenate into a single object
 #' fs <- read.flowstate(
 #'   fcs.file.paths,
 #'   colnames.type = "S",
@@ -403,35 +417,30 @@ read.flowstate<-function(
 {
   ## add names to fcs.files.paths
   fcs.file.paths <- stats::setNames(fcs.file.paths, nm = basename(fcs.file.paths))
-  ## create the flowstate object(s)
+  ## create the flowstate(s)
   fs <- lapply(fcs.file.paths, function(fcs.file.path){
     message(paste(basename(fcs.file.path), "-->", "flowstate"))
     flowstate.from.file.path(fcs.file.path)
   })
   ##
-  colnames.type <- switch(
-    match.arg(colnames.type),
-    N = "N.alias",
-    S = "S.alias",
-    S_N = "S_N.alias"
-  )
+  colnames.type <- match.arg(colnames.type)
+  ## use alias to modify parameter names
   ## update [['data']] names by reference using data.table::setnames
   ## update [['spill']] to match
-  invisible(
-    lapply(fs, function(.fs){
-      if(all(names(.fs$data) != attributes(.fs$parameters)[['alias']][['N']])){
-        stop("Naming conflict between [['data']] and [['parameters']]")
-      }
-      j <- attributes(.fs$parameters)[['alias']][[colnames.type]]
-      data.table::setnames(x = .fs$data, old = names(.fs$data), new = j)
-      if('spill' %in% names(.fs)){
-        data.table::setnames(
-          x = .fs$spill,
-          new = j[match(names(.fs$spill), .fs$parameters[['N']])]
-        )
-      }
-    })
-  )
+  lapply(fs, function(.fs){
+    alias <- parameter.alias(.fs, colnames.type)
+    if(any(names(.fs$data) != names(alias))){
+      stop("Naming conflict between [['data']] and derived 'alias'.")
+    }
+    data.table::setnames(x = .fs$data, old = names(.fs$data), new = alias)
+    data.table::setattr(x = .fs$parameters, name = 'alias', value = alias)
+    if('spill' %in% names(.fs)){
+      data.table::setnames(
+        x = .fs$spill,
+        new = alias[match(names(.fs$spill), .fs$parameters[['N']])]
+      )
+    }
+  })
   ## get keyword identifier for use in defining 'sample.id' argument
   if(is.null(sample.id)){
     sample.id <- cytometer.identifier(fcs.file.paths)

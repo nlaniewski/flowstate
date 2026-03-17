@@ -48,22 +48,22 @@ cytometer.identifier <- function(fcs.file.paths){
   }
 }
 
-j.match.parameters.to.data <- function(flowstate){
-  alias <- attr(flowstate[['parameters']], which = 'alias', exact = TRUE)
-  res <- alias[
-    ,
-    sapply(.SD, function(j){sum(j %in% names(flowstate$data), na.rm = TRUE)})
-  ]
-  j.match <- names(which.max(res))
+parameter.alias.merged <- function(flowstate){
   ##
-  parameters.alias <- merge(
+  alias <- attr(flowstate[['parameters']], which = 'alias', exact = TRUE)
+  ##
+  parameter.alias.merged <- merge(
     flowstate$parameters,
-    alias[,.SD,.SDcols = c('N',j.match)],
+    data.table::data.table(
+      N = names(alias),
+      alias = alias
+    ),
     sort = F
   )
-  data.table::setattr(parameters.alias,'j.match',j.match)
   ##
+  invisible(parameter.alias.merged)
 }
+
 j.match.keyword.to.data.sample.id <- function(flowstate.object){
   flowstate.object$keywords[
     ,
@@ -191,7 +191,7 @@ check.keyword <- function(fcs.file.paths,keyword=NULL,value=NULL){
 #'
 #' Detection of saturating events requires linear (non-transformed) values and as such should be performed before [flowstate.transform].
 #'
-#' @param flowstate A flowstate object as returned from [read.flowstate].
+#' @param flowstate A flowstate as returned from [read.flowstate].
 #'
 #' @returns UPDATES BY REFERENCE:
 #' \itemize{
@@ -206,7 +206,7 @@ check.keyword <- function(fcs.file.paths,keyword=NULL,value=NULL){
 #' fcs.file.paths <- system.file("extdata", package = "flowstate") |>
 #' list.files(full.names = TRUE, pattern = "BLOCK.*.fcs")
 #'
-#' #read all .fcs files as flowstate objects; concatenate into a single object
+#' #read all .fcs files as flowstates; concatenate into a single object
 #' fs <- read.flowstate(
 #'   fcs.file.paths,
 #'   colnames.type = "S",
@@ -231,31 +231,32 @@ check.keyword <- function(fcs.file.paths,keyword=NULL,value=NULL){
 #' fs$data[,'select.nonsaturating' := NULL]
 #'
 select.nonsaturating <- function(flowstate){
-  ## merged parameters; alias column
-  parameters.matched <- j.match.parameters.to.data(flowstate)
-  ## alias that matches parameters to data
-  j.match <- attr(parameters.matched,'j.match')
+
+
+  # ## merged parameters; alias column
+  # parameters.matched <- j.match.parameters.to.data(flowstate)
+  # ## alias that matches parameters to data
+  # j.match <- attr(parameters.matched,'j.match')
+
+
   ## scatter and raw/unmixed fluorescence (linear values);
   ## '$PnR/n1' value to get detector upper limit
   type.string <- c(
     sprintf("%s_Scatter",c("Forward","Side")),
     sprintf("%s_Fluorescence",c("Raw","Unmixed"))
   )
-  ranges <- parameters.matched[
+  ranges <- parameter.alias.merged(fs)[
     i = TYPE %in% type.string,
     j = .SD,
-    .SDcols = c('R',j.match)
+    .SDcols = c('R','alias')
   ][,R := as.numeric(R)]
   ## initialize a logical
   flowstate$data[, select.nonsaturating := TRUE]
   ## loop through and set to FALSE any event in any j that is saturating
-  for(j in ranges[[j.match]]){
+  for(j in ranges[['alias']]){
     data.table::set(
       x = flowstate$data,
-      i = flowstate$data[
-        ,
-        .I[.SD[[j]] >= ranges[i == j, R, env = list(i = j.match)]]
-      ],
+      i = flowstate$data[, .I[.SD[[j]] >= ranges[alias == j, R]]],
       j = 'select.nonsaturating',
       value = FALSE
     )

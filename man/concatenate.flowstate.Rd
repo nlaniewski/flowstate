@@ -2,34 +2,34 @@
 % Please edit documentation in R/concatenate_flowstate.R
 \name{concatenate.flowstate}
 \alias{concatenate.flowstate}
-\title{Concatenate a list of flowstate objects}
+\title{Concatenate a list of flowstates}
 \usage{
-concatenate.flowstate(flowstate.objects)
+concatenate.flowstate(flowstates)
 }
 \arguments{
-\item{flowstate.objects}{a list; the return of \link{read.flowstate}}
+\item{flowstates}{a list; the return of \link{read.flowstate}}
 }
 \value{
 An object of class flowstate.
 }
 \description{
-Concatenate a list of flowstate objects
+Concatenate a list of flowstates
 }
 \examples{
 fcs.file.paths <- system.file("extdata", package = "flowstate") |>
 list.files(full.names = TRUE, pattern = "BLOCK.*.fcs")
 
-#read all .fcs files as flowstate objects
+#read all .fcs files as flowstates
 fs <- read.flowstate(
   fcs.file.paths,
   colnames.type = "S"
 )
 
-#a list of flowstate objects
+#a list of flowstates
 class(fs)
 sapply(fs, class)
 
-#concatenate into a single flowstate object
+#concatenate into a single flowstate
 fs <- concatenate.flowstate(fs)
 class(fs)
 

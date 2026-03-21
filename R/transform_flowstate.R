@@ -192,6 +192,7 @@ flowstate.transform.inverse <- function(flowstate, j = NULL){
     j.inverse <- j.inverse[i]
   }
   ##
+  message('flowstate --> transforming -- inverse...')
   for(.j in names(j.inverse)){
     trans.func <- get(j.inverse[[.j]][1])
     cofactor <- as.numeric(j.inverse[[.j]][2])

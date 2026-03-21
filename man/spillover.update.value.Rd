@@ -18,7 +18,7 @@ spillover.update.value(flowstate, i, j, value)
 \value{
 UPDATES BY REFERENCE:
 \itemize{
-\item \code{flowstate[['spill']]}; updates \link{i,j} with the define correction value.
+\item \code{flowstate[['spill']]}; updates \verb{[i, j]} with the defined correction value.
 }
 
 Invisibly returns \code{flowstate}.
@@ -42,7 +42,7 @@ index <- which(names(fs$spill) \%in\% c('CD4', 'CD8'))
 fs$spill[index, .(CD4, CD8)]
 
 #update a spill value
-spillover.update.value(fs, CD8, CD4, 0.03)
+spillover.update.value(fs, i = CD8, j = CD4, value = 0.03)
 
 fs$spill[index, .(CD4, CD8)]
 

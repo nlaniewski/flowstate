@@ -35,7 +35,7 @@ spillover.update.external <- function(flowstate, spillover.flowjo.path.csv){
 #'
 #' @returns UPDATES BY REFERENCE:
 #' \itemize{
-#'    \item `flowstate[['spill']]`; updates [i,j] with the define correction value.
+#'    \item `flowstate[['spill']]`; updates `[i, j]` with the defined correction value.
 #' }
 #'
 #' Invisibly returns `flowstate`.
@@ -57,7 +57,7 @@ spillover.update.external <- function(flowstate, spillover.flowjo.path.csv){
 #' fs$spill[index, .(CD4, CD8)]
 #'
 #' #update a spill value
-#' spillover.update.value(fs, CD8, CD4, 0.03)
+#' spillover.update.value(fs, i = CD8, j = CD4, value = 0.03)
 #'
 #' fs$spill[index, .(CD4, CD8)]
 #'

@@ -27,8 +27,8 @@ Read/parse them as a `flowstate` using `flowstate::read.flowstate()`.
 ```{r read.flowstate}
 ##paths to example .fcs files
 fcs.files <- system.file("extdata", package = "flowstate") |> 
-  list.files(full.names = T) |>
-  grep(pattern = "BLOCK.*.fcs",value = T)
+  list.files(full.names = T) |> 
+  grep(pattern = "BLOCK.*.fcs", value = T)
 fcs.files |> basename() |> print()
 
 ##read them in and concatenate; a flowstate object
@@ -40,6 +40,7 @@ fs <- flowstate::read.flowstate(
 
 ##S3 object of class "flowstate"
 class(fs)
+
 ##flowstate structure
 names(fs)
 ```
@@ -48,17 +49,17 @@ names(fs)
 
 Data can be accessed by name via: `fs$data` or `fs[['data']]`.
 
-`[['data']]` contains events as rows and scatter, time, and fluorescent measurements as columns. By design, no transformation is applied to the linear measurement values during reading. In addition, a unique sample identifier (factored) is added for workflow purposes.
+`[['data']]` contains events as rows and instrument measurements (Time, scatter, fluorescence, etc.) as columns. By design, no transformation is applied to the linear measurement values during reading. In addition, a unique sample identifier (factored) is added for workflow purposes.
 
 ```{r flowstate.data}
 ##
 fs$data |> head()
 
-##variable names
+##parameter/variable names
 names(fs$data)
 
 ##sample identifiers
-fs$data[,levels(sample.id)]
+fs$data[, levels(sample.id)]
 
 ```
 
@@ -66,24 +67,25 @@ fs$data[,levels(sample.id)]
 
 Parameters can be accessed by name via: `fs$parameters` or `fs[['parameters']]`.
 
-`[['parameters']]` contains instrument-specific measurement...parameters.
+`[['parameters']]` contains instrument-specific measurement parameters -- keyword-value pairs denoted by '$P' (N, S, V, TYPE, etc.).
 
 ```{r flowstate.parameters}
 ##
 fs$parameters
 
-##internal flowstate functions add a few 'alias' columns;
-##they serve the purpose of renaming the columns in [['data']];
-##the colnames.type argument in read.flowstate uses these alias columns;
-##some combination of N and S -- made syntactically valid
-
-##original (encoded) parameters: N and S
-fs$parameters[,.(N,S)]
-
-##alias columns used to rename [['data']] columns
-fs$parameters[,.(N.alias,S.alias)]
+##parameters: N, S, and TYPE
+fs$parameters[, .(N, S, TYPE)]
 
 ```
+
+`[['parameters']]` also contains attribute-level metadata -- notably, an `alias` attribute that serves the purpose of linking syntactically-valid names with their original '$PnN' name.  The aliases are used to rename variables in `'[['data']]`, allowing for non-standard evaluation when programming using `data.table`.
+
+```{r flowstate.parameters.alias}
+##
+attr(fs$parameters, 'alias')
+
+```
+
 
 ## `[['keywords']]`
 

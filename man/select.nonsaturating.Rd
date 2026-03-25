@@ -42,7 +42,7 @@ fs$data[, .N, by = select.nonsaturating]
 plot(fs,FSC_A,SSC_A) + ggplot2::facet_wrap(~select.nonsaturating)
 
 #subset to retain only non-saturating events
-fs <- subset(fs,select.nonsaturating)
+fs <- subset(fs, select.nonsaturating)
 fs$data[, .N, by = select.nonsaturating]
 
 #after the subset, the column is now redundant

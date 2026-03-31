@@ -6,7 +6,7 @@
 \usage{
 read.flowstate(
   fcs.file.paths,
-  colnames.type = c("N", "S", "S_N"),
+  colnames.type = c("N", "S"),
   sample.id = NULL,
   concatenate = FALSE
 )
@@ -18,7 +18,6 @@ read.flowstate(
 \itemize{
 \item \code{"N"} -- \verb{[['data']]} columns are named by using only their respective $PN (name) keyword value.
 \item \code{"S"} -- \verb{[['data']]} columns are named by using only their respective $PS (stain/user-defined) keyword value.
-\item \code{"S_N"} -- \verb{[['data']]} columns are named by combining $PS and $PN, separated by an underscore.
 }}
 
 \item{sample.id}{Keyword name -- default \code{NULL}; based on cytometer platform, the keyword name for \code{sample.id} will be automatically set and the respective keyword values will be added to \verb{[['data']]} as a factored sample identifier. One of:

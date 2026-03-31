@@ -87,6 +87,7 @@ readFCStext <- function(fcs.file.path, return.string = FALSE, con = NULL, offset
   if(return.string){
     return(txt)
   }
+  #readChar(con, nchars = (diff(offsets) + 1))
   ## delimiter
   delimiter <- substr(txt, 1, 1)
   ## split the string; start at position 2
@@ -171,34 +172,6 @@ parameters.to.data.table <- function(
   invisible(dt.parameters)
 }
 
-parameter.alias <- function(flowstate, colnames.type = c('N', 'S', 'S_N')){
-  ## make N syntactically valid
-  alias <- flowstate$parameters[, .(N, S)]
-  alias[
-    i = !grepl("[FS]SC|Time", N),
-    j = N.alias := gsub(" |-|/", "", sub("-A$", "", N))
-  ]
-  alias[
-    i = grepl("[FS]SC|Time", N),
-    j = N.alias := sub("-", "_", sub("SSC-B", "SSCB", N))
-  ]
-  ## make S syntactically valid
-  alias[, S.alias := gsub(" |-|/", "", S)]
-  alias[is.na(S.alias), S.alias := N.alias]
-  ## form S_N
-  alias[!is.na(S), S_N.alias := paste(S.alias, N.alias, sep = "_")]
-  alias[is.na(S_N.alias), S_N.alias := N.alias]
-  ## for and return alias
-  nm <- alias[['N']]
-  alias <- switch(
-    match.arg(colnames.type),
-    N = alias[['N.alias']],
-    S = alias[['S.alias']],
-    S_N = alias[['S_N.alias']]
-  )
-  return(stats::setNames(alias, nm))
-}
-
 keywords.to.data.table <- function(keywords, drop.primary = TRUE, drop.spill = TRUE){
   ## using the return of 'readFCStext(...)'
   ## regex pattern to find '$P#' and 'P#' -- inverted
@@ -230,11 +203,11 @@ keywords.to.data.table <- function(keywords, drop.primary = TRUE, drop.spill = T
   invisible(dt.keywords)
 }
 
-spill.to.data.table <- function(keywords, add.PROJ.identifier = TRUE){
+spill.to.data.table <- function(keywords, add.PROJ.identifier = TRUE, attribute.N = TRUE){
   ## using the return of 'readFCStext(...)'
   ## spill/spillover keyword name
   spill.name <- grep('spill', names(keywords), ignore.case = TRUE, value = T)
-  ##parse the spillover string
+  ## parse the spillover string
   if(length(spill.name) == 1){
     spillover.string <- keywords[[spill.name]]
     spill.split <- unlist(strsplit(spillover.string, ","))
@@ -250,12 +223,18 @@ spill.to.data.table <- function(keywords, add.PROJ.identifier = TRUE){
       )
     )
     # rownames(dt.spill)<-names(dt.spill)
-    ##add '$PROJ' identifier; if not found, use '$DATE' instead
+    ## add '$PROJ' identifier; if not found, use '$DATE' instead
     if(add.PROJ.identifier){
       data.table::setattr(dt.spill, 'PROJ', add.identifier.proj(keywords))
     }
     ##
     data.table::setattr(dt.spill, name = "applied", value = FALSE)
+    ## add attributes: 'N'
+    if(attribute.N){
+      for(j in names(dt.spill)){
+        data.table::setattr(x = dt.spill[[j]], name = "N", value = j)
+      }
+    }
     ##
     return(dt.spill)
   }else{
@@ -263,7 +242,7 @@ spill.to.data.table <- function(keywords, add.PROJ.identifier = TRUE){
   }
 }
 
-readFCSdata <- function(fcs.file.path){
+readFCSdata <- function(fcs.file.path, attribute.N = TRUE){
   ## use the return of 'FCSoffsets(...)[["DATA"]]'
   offsets <- FCSoffsets(fcs.file.path)[["DATA"]]
   ## use the return of 'readFCStext(...)'
@@ -292,21 +271,32 @@ readFCSdata <- function(fcs.file.path){
       dimnames = list(NULL,(pars.N))
     )
   )
+  ## add attributes: 'N'
+  if(attribute.N){
+    for(j in names(dt)){
+      data.table::setattr(x = dt[[j]], name = "N", value = j)
+    }
+  }
   ## return the data.table
   invisible(dt)
 }
 
-flowstate.from.file.path <- function(fcs.file.path){
+flowstate.from.file.path <- function(fcs.file.path, alias.attributes = TRUE, alias = c('N.alias', 'S.alias')){
   ## keyword-value pairs from TEXT segment; based on offsets from 'FCSoffsets(...)[["TEXT"]]'
   keywords <- readFCStext(fcs.file.path)
   ## create a flowstate (fs) S3 object ; class 'flowstate'
   fs <- flowstate(
     ## DATA segment; based on (updated) offsets from 'FCSoffsets(...)[["DATA"]]'
-    data = readFCSdata(fcs.file.path),
+    data = readFCSdata(fcs.file.path, attribute.N = TRUE),
     parameters = parameters.to.data.table(keywords, add.PROJ.identifier = TRUE),
     keywords = keywords.to.data.table(keywords, drop.primary = TRUE, drop.spill = TRUE),
     spill = spill.to.data.table(keywords)
   )
+  ## add aliases
+  if(alias.attributes){
+    aliases(fs)
+    setalias(fs, alias)
+  }
   ## any/all .fcs files should return:
   ## [['data']], [['parameters']], and [['keywords']]
   ## may not have spill (mass cytometry)
@@ -314,6 +304,60 @@ flowstate.from.file.path <- function(fcs.file.path){
   ##
   return(fs)
 }
+
+aliases <- function(flowstate){
+  lapply(c('data', 'spill'), function(i){
+    alias <- flowstate$parameters[
+      i = match(flowstate[[i]][, names(sapply(.SD, attr, which = 'N'))], N),
+      j = .SD,
+      .SDcols = c('N', 'S')[c('N', 'S') %in% names(flowstate$parameters)]
+    ]
+    if(!'S' %in% names(alias)){
+      alias[, S := NA]
+    }
+    ## make N syntactically valid
+    alias[
+      i = !grepl("[FS]SC|Time", N),
+      j = N.alias := gsub(" |-|/", "", sub("-A$", "", N))
+    ]
+    alias[
+      i = grepl("[FS]SC|Time", N),
+      j = N.alias := sub("-", "_", sub("SSC-B", "SSCB", N))
+    ]
+    ## make S syntactically valid
+    alias[, S.alias := gsub(" |-|/", "", S)]
+    alias[is.na(S.alias), S.alias := N.alias]
+    ## add attributes -- named vector -- to each column in [['data']] and [['spill']]
+    for(j in names(flowstate[[i]])){
+      data.table::setattr(
+        x = flowstate[[i]][[j]],
+        name = "alias",
+        value = unlist(alias[N == j])
+      )
+    }
+  })
+  ##
+  invisible(flowstate)
+}
+
+setalias <- function(flowstate, alias = c('N.alias', 'S.alias')){
+  alias <- match.arg(alias)
+  ##
+  invisible(lapply(c('data', 'spill'), function(type){
+    data.table::setnames(
+      x = flowstate[[type]],
+      old = names(flowstate[[type]]),
+      new = flowstate[[type]][
+        ,
+        sapply(.SD, function(j){
+          attr(j, which = 'alias')[[alias]]
+        })]
+    )
+  }))
+  ##
+  invisible(flowstate)
+}
+
 
 #' @title `flowstate`: read, parse, and store .fcs data
 #' @description
@@ -339,7 +383,6 @@ flowstate.from.file.path <- function(fcs.file.path){
 #' \itemize{
 #'   \item `"N"` -- `[['data']]` columns are named by using only their respective $PN (name) keyword value.
 #'   \item `"S"` -- `[['data']]` columns are named by using only their respective $PS (stain/user-defined) keyword value.
-#'   \item `"S_N"` -- `[['data']]` columns are named by combining $PS and $PN, separated by an underscore.
 #' }
 #' @param sample.id Keyword name -- default `NULL`; based on cytometer platform, the keyword name for `sample.id` will be automatically set and the respective keyword values will be added to `[['data']]` as a factored sample identifier. One of:
 #' \itemize{
@@ -410,36 +453,18 @@ flowstate.from.file.path <- function(fcs.file.path){
 #'
 read.flowstate<-function(
     fcs.file.paths,
-    colnames.type = c("N", "S", "S_N"),
+    colnames.type = c("N", "S"),
     sample.id = NULL,
     concatenate = FALSE
 )
 {
   ## add names to fcs.files.paths
   fcs.file.paths <- stats::setNames(fcs.file.paths, nm = basename(fcs.file.paths))
-  ## create the flowstate(s)
-  fs <- lapply(fcs.file.paths, function(fcs.file.path){
+  ## create the flowstate(s); set column aliases
+  colnames.type <- sprintf("%s.alias", match.arg(colnames.type))
+  fs <- lapply(fcs.file.paths, function(fcs.file.path, alias = colnames.type){
     message(paste(basename(fcs.file.path), "-->", "flowstate"))
-    flowstate.from.file.path(fcs.file.path)
-  })
-  ##
-  colnames.type <- match.arg(colnames.type)
-  ## use alias to modify parameter names
-  ## update [['data']] names by reference using data.table::setnames
-  ## update [['spill']] to match
-  lapply(fs, function(.fs){
-    alias <- parameter.alias(.fs, colnames.type)
-    if(any(names(.fs$data) != names(alias))){
-      stop("Naming conflict between [['data']] and derived 'alias'.")
-    }
-    data.table::setnames(x = .fs$data, old = names(.fs$data), new = alias)
-    data.table::setattr(x = .fs$parameters, name = 'alias', value = alias)
-    if('spill' %in% names(.fs)){
-      data.table::setnames(
-        x = .fs$spill,
-        new = alias[match(names(.fs$spill), .fs$parameters[['N']])]
-      )
-    }
+    flowstate.from.file.path(fcs.file.path, alias.attributes = T, alias = alias)
   })
   ## get keyword identifier for use in defining 'sample.id' argument
   if(is.null(sample.id)){

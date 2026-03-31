@@ -34,7 +34,7 @@ fs <- concatenate.flowstate(fs)
 class(fs)
 
 fs$data
-fs$parameters ; attr(fs$parameters, 'alias')
+fs$parameters
 fs$keywords
 fs$spill
 

@@ -4,13 +4,13 @@
 #'
 #' @param flowstate A flowstate object as returned from [read.flowstate].
 #' @param j Character vector -- default `NULL`; any/all parameters having a keyword-value pair of `TYPE/Raw|Unmixed_Fluorescence` will be transformed in `[['data']]`.  If a defined character vector: specific columns in `[['data']]` that are to be transformed.
-#' @param transform.type Character vector -- default \link{asinh}; quoted function that will be used to transform `j` in `[['data']]`.
-#' @param cofactor Numeric -- default 5000; if `transform.type` = \link{asinh} (default), the cofactor will be used to modify the transformation.
+#' @param transform.func Character vector -- default \link{asinh}; quoted function that will be used to transform `j` in `[['data']]`.
+#' @param cofactor Numeric -- default 5000; if `transform.func` = \link{asinh} (default), the cofactor will be used to modify the transformation.
 #'
 #' @returns UPDATES BY REFERENCE:
 #' \itemize{
 #'    \item `flowstate[['data']]`; transformed values
-#'    \item `flowstate[['parameters']]`; an attribute -- `transformed` -- is added to record which parameters have been transformed.
+#'    \item `flowstate[['data']]`; an attribute -- `transformed` -- is added to record which parameters (`j`) have been transformed.
 #' }
 #'
 #' Invisibly returns `flowstate`.
@@ -35,13 +35,13 @@
 #' flowstate.transform(
 #'   fs,
 #'   j = c('CD3', 'CD4', 'CD8'),
-#'   transform.type = "asinh",
+#'   transform.func = "asinh",
 #'   cofactor = 5000
 #' )
 #'
-#' #updated [['parameters']] attribute
-#' #applied transform function and cofactor mapped to $PnN
-#' attr(fs$parameters,'transformed')
+#' #updated [['data']] attributes; applied transform function and cofactor
+#' fs$data[, lapply(.SD, attr, which = 'transformed')]
+#' fs$data[, lapply(.SD, attr, which = 'transformed')][['CD3']]
 #'
 #' #plot and mean values of transformed columns from updated fs[['data']]
 #' plot(fs, CD3, CD8) + ggplot2::guides(fill = 'none')
@@ -51,22 +51,30 @@
 #' flowstate.transform(
 #'   fs,
 #'   j = NULL,
-#'   transform.type = "asinh",
+#'   transform.func = "asinh",
 #'   cofactor = 5000
 #' )
 #'
-#' #updated [['parameters']] attribute
-#' #applied transform function and cofactor mapped to $PnN
-#' attr(fs$parameters,'transformed')
+#' #updated [['data']] attributes; applied transform function and cofactor
+#' fs$data[, lapply(.SD, attr, which = 'transformed')]
 #'
-flowstate.transform<-function(flowstate, j = NULL, transform.type = "asinh", cofactor = 5000){
-  ## merged parameters; alias column; parameters to transform
-  pam <- parameter.alias.merged(flowstate)[TYPE %in% flowstate.transform.types]
+flowstate.transform<-function(flowstate, j = NULL, transform.func = "asinh", cofactor = 5000){
+  ## parameters to transform -- alias
+  alias <- merge(
+    x = flowstate$parameters[
+      i = TYPE %in% flowstate.transform.types,
+      j = .(N)
+    ],
+    y = alias_dt(flowstate),
+    sort = F
+  )[['alias']]
   ## if j argument is defined, subset
   if(!is.null(j)){
-    pam <- pam[alias %in% j]
+    alias <- alias[alias %in% j]
   }
-  j <- pam[['alias']]
+  ##
+  j <- alias
+  ##
   if(!all(j %in% names(flowstate$data))){
     stop(paste(
       paste0(j[!j %in% names(flowstate$data)], collapse = ", "),
@@ -75,10 +83,11 @@ flowstate.transform<-function(flowstate, j = NULL, transform.type = "asinh", cof
   }
   ## has transformation already been applied?
   ## check for the attribute
-  if("transformed" %in% names(attributes(flowstate$parameters))){
+  res.transformed <- flowstate$data[, sapply(.SD, function(j)
+    'transformed' %in% names(attributes(j)))]
+  if(any(res.transformed)){
     ## what has been transformed?
-    j.transformed <- attr(flowstate$parameters, 'transformed')
-    j.transformed <- pam[N %in% names(j.transformed)][['alias']]
+    j.transformed <- names(which(res.transformed))
     j <- j[!j %in% j.transformed]
     if(length(j)==0){
       return(
@@ -92,22 +101,21 @@ flowstate.transform<-function(flowstate, j = NULL, transform.type = "asinh", cof
   }else{
     message('flowstate --> transforming...')
   }
-  trans.func <- get(transform.type)
+  trans.func <- get(transform.func)
   for(.j in j){
     data.table::set(
       x = flowstate$data,
       j = .j,
       value = trans.func(flowstate$data[[.j]] / cofactor)
     )
+    data.table::setattr(
+      x = flowstate$data[[.j]],
+      name = "transformed",
+      value = c(trans.func = trans.func, cofactor = cofactor)
+    )
   }
   ##
-  nm <- pam[['N']]
-  val <- stats::setNames(paste0(rep(transform.type, length(nm)), ";", cofactor), nm)
-  data.table::setattr(
-    x = flowstate$parameters,
-    name = 'transformed',
-    value = val
-  )
+  invisible(flowstate)
 }
 #' @title Transform values to linear -- inverse
 #'

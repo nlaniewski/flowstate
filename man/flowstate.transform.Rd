@@ -7,7 +7,7 @@
 flowstate.transform(
   flowstate,
   j = NULL,
-  transform.type = "asinh",
+  transform.func = "asinh",
   cofactor = 5000
 )
 }
@@ -16,15 +16,15 @@ flowstate.transform(
 
 \item{j}{Character vector -- default \code{NULL}; any/all parameters having a keyword-value pair of \code{TYPE/Raw|Unmixed_Fluorescence} will be transformed in \verb{[['data']]}.  If a defined character vector: specific columns in \verb{[['data']]} that are to be transformed.}
 
-\item{transform.type}{Character vector -- default \link{asinh}; quoted function that will be used to transform \code{j} in \verb{[['data']]}.}
+\item{transform.func}{Character vector -- default \link{asinh}; quoted function that will be used to transform \code{j} in \verb{[['data']]}.}
 
-\item{cofactor}{Numeric -- default 5000; if \code{transform.type} = \link{asinh} (default), the cofactor will be used to modify the transformation.}
+\item{cofactor}{Numeric -- default 5000; if \code{transform.func} = \link{asinh} (default), the cofactor will be used to modify the transformation.}
 }
 \value{
 UPDATES BY REFERENCE:
 \itemize{
 \item \code{flowstate[['data']]}; transformed values
-\item \code{flowstate[['parameters']]}; an attribute -- \code{transformed} -- is added to record which parameters have been transformed.
+\item \code{flowstate[['data']]}; an attribute -- \code{transformed} -- is added to record which parameters (\code{j}) have been transformed.
 }
 
 Invisibly returns \code{flowstate}.
@@ -51,13 +51,13 @@ fs$data[, sapply(.SD, mean), .SDcols = c('CD3', 'CD4', 'CD8')]
 flowstate.transform(
   fs,
   j = c('CD3', 'CD4', 'CD8'),
-  transform.type = "asinh",
+  transform.func = "asinh",
   cofactor = 5000
 )
 
-#updated [['parameters']] attribute
-#applied transform function and cofactor mapped to $PnN
-attr(fs$parameters,'transformed')
+#updated [['data']] attributes; applied transform function and cofactor
+fs$data[, lapply(.SD, attr, which = 'transformed')]
+fs$data[, lapply(.SD, attr, which = 'transformed')][['CD3']]
 
 #plot and mean values of transformed columns from updated fs[['data']]
 plot(fs, CD3, CD8) + ggplot2::guides(fill = 'none')
@@ -67,12 +67,11 @@ fs$data[, sapply(.SD, mean), .SDcols = c('CD3', 'CD4', 'CD8')]
 flowstate.transform(
   fs,
   j = NULL,
-  transform.type = "asinh",
+  transform.func = "asinh",
   cofactor = 5000
 )
 
-#updated [['parameters']] attribute
-#applied transform function and cofactor mapped to $PnN
-attr(fs$parameters,'transformed')
+#updated [['data']] attributes; applied transform function and cofactor
+fs$data[, lapply(.SD, attr, which = 'transformed')]
 
 }

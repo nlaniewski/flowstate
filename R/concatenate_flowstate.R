@@ -28,15 +28,6 @@ parameters.unique <- function(flowstates){
   ## 'R' (range -- 'Time');
   ## 'V' (volts/gain);
 
-  ## copy aliases; resolve to a unique 'alias'
-  aliases <- unique(lapply(flowstates, function(fs){
-    attr(fs[['parameters']], which = 'alias', exact = TRUE)
-  }))
-  if(length(aliases) == 1){
-    alias <- aliases[[1]]
-  }else{
-    stop("Could not resolve a unique `alias` data.table.")
-  }
   ## resolve to a unique [['parameters']]
   parameters <- unique(data.table::rbindlist(lapply(flowstates, '[[', 'parameters')))
   ## duplicate names ('N') of parameters due to differing range ('R') values; 'Time'
@@ -60,8 +51,6 @@ parameters.unique <- function(flowstates){
     x = parameters[, ord := match(par, paste0("$P", seq(.N)))],
     "ord"
   )[,ord := NULL]
-  ##
-  data.table::setattr(parameters, name = "alias", alias)
   ## return the data.table
   invisible(parameters)
 }
@@ -92,7 +81,7 @@ parameters.unique <- function(flowstates){
 #' class(fs)
 #'
 #' fs$data
-#' fs$parameters ; attr(fs$parameters, 'alias')
+#' fs$parameters
 #' fs$keywords
 #' fs$spill
 #'

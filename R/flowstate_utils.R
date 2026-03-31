@@ -48,20 +48,12 @@ cytometer.identifier <- function(fcs.file.paths){
   }
 }
 
-parameter.alias.merged <- function(flowstate){
-  ##
-  alias <- attr(flowstate[['parameters']], which = 'alias', exact = TRUE)
-  ##
-  parameter.alias.merged <- merge(
-    flowstate$parameters,
-    data.table::data.table(
-      N = names(alias),
-      alias = alias
-    ),
-    sort = F
+alias_dt <- function(flowstate){
+  alias.vec <- flowstate$data[, unlist(sapply(.SD, attr, which = 'N'))]
+  data.table::data.table(
+    N = alias.vec,
+    alias = names(alias.vec)
   )
-  ##
-  invisible(parameter.alias.merged)
 }
 
 j.match.keyword.to.data.sample.id <- function(flowstate.object){
@@ -217,11 +209,13 @@ select.nonsaturating <- function(flowstate){
     sprintf("%s_Scatter",c("Forward","Side")),
     sprintf("%s_Fluorescence",c("Raw","Unmixed"))
   )
-  ranges <- parameter.alias.merged(flowstate)[
+  ##
+  ranges <- flowstate$parameters[
     i = TYPE %in% type.string,
-    j = .SD,
-    .SDcols = c('R','alias')
-  ][,R := as.numeric(R)]
+    j = .(N, R)
+  ][, R := as.numeric(R)]
+  ##
+  ranges <- merge(ranges, alias_dt(flowstate), sort = F)
   ## initialize a logical
   flowstate$data[, select.nonsaturating := TRUE]
   ## loop through and set to FALSE any event in any j that is saturating
@@ -288,10 +282,18 @@ select.quantile <- function(flowstate, probs = c(0.0005, 0.9995)){
     sprintf("%s_Scatter", c("Forward", "Side")),
     sprintf("%s_Fluorescence", c("Raw", "Unmixed"))
   )
-  alias <- parameter.alias.merged(flowstate)[TYPE %in% type.string][['alias']]
-  ##initialize a logical
+  ##
+  alias <- merge(
+    x = flowstate$parameters[
+      i = TYPE %in% type.string,
+      j = .(N)
+    ],
+    y = alias_dt(flowstate),
+    sort = F
+  )[['alias']]
+  ## initialize a logical
   flowstate$data[, select.quantile := TRUE]
-  ##loop through and set to FALSE any event in any j that exceeds quantile probs
+  ## loop through and set to FALSE any event in any j that exceeds quantile probs
   for(j in alias){
     data.table::set(
       x = flowstate$data,

@@ -144,7 +144,9 @@ spillover.apply <- function(flowstate, decompensate = FALSE){
     }))
   }) |> Reduce(f = union, x = _) |> sort()
   spill.index <- names(flowstate$spill)[spill.index]
+  ##
   flowstate.transform.inverse(flowstate, j = spill.index)
+  ##
   spill.mat <- as.matrix(
     flowstate$spill[
       i = which(colnames(flowstate$spill) %in% spill.index),
@@ -152,19 +154,32 @@ spillover.apply <- function(flowstate, decompensate = FALSE){
       .SDcols = spill.index
     ]
   )
-  ##
+  ## preserve attributes;
+  ## had to use the sapply with direct indexing to also preserve attribute names
+  attributes.preserved <- sapply(spill.index, function(j){
+    attributes(flowstate$data[[j]])
+  }, simplify = F)
+  ## losing attributes here...
   flowstate$data[
     ,
-    j = (spill.index) := as.list(
-      as.data.frame(
-        if(decompensate){
-          as.matrix(flowstate$data[, .SD, .SDcols = spill.index]) %*% spill.mat
-        }else{
-          as.matrix(flowstate$data[, .SD, .SDcols = spill.index]) %*% solve(spill.mat)
-        }
-      )
-    )
+    (spill.index) := as.data.frame(as.matrix(.SD) %*% if(decompensate){
+      spill.mat
+    }else{
+      solve(spill.mat)
+    }),
+    .SDcols = spill.index
   ]
+  ## add them back...
+  for(j in spill.index){
+    for(n in names(attributes.preserved[[j]])){
+      data.table::setattr(
+        x = flowstate$data[[j]],
+        name = n,
+        value = attributes.preserved[[j]][[n]]
+      )
+    }
+  }
+  ##
   flowstate.transform(flowstate, j = spill.index)
   ##
   if(decompensate){

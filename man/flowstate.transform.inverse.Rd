@@ -56,12 +56,13 @@ plot(fs, CD3, CD8) + ggplot2::guides(fill = 'none')
 fs$data[, sapply(.SD, mean), .SDcols = c('CD3', 'CD4', 'CD8')]
 
 #inverse transformation; defined `j` argument
-flowstate.transform.inverse(fs, j = c('CD3', 'CD8'))
+flowstate.transform.inverse(
+  fs,
+  j = c('CD3', 'CD8')
+)
 
-#updated [['parameters']] attribute
-#returns only `PerCP-Fire 806-A (CD4)` as all other transformations have been inversed
-'transformed' \%in\% names(attributes(fs$parameters))
-attr(fs$parameters, 'transformed')
+#updated [['data']] attributes; returns only `CD4` as all other transformations have been inversed
+fs$data[, lapply(.SD, attr, which = 'transformed')]
 
 #plot and mean values of linear columns
 plot(fs, CD3, CD8) + ggplot2::guides(fill = 'none')

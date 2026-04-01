@@ -9,13 +9,13 @@ flowstate.transform.inverse(flowstate, j = NULL)
 \arguments{
 \item{flowstate}{A flowstate object as returned from \link{read.flowstate}.}
 
-\item{j}{Character vector -- default \code{NULL}; any/all parameters having a stored \code{transformed} attribute -- from the result of \link{flowstate.transform} -- will be inverse transformed in \verb{[['data']]} using \code{\link[base:Hyperbolic]{base::sinh()}}.  If a defined character vector: specific columns in \verb{[['data']]} that are to be inverse transformed.}
+\item{j}{Character vector -- default \code{NULL}; any/all parameters having a stored \code{transformed} attribute -- from the result of \link{flowstate.transform} -- will be inverse transformed in \verb{[['data']]} using the stored function (default \code{\link[base:Hyperbolic]{base::sinh()}}).  If a defined character vector: specific columns in \verb{[['data']]} that are to be inverse transformed.}
 }
 \value{
 UPDATES BY REFERENCE:
 \itemize{
 \item \code{flowstate[['data']]}; inverse transformed values -- linear.
-\item \code{flowstate[['parameters']]}; the stored attribute -- \code{transformed} -- is modified, removing parameters that have been inverse transformed.
+\item \code{flowstate[['data']]}; the stored attribute -- \code{transformed} -- is removed from each \code{j}.
 }
 
 Invisibly returns \code{flowstate}.
@@ -43,18 +43,17 @@ print(res1.linear)
 flowstate.transform(
   fs,
   j = c('CD3','CD4','CD8'),
-  transform.type = "asinh",
+  transform.func = "asinh",
   cofactor = 5000
 )
 
-#updated [['parameters']] attribute
-#applied transform function and cofactor mapped to $PnN
-'transformed' \%in\% names(attributes(fs$parameters))
-attr(fs$parameters, 'transformed')
+#updated [['data']] attributes; applied transform function and cofactor
+fs$data[, lapply(.SD, attr, which = 'transformed')]
+fs$data[, attr(CD3, 'transformed')]
 
 #plot and mean values of transformed columns from updated fs[['data']]
 plot(fs, CD3, CD8) + ggplot2::guides(fill = 'none')
-fs$data[,sapply(.SD,mean),.SDcols = c('CD3', 'CD4', 'CD8')]
+fs$data[, sapply(.SD, mean), .SDcols = c('CD3', 'CD4', 'CD8')]
 
 #inverse transformation; defined `j` argument
 flowstate.transform.inverse(fs, j = c('CD3', 'CD8'))

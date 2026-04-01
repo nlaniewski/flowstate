@@ -9,8 +9,8 @@
 #'
 #' @returns UPDATES BY REFERENCE:
 #' \itemize{
-#'    \item `flowstate[['data']]`; transformed values
-#'    \item `flowstate[['data']]`; an attribute -- `transformed` -- is added to record which parameters (`j`) have been transformed.
+#'    \item `flowstate[['data']]`; transformed values.
+#'    \item `flowstate[['data']]`; an attribute -- `transformed` -- is added to each `j`.
 #' }
 #'
 #' Invisibly returns `flowstate`.
@@ -41,7 +41,7 @@
 #'
 #' #updated [['data']] attributes; applied transform function and cofactor
 #' fs$data[, lapply(.SD, attr, which = 'transformed')]
-#' fs$data[, lapply(.SD, attr, which = 'transformed')][['CD3']]
+#' fs$data[, attr(CD3, 'transformed')]
 #'
 #' #plot and mean values of transformed columns from updated fs[['data']]
 #' plot(fs, CD3, CD8) + ggplot2::guides(fill = 'none')
@@ -101,17 +101,17 @@ flowstate.transform<-function(flowstate, j = NULL, transform.func = "asinh", cof
   }else{
     message('flowstate --> transforming...')
   }
-  trans.func <- get(transform.func)
+  # trans.func <- get(transform.func)
   for(.j in j){
     data.table::set(
       x = flowstate$data,
       j = .j,
-      value = trans.func(flowstate$data[[.j]] / cofactor)
+      value = get(transform.func)(flowstate$data[[.j]] / cofactor)
     )
     data.table::setattr(
       x = flowstate$data[[.j]],
       name = "transformed",
-      value = c(trans.func = trans.func, cofactor = cofactor)
+      value = mget(c("transform.func","cofactor"))
     )
   }
   ##
@@ -120,12 +120,12 @@ flowstate.transform<-function(flowstate, j = NULL, transform.func = "asinh", cof
 #' @title Transform values to linear -- inverse
 #'
 #' @param flowstate A flowstate object as returned from [read.flowstate].
-#' @param j Character vector -- default `NULL`; any/all parameters having a stored `transformed` attribute -- from the result of [flowstate.transform] -- will be inverse transformed in `[['data']]` using [base::sinh()].  If a defined character vector: specific columns in `[['data']]` that are to be inverse transformed.
+#' @param j Character vector -- default `NULL`; any/all parameters having a stored `transformed` attribute -- from the result of [flowstate.transform] -- will be inverse transformed in `[['data']]` using the stored function (default [base::sinh()]).  If a defined character vector: specific columns in `[['data']]` that are to be inverse transformed.
 #'
 #' @returns UPDATES BY REFERENCE:
 #' \itemize{
 #'    \item `flowstate[['data']]`; inverse transformed values -- linear.
-#'    \item `flowstate[['parameters']]`; the stored attribute -- `transformed` -- is modified, removing parameters that have been inverse transformed.
+#'    \item `flowstate[['data']]`; the stored attribute -- `transformed` -- is removed from each `j`.
 #' }
 #'
 #' Invisibly returns `flowstate`.
@@ -151,26 +151,26 @@ flowstate.transform<-function(flowstate, j = NULL, transform.func = "asinh", cof
 #' flowstate.transform(
 #'   fs,
 #'   j = c('CD3','CD4','CD8'),
-#'   transform.type = "asinh",
+#'   transform.func = "asinh",
 #'   cofactor = 5000
 #' )
 #'
-#' #updated [['parameters']] attribute
-#' #applied transform function and cofactor mapped to $PnN
-#' 'transformed' %in% names(attributes(fs$parameters))
-#' attr(fs$parameters, 'transformed')
+#' #updated [['data']] attributes; applied transform function and cofactor
+#' fs$data[, lapply(.SD, attr, which = 'transformed')]
+#' fs$data[, attr(CD3, 'transformed')]
 #'
 #' #plot and mean values of transformed columns from updated fs[['data']]
 #' plot(fs, CD3, CD8) + ggplot2::guides(fill = 'none')
-#' fs$data[,sapply(.SD,mean),.SDcols = c('CD3', 'CD4', 'CD8')]
+#' fs$data[, sapply(.SD, mean), .SDcols = c('CD3', 'CD4', 'CD8')]
 #'
 #' #inverse transformation; defined `j` argument
-#' flowstate.transform.inverse(fs, j = c('CD3', 'CD8'))
+#' flowstate.transform.inverse(
+#'   fs,
+#'   j = c('CD3', 'CD8')
+#' )
 #'
-#' #updated [['parameters']] attribute
-#' #returns only `PerCP-Fire 806-A (CD4)` as all other transformations have been inversed
-#' 'transformed' %in% names(attributes(fs$parameters))
-#' attr(fs$parameters, 'transformed')
+#' #updated [['data']] attributes; returns only `CD4` as all other transformations have been inversed
+#' fs$data[, lapply(.SD, attr, which = 'transformed')]
 #'
 #' #plot and mean values of linear columns
 #' plot(fs, CD3, CD8) + ggplot2::guides(fill = 'none')
@@ -181,48 +181,56 @@ flowstate.transform<-function(flowstate, j = NULL, transform.func = "asinh", cof
 #' res1.linear == res2.linear
 #'
 flowstate.transform.inverse <- function(flowstate, j = NULL){
-  if(is.null(attr(flowstate$parameters, 'transformed', exact = TRUE))){
+  ## has transformation been applied?
+  ## check for the attribute
+  res.transformed <- flowstate$data[, sapply(.SD, function(j)
+    'transformed' %in% names(attributes(j)))]
+  ##
+  if(any(res.transformed)){
+    ## what has been transformed?
+    j.transformed <- names(which(res.transformed))
+    ## subset if j is defined
+    if(!is.null(j)){
+      j.transformed <- j.transformed[j.transformed %in% j]
+    }
+  }else{
     return(message(
       sprintf(
-        "attributes(%s$parameters)[['transformed']] not found;\nno inverse transformation applied.",
+        "'transformed' attribute not found in %s[['data']];\nno inverse transformation applied.",
         deparse(substitute(flowstate))
       )
     ))
   }
-  alias <- attr(flowstate$parameters,'alias')
-  ##
-  j.transformed <- attr(flowstate$parameters, 'transformed', exact = TRUE)
-  j.inverse <- strsplit(j.transformed, ";")
-  j.inverse <- lapply(j.inverse, sub, pattern = "asinh", replacement = "sinh")
-  names(j.inverse) <- alias[names(j.inverse)]
-  if(!is.null(j)){
-    i <- names(j.inverse) %in% j
-    j.inverse <- j.inverse[i]
-  }
   ##
   message('flowstate --> transforming -- inverse...')
-  for(.j in names(j.inverse)){
-    trans.func <- get(j.inverse[[.j]][1])
-    cofactor <- as.numeric(j.inverse[[.j]][2])
-    ##
-    data.table::set(
-      x = flowstate$data,
-      j = .j,
-      value = trans.func(flowstate$data[[.j]]) * cofactor
-    )
+  ##...
+  for(j in j.transformed){
+    ## retrieve the transform attribute
+    transform.attr <- attr(flowstate$data[[j]], which = "transformed")
+    ## apply the inverse or error out
+    if(transform.attr$transform.func == "asinh"){
+      transform.func <- get("sinh")
+      cofactor <- transform.attr$cofactor
+      data.table::set(
+        x = flowstate$data,
+        j = j,
+        value = transform.func(flowstate$data[[j]]) * cofactor
+      )
+      data.table::setattr(
+        x = flowstate$data[[j]],
+        name = "transformed",
+        value = NULL
+      )
+    }else{
+      stop(
+        sprintf(
+          "Currently only supports 'sinh' (the inverse of 'asinh'); '%s' is stored in the 'transform' attribute for '%s'",
+          transform.attr$transform.func,
+          j
+        )
+      )
+    }
   }
   ##
-  drop.trans <- names(alias)[alias %in% names(j.inverse)]
-  j.transformed <- j.transformed[!names(j.transformed) %in% drop.trans]
-  ##
-  data.table::setattr(
-    x = flowstate$parameters,
-    name = 'transformed',
-    value = if(length(j.transformed) == 0){
-      NULL
-    }else{
-      j.transformed
-    }
-  )
-  ##
+  invisible(flowstate)
 }

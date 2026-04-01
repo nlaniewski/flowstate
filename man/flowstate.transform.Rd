@@ -23,8 +23,8 @@ flowstate.transform(
 \value{
 UPDATES BY REFERENCE:
 \itemize{
-\item \code{flowstate[['data']]}; transformed values
-\item \code{flowstate[['data']]}; an attribute -- \code{transformed} -- is added to record which parameters (\code{j}) have been transformed.
+\item \code{flowstate[['data']]}; transformed values.
+\item \code{flowstate[['data']]}; an attribute -- \code{transformed} -- is added to each \code{j}.
 }
 
 Invisibly returns \code{flowstate}.
@@ -57,7 +57,7 @@ flowstate.transform(
 
 #updated [['data']] attributes; applied transform function and cofactor
 fs$data[, lapply(.SD, attr, which = 'transformed')]
-fs$data[, lapply(.SD, attr, which = 'transformed')][['CD3']]
+fs$data[, attr(CD3, 'transformed')]
 
 #plot and mean values of transformed columns from updated fs[['data']]
 plot(fs, CD3, CD8) + ggplot2::guides(fill = 'none')

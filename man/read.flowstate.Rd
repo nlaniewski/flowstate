@@ -112,5 +112,5 @@ Barrett T, Dowle M, Srinivasan A, Gorecki J, Chirico M, Hocking T, Schwendinger 
 data.table: Extension of 'data.frame'. R package version 1.17.99, https://r-datatable.com.
 }
 \seealso{
-\link{select.nonsaturating} ; \link{flowstate.transform}
+\link{select_nonsaturating} ; \link{flowstate.transform}
 }

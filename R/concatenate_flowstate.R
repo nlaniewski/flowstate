@@ -23,11 +23,40 @@ concatenate.test <- function(flowstates){
   message("Concatenating 'flowstates'...")
 }
 
+## a sample-specific list of the unique values for R and V
+## add as an attribute to [['parameters']] after concatenation
+parameters.diff <- function(flowstates){
+  ## a list of [['parameters']]
+  parameters.list <- lapply(flowstates,'[[','parameters')
+  ## differences occur in both range (R) and volts (V)
+  ## find the vector indicies where they do differ (namely 'Time' for R and scatter for V)
+  RV.diff <- sapply(c('R', 'V'), function(j){
+    res <- lapply(parameters.list, function(i){
+      as.numeric(i[[j]])
+    })
+    res <- do.call(rbind, res)
+    which(apply(res, 2, function(x) length(unique(x)) > 1))
+  }, simplify = F)
+  ## return a sample-specific list of the unique values for R and V
+  res <- lapply(parameters.list, function(i){
+    sapply(names(RV.diff), function(j){
+      i[
+        i = RV.diff[[j]],
+        j = stats::setNames(.SD[[j]], nm = N)
+      ]
+    },simplify = F)
+  })
+}
+
 parameters.unique <- function(flowstates){
   ## if 'concatenate.test(flowstates)' passes then parameters will be non-unique due to possible differences in:
   ## 'R' (range -- 'Time');
-  ## 'V' (volts/gain);
+  ## 'V' (volts/gain, e.g., scatter gain differences between beads and cells);
+  ## easiest way for now: store the individual sample-specific differences as a list (as an attribute)
+  ## update the [['parameters']] slot with a 'representative' unique data.table
 
+  ## a sample-specific list of the unique values for R and V
+  .parameters.diff <- parameters.diff(flowstates)
   ## resolve to a unique [['parameters']]
   parameters <- unique(data.table::rbindlist(lapply(flowstates, '[[', 'parameters')))
   ## duplicate names ('N') of parameters due to differing range ('R') values; 'Time'
@@ -51,6 +80,12 @@ parameters.unique <- function(flowstates){
     x = parameters[, ord := match(par, paste0("$P", seq(.N)))],
     "ord"
   )[,ord := NULL]
+  ##
+  data.table::setattr(
+    x = parameters,
+    name = "parameters.diff",
+    value = .parameters.diff
+  )
   ## return the data.table
   invisible(parameters)
 }

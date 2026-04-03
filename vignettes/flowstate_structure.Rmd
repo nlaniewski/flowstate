@@ -39,7 +39,7 @@ fcs.files |> basename() |> print()
 ##read them in and concatenate; a flowstate object
 fs <- flowstate::read.flowstate(
   fcs.file.paths = fcs.files,
-  colnames.type = "S_N",
+  colnames.type = "S",
   concatenate = TRUE
 )
 
@@ -65,7 +65,13 @@ names(fs$data)
 
 ##sample identifiers
 fs$data[, levels(sample.id)]
+```
 
+`[['data']]` also contains column/variable-specific attribute metadata -- notably, an `alias` attribute (named character vector) that serves the purpose of linking syntactically-valid names with their original (required to be unique) '$PnN' name.  The aliases are used to rename variables in `'[['data']]`, allowing for non-standard evaluation when programming using `data.table`.
+
+```{r flowstate.data.alias}
+## example alias attribute
+fs$data[, attr(CD3, which = 'alias')]
 ```
 
 ## `[['parameters']]`
@@ -80,17 +86,15 @@ fs$parameters
 
 ##parameters: N, S, and TYPE
 fs$parameters[, .(N, S, TYPE)]
-
 ```
 
-`[['parameters']]` also contains attribute-level metadata -- notably, an `alias` attribute that serves the purpose of linking syntactically-valid names with their original '$PnN' name.  The aliases are used to rename variables in `'[['data']]`, allowing for non-standard evaluation when programming using `data.table`.
+`[['parameters']]` also contains attribute-level metadata -- notably, a `parameters.diff` attribute (list) that serves the purpose of preserving sample-specific differences due to unique measurement values (e.g., differences in measured 'Time').
 
-```{r flowstate.parameters.alias}
+```{r flowstate.parameters.diff}
 ##
-attr(fs$parameters, 'alias')
-
+pd <- attr(fs$parameters, 'parameters.diff')
+lapply(pd, '[[', 'R')
 ```
-
 
 ## `[['keywords']]`
 
@@ -125,5 +129,4 @@ fs$spill |> head()
 
 ##small value; there in the source data
 fs$spill[2,1]
-
 ```

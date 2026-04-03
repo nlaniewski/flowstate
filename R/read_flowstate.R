@@ -393,7 +393,7 @@ setalias <- function(flowstate, alias = c('N.alias', 'S.alias')){
 #' @param concatenate Logical -- default `FALSE`; if `TRUE`, the list of flowstates will be combined into a single flowstate.
 #'
 #' @returns For a single file: an object of class `flowstate`; for multiple files: a named list of `flowstates`; for concatenated files: an object of class `flowstate`
-#' @seealso [select.nonsaturating] ; [flowstate.transform]
+#' @seealso [select_nonsaturating] ; [flowstate.transform]
 #' @references Directly/heavily-inspired by:
 #'
 #' [flowCore][flowCore::flowFrame]:

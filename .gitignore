@@ -6,3 +6,6 @@
 .quarto
 inst/doc
 docs
+inst/extdata/Raw/
+inst/extdata/Unmixed/
+temp/

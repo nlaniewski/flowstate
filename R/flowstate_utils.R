@@ -392,18 +392,19 @@ select_scatter.population.contour <- function(
     by = cols.by
   ][,population := factor(population)][]
   ## apply tissue.type/population-specific contour bounds to all relevant data (rows)
-  ## adds a population label and a logical for selection
+  ## indexes rows (i) and adds a specific population label
   for(.population in contour.bound[, levels(population)]){
     .type <- ifelse(.population == 'beads', "Beads", "Cells")
-    flowstate$data[
-      i = tissue.type == .type,
-      j = c('population', 'select.contour') := {
-        cl <- sapply(c('x', 'y'), function(i){
-          contour.bound[population == .population][[i]]}, simplify = F)
-        res <- as.logical(sp::point.in.polygon(FSC_A, SSC_A, cl$x, cl$y))
-        list(.population, res)
-      }
-    ][]
+    cl <- contour.bound[population == .population, .(x, y)]
+    data.table::set(
+      x = flowstate$data,
+      i = flowstate$data[
+        i = tissue.type == .type,
+        j = .I[as.logical(sp::point.in.polygon(FSC_A, SSC_A, cl$x, cl$y))]
+      ],
+      j = 'population',
+      value = .population
+    )
   }
   ##
   invisible(flowstate)

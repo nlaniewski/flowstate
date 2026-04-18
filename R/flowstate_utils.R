@@ -330,27 +330,26 @@ kde.contour <- function(x, y, bandwidth.adjust = NULL, grid.points = 100, prob =
   ## major contour -- line
   cl <- cl[[which.max(sapply(cl, function(i) length(i$x)))]]
 }
+
 ## SpectroFlo Reference Group-specific function
 select_scatter.population.contour <- function(
     flowstate,
     population.marker,
-    top.N.percent = 10,
+    top.N.percent = 5,
     bandwidth.adjust = 2,
     grid.points = 100,
-    prob = 0.975
+    prob = c("Beads" = 0.985, "Cells" = 0.975)
 ){
-  ## alias
+  ## alias for selecting columns/variables; matches to N ($PnN)
   alias <- merge(
     x = flowstate$parameters[, j = .(N, TYPE)],
     y = alias_dt(flowstate),
     sort = F
   )
   ## relevant variables
-  #cols.scatter <- sort(alias[grep("Scatter", TYPE)][['alias']])
   cols.scatter <- c('FSC_A', 'SSC_A')
   cols.detector <- alias[TYPE == "Raw_Fluorescence"][['alias']]
   cols.by <- flowstate$data[, names(.SD), .SDcols = is.factor]
-  proj <- factor(unique(flowstate$keywords[['$PROJ']]))
   ## if there are any bead controls, add to population marker;
   ## any single fluor bead control should work...
   if(flowstate$keywords[, "Beads" %in% levels(tissue.type)]){
@@ -360,7 +359,7 @@ select_scatter.population.contour <- function(
     ][1, as.character(sample.id)]
     population.marker <- c(population.marker, beads = bead.ctrl)
   }
-  ##
+  ## define the initial tissue.type/population-specific contour bound
   contour.bound <- flowstate$data[
     i = sample.id %in% population.marker,
     j = {
@@ -375,14 +374,15 @@ select_scatter.population.contour <- function(
       ## index of ordered peak detector vector -- top expressing events
       i <- order(.SD[[detector]],decreasing = T)[1:top.N]
       ## the index allows a more discrete identification of scatter-based contour/landmark
+      ## different prob for beads vs cells
       cl <- kde.contour(
         x = FSC_A[i],
         y = SSC_A[i],
         bandwidth.adjust = bandwidth.adjust,
         grid.points = grid.points,
-        prob = prob
+        prob = prob[[.BY$tissue.type]]
       )
-      ## return population label(s) and major contour line (x, y)
+      ## return population annotation/label(s) and major contour line (x, y)
       c(
         population =  names(which(population.marker == .BY$sample.id)),
         cl[c('x', 'y')]
@@ -392,36 +392,59 @@ select_scatter.population.contour <- function(
     by = cols.by
   ][,population := factor(population)][]
   ## apply tissue.type/population-specific contour bounds to all relevant data (rows)
-  ## indexes rows (i) and adds a specific population label
+  ## use a placeholder logical; index by the logical; add population label; NULL logical
   for(.population in contour.bound[, levels(population)]){
     .type <- ifelse(.population == 'beads', "Beads", "Cells")
     cl <- contour.bound[population == .population, .(x, y)]
-    data.table::set(
-      x = flowstate$data,
-      i = flowstate$data[
-        i = tissue.type == .type,
-        j = .I[as.logical(sp::point.in.polygon(FSC_A, SSC_A, cl$x, cl$y))]
-      ],
-      j = 'population',
-      value = .population
-    )
+    ##
+    flowstate$data[
+      i = tissue.type == .type,
+      j = select.population := as.logical(sp::point.in.polygon(FSC_A, SSC_A, cl$x, cl$y))
+    ]
+    flowstate$data[(select.population), population := .population]
+    flowstate$data[, select.population := NULL]
   }
+  flowstate$data[, population := factor(population)]
+  ## use a helper function to define a singlets contour (forward scatter pulses)
+  select_contour.singlets(
+    flowstate,
+    scatter.singlets = 'FSC',
+    N.percent = 5,
+    prob = 0.80
+  )
+  flowstate$data[!(select.contour), population := NA]
+  flowstate$data[, select.contour := NULL]
+  ## use a helper function to define a singlets contour (side scatter pulses)
+  select_contour.singlets(
+    flowstate,
+    scatter.singlets = 'SSC',
+    N.percent = 5,
+    prob = 0.80
+  )
+  flowstate$data[!(select.contour), population := NA]
+  flowstate$data[, select.contour := NULL]
   ##
   invisible(flowstate)
 }
-## SpectroFlo Reference Group-specific function
+
+## SpectroFlo Reference Group-specific helper function
 select_contour.singlets <- function(
     flowstate,
     scatter.singlets = c('FSC', 'SSC'),
-    n.adjust = 0.2,
+    N.percent = 1,
     prob = 0.90
 )
 {
+  ##
   pulses <- paste(match.arg(scatter.singlets), c('H', 'W'), sep = "_")
+  if(!all(pulses %in% names(flowstate$data))){
+    pulses <- sub("_W$", "_A", pulses)
+  }
+  ##
   flowstate$data[
     ,
     j = select.contour := {
-      .i <- sample(.N,floor(.N*n.adjust))
+      .i <- {set.seed(1337) ; sample(.N,.N*(N.percent/100))}
       cl <- kde.contour(
         x = .SD[[pulses[1]]][.i],
         y = .SD[[pulses[2]]][.i],

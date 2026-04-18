@@ -679,62 +679,112 @@ plot_spectral.ribbons <- function(spectral.events){
   ]
 }
 
-plot_spectral.trace <- function(spectra){
+plot_spectral.trace <- function(
+    spectra,
+    plot.type = c("ggplot", "plotly")
+)
+{
   ##
   cols.by <- spectra[, names(.SD) ,.SDcols = is.factor]
   cols.detector <- spectra[, names(.SD), .SDcols = is.numeric]
   mdat <- attr(spectra, "mdat")
   mdat <- paste(paste0(names(mdat), ":"), mdat, collapse = " ; ")
   ##
-  spectral.traces <- spectra[
-    ,
-    j = .(trace = {
-      trace <- data.table::melt(
-        data = .SD,
-        measure.vars = cols.detector
-      )
-      p <- ggplot2::ggplot(
-        data = trace,
-        mapping = ggplot2::aes(variable, value)
-      ) +
-        ggplot2::geom_line(linewidth=0.5, group=1) +
-        # ggplot2::geom_point(size = 1) +
-        ggplot2::geom_vline(
-          xintercept = as.character(.BY$detector),
-          linetype = 'dashed'
-        ) +
-        ggplot2::theme_bw() +
-        ggplot2::theme(
-          axis.text.x = ggplot2::element_text(
-            color = "black",
-            angle = 90,
-            vjust = 0.5,
-            hjust = 1
+  pt <- match.arg(plot.type)
+  ##
+  switch(
+    match.arg(plot.type),
+    ggplot = {
+      spectral.traces <- spectra[
+        ,
+        j = .(trace = {
+          trace <- data.table::melt(
+            data = .SD,
+            measure.vars = cols.detector
           )
-        ) +
-        ggplot2::labs(
-          title = paste0(
-            "Spectral Signature: Trace",
-            paste0(rep(" ",10), collapse = ""),
-            .BY$sample.id
-          ),
-          subtitle = paste(
-            paste("Fluorophore:", .BY$N),
-            paste("Marker:", .BY$S),
-            sprintf("Type: %s     Population: %s", .BY$tissue.type, .BY$population),
-            sep = "\n"
-          ),
-          x = "Detector",
-          y = "Emission (Normalized [0,1])",
-          caption = paste(
-            paste("Peak Detector:", .BY$detector),
-            mdat,
-            sep = "\n"
+          p <- ggplot2::ggplot(
+            data = trace,
+            mapping = ggplot2::aes(variable, value)
+          ) +
+            ggplot2::geom_line(linewidth=0.5, group=1) +
+            # ggplot2::geom_point(size = 1) +
+            ggplot2::geom_vline(
+              xintercept = as.character(.BY$detector),
+              linetype = 'dashed'
+            ) +
+            ggplot2::theme_bw() +
+            ggplot2::theme(
+              axis.text.x = ggplot2::element_text(
+                color = "black",
+                angle = 90,
+                vjust = 0.5,
+                hjust = 1
+              )
+            ) +
+            ggplot2::labs(
+              title = paste0(
+                "Spectral Signature: Trace",
+                paste0(rep(" ",10), collapse = ""),
+                .BY$sample.id
+              ),
+              subtitle = paste(
+                paste("Fluorophore:", .BY$N),
+                paste("Marker:", .BY$S),
+                sprintf("Type: %s     Population: %s", .BY$tissue.type, .BY$population),
+                sep = "\n"
+              ),
+              x = "Detector",
+              y = "Emission (Normalized [0,1])",
+              caption = paste(
+                paste("Peak Detector:", .BY$detector),
+                mdat,
+                sep = "\n"
+              )
+            )
+          list(p)
+        }),
+        .SDcols = cols.detector,
+        by = cols.by
+      ]
+    },
+    plotly = {
+      lapply(split(spectra[N != "AF"], by = 'laser'), function(laser){
+        traces <- data.table::melt(
+          data = laser,
+          measure.vars = cols.detector,
+          variable.name = "Detector"
+        )
+        n <- traces[, length(unique(alias))]
+        ##
+        p <- plotly::plot_ly(
+          data = droplevels(traces),
+          x = ~Detector,
+          y = ~value,
+          color = ~alias,
+          colors = grDevices::hcl.colors(n = n, palette = "Purple-Green"),
+          type = "scatter",
+          mode = "lines"
+        )
+        ##
+        p <- plotly::layout(p, xaxis = list(type = 'category'))
+        ##
+        p <- plotly::layout(
+          p,
+          xaxis = list(tickmode = 'linear', dtick = 1, tickangle = 270),
+          yaxis = list(title = "Emission (Normalized [0,1])"),
+          margin = list(b = 100),
+          annotations = list(
+            x = 1, y = -0.15,
+            text = mdat,
+            showarrow = F,
+            xref='paper', yref='paper',
+            xanchor='right', yanchor='auto',
+            font = list(size = 12, color = "black")
           )
         )
-      list(p)
-    }),
-    .SDcols = cols.detector,
-    by = cols.by
-  ]
+        ##
+        return(p)
+      })
+    }
+  )
 }

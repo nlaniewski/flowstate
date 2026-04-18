@@ -174,37 +174,47 @@ select_scatter.population <- function(
   ## return
   invisible(flowstate)
 }
+
 .reference.group.spectral.events <- function(
     flowstate,
     top.n = 200,
     top.n.override = NULL
 )
 {
-  ## relevant variables
-  j.match <- j.match.parameters.to.data(flowstate)
-  cols.detector <- (flowstate$parameters
-                    [TYPE == "Raw_Fluorescence"][[j.match]])
+  ## alias for selecting columns/variables; matches to N ($PnN)
+  alias <- merge(
+    x = flowstate$parameters[, j = .(N, TYPE)],
+    y = alias_dt(flowstate),
+    sort = F
+  )
+  ## detectors for use in .SDcols
+  cols.detector <- alias[TYPE == "Raw_Fluorescence"][['alias']]
+  ## factors in [['data']] for use in by
+  cols.by <- flowstate$data[, names(.SD), .SDcols = is.factor]
+  ## additional metadata
+  cols.mdat <- names(flowstate$keywords)[names(flowstate$keywords) %in% c('$CYT', '$CYTSN', '$PROJ')]
+  mdat <- flowstate$keywords[, unique(.SD), .SDcols = cols.mdat]
   ## unstained/AF 0.995 quantile;
   ## used in subsequent step to help resolve dim/AF-impacted fluors through subtraction
   q.af <- flowstate$data[
     i = N == "AF",
     j = {
-      q <- lapply(.SD,stats::quantile,probs=0.995)
+      q <- lapply(.SD, stats::quantile, probs = 0.995)
       detector <- names(which.max(q))
-      c(detector = detector,q)
+      c(detector = detector, q)
     },
     .SDcols = cols.detector,
-    by = c(flowstate$data[,names(.SD),.SDcols = is.factor])
+    by = cols.by
   ]
   ## use the mean of top-expressing events (sorted vectors) to find peak detector;
   ## subtract 'q.af' to resolve dim/AF-impacted fluors (otherwise obscured by AF);
   ## index top expressing events in peak detector (from ordered vector) -- 'spectral events';
-  ## return the spectral events for generating ribbon plots
+  ## return the spectral events
   spectral.events <- flowstate$data[
     ,#i = type == "Beads",
     j = {
-      means.detector <- sapply(.SD,function(j){
-        mean(sort(j,decreasing = T)[1:100])
+      means.detector <- sapply(.SD, function(j){
+        mean(sort(j, decreasing = T)[1:100])
       })
       if(.BY$N != "AF"){
         means.detector <- means.detector - q.af[
@@ -216,50 +226,105 @@ select_scatter.population <- function(
       mean.detector <- max(means.detector)
       detector <- names(which.max(means.detector))
       if(.BY$N == "AF"){
-        .top.n <- ifelse(.N >= 1000,1000,.N)
+        .top.n <- ifelse(.N >= 1000, 1000, .N)
       }else if(.BY$sample.id %in% names(top.n.override)){
         .top.n <- top.n.override[[as.character(.BY$sample.id)]]
       }else{
         .top.n <- top.n
       }
-      i.top <- order(.SD[[detector]],decreasing = T)[1:.top.n]
+      i.top <- order(.SD[[detector]], decreasing = T)[1:.top.n]
       ##
-      c(mean.detector = mean.detector,detector = detector,.SD[i.top])
+      c(mean.detector = mean.detector, detector = detector, .SD[i.top])
     },
     .SDcols = cols.detector,
-    by=c(flowstate$data[,names(.SD),.SDcols = is.factor])
+    by = cols.by
   ]
   ## factor detector column; levels equal to order in [['parameters']]
   ## order by detector, N, S, and type
-  spectral.events[,detector := factor(detector,levels = cols.detector)]
-  data.table::setorder(spectral.events,detector,N,S,type)
+  spectral.events[, detector := factor(detector, levels = cols.detector)]
+  data.table::setorder(spectral.events, detector, N, S, tissue.type)
+  ## laser column
+  spectral.events[, j = laser := gsub("\\d", "", detector)]
+  spectral.events[, j = laser := factor(laser, levels = unique(laser))]
   ## subset to retain representative max expressing population-specific spectral events;
   ## Cells only
   i.drop <- spectral.events[
-    i = N != "AF" & type == "Cells",
+    i = N != "AF" & tissue.type == "Cells",
     j = .I[mean.detector != max(mean.detector)],
     by = sample.id
   ][['V1']]
   if(length(i.drop)!=0){
     spectral.events <- spectral.events[-i.drop]
   }
-  spectral.events[,mean.detector := NULL]
+  spectral.events[, mean.detector := NULL]
+  ## add instrument metadata
+  data.table::setattr(spectral.events, "mdat", mdat)
   ##
   invisible(spectral.events)
 }
+
+spectral.events.select.events <- function(spectral.events){
+  ## variables
+  cols.detector <- spectral.events[, names(.SD), .SDcols = is.numeric]
+  cols.by <- spectral.events[, names(.SD), .SDcols = is.factor]
+  ## initialize a logical
+  spectral.events[N == 'AF', select.events := !vector(length = .N)]
+  ##
+  spectral.events[
+    i = N != 'AF',
+    j = select.events := {
+      ## among the sorted (by peak detector) spectral events:
+      ## test cosine similarity of the brightest event against the bottom ten events
+      res <- sapply(seq(.N-10, .N), function(i){
+        cosine.similarity(unlist(.SD[1]), unlist(.SD[i]))
+      })
+      ## if the mean result is less than 0.985, test by chunks of ten;
+      ## set a new index and return a logical for selecting events
+      if(mean(res) < 0.985){
+        x <- seq(.N)
+        chunks <- split(x, ceiling(seq_along(x) / 5))
+        m1 <- sapply(.SD[chunks[[1]]], stats::median)
+        res <- TRUE
+        i <- 1
+        while(res){
+          i <- i + 1
+          if(i > length(chunks)) break
+          m2 <- sapply(.SD[chunks[[i]]], stats::median)
+          res <- cosine.similarity(m1, m2) > 0.985
+        }
+        i <- max(chunks[[i-1]])
+        select.events <- vector(length = .N)
+        select.events[1:i] <- TRUE
+        select.events
+      }else{
+        select.events <- !vector(length = .N)
+      }
+      ##
+      select.events
+    },
+    .SDcols = cols.detector,
+    by = cols.by
+  ]
+  ##
+  invisible(spectral.events)
+}
+
 .reference.group.spectra <- function(spectral.events){
-  cols.detector <- spectral.events[,names(.SD),.SDcols = is.numeric]
+  ##
+  cols.by <- spectral.events[, names(.SD), .SDcols = is.factor]
+  cols.detector <- spectral.events[, names(.SD), .SDcols = is.numeric]
+  mdat <- attr(spectral.events, "mdat")
   ## derive medians
   medians.reference <- spectral.events[
     ,
-    j = lapply(.SD,stats::median),
+    j = lapply(.SD, stats::median),
     .SDcols = cols.detector,
-    by=c(spectral.events[,names(.SD),.SDcols = is.factor])
+    by = cols.by
   ]
-  ## subtract unstained/AF; type/population-specific
+  ## subtract unstained/AF; tissue.type/population-specific
   medians.reference <- medians.reference[
     ,
-    j = (cols.detector) := lapply(.SD,function(j){
+    j = (cols.detector) := lapply(.SD, function(j){
       af <- j[N == 'AF']
       j <- j - af
       j[N == 'AF'] <- af
@@ -272,22 +337,26 @@ select_scatter.population <- function(
   spectra <- data.table::copy(medians.reference)[
     ,
     j = (cols.detector) := {
-      j <- .SD/max(.SD)
-      j[j<0]<-0
+      j <- .SD / max(.SD)
+      j[j < 0] <- 0
       j
     },
     .SDcols = cols.detector,
-    by =c(medians.reference[,names(.SD),.SDcols = is.factor])
+    by = cols.by
   ]
   ## AF in last position
   spectra[,ord := seq(.N)]
-  spectra[grepl('AF',N), ord := spectra[,.N] + seq(.N)]
-  data.table::setorder(spectra,ord)[,ord := NULL]
+  spectra[grepl('AF', N), ord := spectra[, .N] + seq(.N)]
+  data.table::setorder(spectra, ord)[, ord := NULL]
   ## alias column used during unmixing/merging; depending on naming convention
-  spectra[,alias := trimws(paste(ifelse(is.na(S),"",as.character(S)),N))]
+  spectra[, alias := trimws(paste(ifelse(is.na(S), "", as.character(S)), N))]
+  spectra[, alias := factor(alias, levels = unique(alias))]
+  ##
+  data.table::setattr(spectra, 'mdat', mdat)
   ## return
   invisible(spectra)
 }
+
 #' Title
 #' @description
 #' This function is entirely dependent -- as of now -- on the following:
@@ -541,13 +610,15 @@ plot_populations <- function(flowstate,pattern.scatter = c('A','AH'),bins = 300,
   ##
   return(p.list)
 }
+
 plot_spectral.ribbons <- function(spectral.events){
-  cols.detector <- spectral.events[,names(.SD),.SDcols = is.numeric]
-  lims <- spectral.events[
-    ,
-    j = range(sapply(.SD,range)),
-    .SDcols = cols.detector
-  ]
+  ##
+  cols.by <- spectral.events[, names(.SD) ,.SDcols = is.factor]
+  cols.detector <- spectral.events[, names(.SD), .SDcols = is.numeric]
+  mdat <- attr(spectral.events, "mdat")
+  mdat <- paste(paste0(names(mdat), ":"), mdat, collapse = " ; ")
+  ##
+  lims <- spectral.events[, j = range(sapply(.SD, range)), .SDcols = cols.detector]
   lims[1] <- floor(lims[1]); lims[2] <- ceiling(lims[2])
   lims <- asinh(lims/5000)
   p.ribbons <- spectral.events[
@@ -559,42 +630,43 @@ plot_spectral.ribbons <- function(spectral.events){
       )
       p <- ggplot2::ggplot(
         data = ribbon,
-        mapping = ggplot2::aes(variable,value)
+        mapping = ggplot2::aes(variable, value)
       ) +
         ggplot2::geom_bin_2d(
-          bins = list(length(cols.detector),.N),
+          bins = list(length(cols.detector), .N),
           boundary = 0.5,
-          show.legend = F
+          show.legend = F,
+          na.rm = T
         ) +
         viridis::scale_fill_viridis(
-          option = "magma",
+          option = "viridis",
           limits = c(0,.N/10),
           oob = scales::squish
         ) +
-        # ggplot2::scale_x_discrete(
-        #   labels = sapply(cols.detector,function(i){
-        #     as.numeric(gsub("[[:alpha:]]","",i))
-        #   })
-        # ) +
         ggplot2::ylim(lims) +
         ggplot2::theme(
-          axis.text.x = ggplot2::element_text(angle = 90,hjust = 1,vjust = 0.5)
+          axis.text.x = ggplot2::element_text(
+            angle = 90,
+            hjust = 1,
+            vjust = 0.5
+          )
         ) +
         ggplot2::labs(
           title = paste0(
             "Spectral Signature: Ribbons",
-            paste0(rep(" ",10),collapse = ""),
+            paste0(rep(" ", 10), collapse = ""),
             .BY$sample.id
           ),
           subtitle = paste(
-            paste("Fluorophore:",.BY$N),
-            paste("Marker:",.BY$S),
-            sprintf("Type: %s     Population: %s",.BY$type,.BY$population),
+            paste("Fluorophore:", .BY$N),
+            paste("Marker:", .BY$S),
+            sprintf("Type: %s     Population: %s", .BY$tissue.type, .BY$population),
             sep = "\n"
           ),
           caption = paste(
-            paste("Peak Detector:",.BY$detector),
-            sprintf("N = %d binned 'spectral events'",.N),
+            paste("Peak Detector:", .BY$detector),
+            sprintf("N = %d binned 'spectral events'", .N),
+            mdat,
             sep = "\n"
           ),
           x = "Detector",
@@ -603,11 +675,16 @@ plot_spectral.ribbons <- function(spectral.events){
       list(p)
     }),
     .SDcols = cols.detector,
-    by=c(spectral.events[,names(.SD),.SDcols = is.factor])
+    by = cols.by
   ]
 }
+
 plot_spectral.trace <- function(spectra){
-  cols.detector <- spectra[,names(.SD),.SDcols = is.numeric]
+  ##
+  cols.by <- spectra[, names(.SD) ,.SDcols = is.factor]
+  cols.detector <- spectra[, names(.SD), .SDcols = is.numeric]
+  mdat <- attr(spectra, "mdat")
+  mdat <- paste(paste0(names(mdat), ":"), mdat, collapse = " ; ")
   ##
   spectral.traces <- spectra[
     ,
@@ -618,10 +695,10 @@ plot_spectral.trace <- function(spectra){
       )
       p <- ggplot2::ggplot(
         data = trace,
-        mapping = ggplot2::aes(variable,value)
+        mapping = ggplot2::aes(variable, value)
       ) +
-        ggplot2::geom_line(linewidth=0.5,group=1) +
-        ggplot2::geom_point() +
+        ggplot2::geom_line(linewidth=0.5, group=1) +
+        # ggplot2::geom_point(size = 1) +
         ggplot2::geom_vline(
           xintercept = as.character(.BY$detector),
           linetype = 'dashed'
@@ -632,33 +709,32 @@ plot_spectral.trace <- function(spectra){
             color = "black",
             angle = 90,
             vjust = 0.5,
-            hjust=1)
+            hjust = 1
+          )
         ) +
         ggplot2::labs(
           title = paste0(
             "Spectral Signature: Trace",
-            paste0(rep(" ",10),collapse = ""),
+            paste0(rep(" ",10), collapse = ""),
             .BY$sample.id
           ),
           subtitle = paste(
-            paste("Fluorophore:",.BY$N),
-            paste("Marker:",.BY$S),
-            sprintf("Type: %s     Population: %s",.BY$type,.BY$population),
+            paste("Fluorophore:", .BY$N),
+            paste("Marker:", .BY$S),
+            sprintf("Type: %s     Population: %s", .BY$tissue.type, .BY$population),
             sep = "\n"
           ),
           x = "Detector",
           y = "Emission (Normalized [0,1])",
           caption = paste(
             paste("Peak Detector:", .BY$detector),
-            paste("(PROJ)ect/Experiment:", .BY$PROJ),
+            mdat,
             sep = "\n"
           )
         )
       list(p)
     }),
     .SDcols = cols.detector,
-    by = c(spectra[,names(.SD),.SDcols = is.factor])
+    by = cols.by
   ]
-  ##
-  return(spectral.traces)
 }

@@ -16,6 +16,7 @@ Imports:
     grDevices,
     MASS,
     methods,
+    plotly,
     scales,
     sp,
     stats,

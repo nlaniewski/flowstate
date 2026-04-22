@@ -246,6 +246,11 @@ select_scatter.population <- function(
   ## laser column
   spectral.events[, j = laser := gsub("\\d", "", detector)]
   spectral.events[, j = laser := factor(laser, levels = unique(laser))]
+  ## reorder
+  data.table::setcolorder(
+    x = spectral.events,
+    neworder = spectral.events[, names(.SD), .SDcols = is.factor]
+  )
   ## subset to retain representative max expressing population-specific spectral events;
   ## Cells only
   i.drop <- spectral.events[
@@ -755,6 +760,7 @@ plot_spectral.trace <- function(
           variable.name = "Detector"
         )
         n <- traces[, length(unique(alias))]
+        .laser <- laser[, as.character(unique(laser))]
         ##
         p <- plotly::plot_ly(
           data = droplevels(traces),
@@ -770,17 +776,9 @@ plot_spectral.trace <- function(
         ##
         p <- plotly::layout(
           p,
+          title = sprintf("Laser: %s", .laser),
           xaxis = list(tickmode = 'linear', dtick = 1, tickangle = 270),
-          yaxis = list(title = "Emission (Normalized [0,1])"),
-          margin = list(b = 100),
-          annotations = list(
-            x = 1, y = -0.15,
-            text = mdat,
-            showarrow = F,
-            xref='paper', yref='paper',
-            xanchor='right', yanchor='auto',
-            font = list(size = 12, color = "black")
-          )
+          yaxis = list(title = "Emission (Normalized [0,1])")
         )
         ##
         return(p)

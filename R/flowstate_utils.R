@@ -314,7 +314,7 @@ select_quantile <- function(flowstate, probs = c(0.0005, 0.9995)){
 
 cosine.similarity <- function(x,y){crossprod(x, y) / sqrt(crossprod(x) * crossprod(y))}
 
-kde.contour <- function(x, y, bandwidth.adjust = NULL, grid.points = 100, prob = 0.95){
+kde.contour <- function(x, y, bandwidth.adjust = 1, grid.points = 100, level = 1, plot = F){
   ## pre-calculate bandwidth
   h <- sapply(list(x,y), function(j) MASS::bandwidth.nrd(j))
   ## adjust bandwidth
@@ -323,22 +323,29 @@ kde.contour <- function(x, y, bandwidth.adjust = NULL, grid.points = 100, prob =
   }
   ## kernel density estimate
   dens <- MASS::kde2d(x = x, y = y, h = h, n = grid.points)
-  ## major contours
-  levels <- stats::quantile(dens$z, probs = prob)
-  ## major contours -- lines
-  cl <- grDevices::contourLines(dens, levels = levels)
-  ## major contour -- line
-  cl <- cl[[which.max(sapply(cl, function(i) length(i$x)))]]
+  ## contour lines
+  cl <- grDevices::contourLines(dens)
+  ## contour line indexed by defined level; 1 = outermost; increasing levels working inward
+  cl.i <- cl[[level]]
+  ##
+  if(plot){
+    graphics::plot(x, y, pch = 19, col = "gray")
+    graphics::contour(dens, add = TRUE)
+    graphics::lines(cl.i, col = "red")
+  }
+  ##
+  return(cl.i[c('x', 'y')])
 }
 
 ## SpectroFlo Reference Group-specific function
 select_scatter.population.contour <- function(
     flowstate,
     population.marker,
-    top.N.percent = 5,
-    bandwidth.adjust = 2,
+    top.N.percent,
+    level,
+    bandwidth.adjust = 1,
     grid.points = 100,
-    prob = c("Beads" = 0.985, "Cells" = 0.975)
+    plot = F
 ){
   ## alias for selecting columns/variables; matches to N ($PnN)
   alias <- merge(
@@ -374,15 +381,15 @@ select_scatter.population.contour <- function(
       ## index of ordered peak detector vector -- top expressing events
       i <- order(.SD[[detector]],decreasing = T)[1:top.N]
       ## the index allows a more discrete identification of scatter-based contour/landmark
-      ## different prob for beads vs cells
       cl <- kde.contour(
         x = FSC_A[i],
         y = SSC_A[i],
+        level = level,
         bandwidth.adjust = bandwidth.adjust,
         grid.points = grid.points,
-        prob = prob[[.BY$tissue.type]]
+        plot = plot
       )
-      ## return population annotation/label(s) and major contour line (x, y)
+      ## return population annotation/label(s) and level-defined contour line (x, y)
       c(
         population =  names(which(population.marker == .BY$sample.id)),
         cl[c('x', 'y')]
@@ -391,7 +398,7 @@ select_scatter.population.contour <- function(
     .SDcols = c(cols.detector,cols.scatter),
     by = cols.by
   ][,population := factor(population)][]
-  ## apply tissue.type/population-specific contour bounds to all relevant data (rows)
+  ## apply tissue.type/population-specific contour bound to all relevant data (rows)
   ## use a placeholder logical; index by the logical; add population label; NULL logical
   for(.population in contour.bound[, levels(population)]){
     .type <- ifelse(.population == 'beads', "Beads", "Cells")
@@ -406,23 +413,27 @@ select_scatter.population.contour <- function(
   }
   flowstate$data[, population := factor(population)]
   ## use a helper function to define a singlets contour (forward scatter pulses)
+  ## use defaults; needs more testing...empirical so far
   select_contour.singlets(
     flowstate,
-    scatter.singlets = 'FSC',
-    N.percent = 5,
-    prob = 0.80
+    scatter.singlets = "FSC",
+    N.percent = 1,
+    level = 1,
+    bandwidth.adjust = 1,
+    grid.points = 50,
+    plot = F
   )
-  flowstate$data[!(select.contour), population := NA]
-  flowstate$data[, select.contour := NULL]
   ## use a helper function to define a singlets contour (side scatter pulses)
+  ## use defaults; needs more testing...empirical so far
   select_contour.singlets(
     flowstate,
-    scatter.singlets = 'SSC',
-    N.percent = 5,
-    prob = 0.80
+    scatter.singlets = "SSC",
+    N.percent = 1,
+    level = 1,
+    bandwidth.adjust = 1,
+    grid.points = 50,
+    plot = F
   )
-  flowstate$data[!(select.contour), population := NA]
-  flowstate$data[, select.contour := NULL]
   ##
   invisible(flowstate)
 }
@@ -432,7 +443,10 @@ select_contour.singlets <- function(
     flowstate,
     scatter.singlets = c('FSC', 'SSC'),
     N.percent = 1,
-    prob = 0.90
+    level = 1,
+    bandwidth.adjust = 1,
+    grid.points = 50,
+    plot = F
 )
 {
   ##
@@ -442,19 +456,25 @@ select_contour.singlets <- function(
   }
   ##
   flowstate$data[
-    ,
+    i = !is.na(population),
     j = select.contour := {
-      .i <- {set.seed(1337) ; sample(.N,.N*(N.percent/100))}
+      .i <- {set.seed(1337) ; sample(.N, .N * (N.percent / 100))}
       cl <- kde.contour(
         x = .SD[[pulses[1]]][.i],
         y = .SD[[pulses[2]]][.i],
-        prob = prob
+        level = level,
+        bandwidth.adjust = bandwidth.adjust,
+        grid.points = grid.points,
+        plot = plot
       )
       in_contour <- as.logical(sp::point.in.polygon(.SD[[pulses[1]]], .SD[[pulses[2]]], cl$x, cl$y))
     },
     .SDcols = pulses,
     by = population
   ]
+  ##
+  flowstate$data[!(select.contour), population := NA]
+  flowstate$data[, select.contour := NULL][]
   ##
   invisible(flowstate)
 }

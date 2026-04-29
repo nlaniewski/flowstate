@@ -223,7 +223,6 @@ select_scatter.population <- function(
           .SDcols = is.numeric
         ]
       }
-      mean.detector <- max(means.detector)
       detector <- names(which.max(means.detector))
       if(.BY$N == "AF"){
         .top.n <- ifelse(.N >= 1000, 1000, .N)
@@ -233,8 +232,9 @@ select_scatter.population <- function(
         .top.n <- top.n
       }
       i.top <- order(.SD[[detector]], decreasing = T)[1:.top.n]
+      detector.mean <- mean(.SD[[detector]][i.top])
       ##
-      c(mean.detector = mean.detector, detector = detector, .SD[i.top])
+      c(detector = detector, detector.mean = detector.mean, .SD[i.top])
     },
     .SDcols = cols.detector,
     by = cols.by
@@ -255,13 +255,13 @@ select_scatter.population <- function(
   ## Cells only
   i.drop <- spectral.events[
     i = N != "AF" & tissue.type == "Cells",
-    j = .I[mean.detector != max(mean.detector)],
+    j = .I[detector.mean != max(detector.mean)],
     by = sample.id
   ][['V1']]
   if(length(i.drop)!=0){
     spectral.events <- spectral.events[-i.drop]
   }
-  spectral.events[, mean.detector := NULL]
+  spectral.events[, detector.mean := NULL][]
   ## add instrument metadata
   data.table::setattr(spectral.events, "mdat", mdat)
   ##

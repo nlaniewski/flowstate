@@ -314,7 +314,7 @@ select_quantile <- function(flowstate, probs = c(0.0005, 0.9995)){
 
 cosine.similarity <- function(x,y){crossprod(x, y) / sqrt(crossprod(x) * crossprod(y))}
 
-kde.contour <- function(x, y, bandwidth.adjust = 1, grid.points = 100, level = 1, plot = F){
+kde.contour <- function(x, y, bandwidth.adjust = 1, grid.points = 100, level = 1, plot = F, ...){
   ## pre-calculate bandwidth
   h <- sapply(list(x,y), function(j) MASS::bandwidth.nrd(j))
   ## adjust bandwidth
@@ -329,7 +329,7 @@ kde.contour <- function(x, y, bandwidth.adjust = 1, grid.points = 100, level = 1
   cl.i <- cl[[level]]
   ##
   if(plot){
-    graphics::plot(x, y, pch = 19, col = "gray")
+    graphics::plot(x, y, pch = 19, col = "gray", ...)
     graphics::contour(dens, add = TRUE)
     graphics::lines(cl.i, col = "red")
   }
@@ -477,4 +477,48 @@ select_contour.singlets <- function(
   flowstate$data[, select.contour := NULL][]
   ##
   invisible(flowstate)
+}
+
+contour_pulses <- function(flowstate.data, bandwidth.adjust = 2, plot = F){
+  ## pulse.pairs can be derived to generate successive selection depending on if H and/or W are present;
+  ## hard-coding for now...
+  pulse.pairs <- list(
+    c('FSC_A', 'SSC_A'),
+    c('FSC_A', 'FSC_H'),
+    c('SSC_A', 'SSC_H')
+  )
+  ## initialize a list to store the resultant contour bounds
+  bounds <- vector(mode = 'list', length = length(pulse.pairs))
+  ## initial contour bounds using area pulses (forward and side)
+  ## the 'bandwidth.adjust' argument will only be applied to this initial contour
+  ## successive selection to refine the bounds using remaining pulses
+  ## return a single contour line/bound using 'level' -- either outermost (1) or 2nd outermost (2)
+  for(i in seq(pulse.pairs)){
+    source("R/funcs/kde_contour.R", local = T)
+    bounds[[i]] <- flowstate.data[
+      ,
+      j = {
+        bound <- kde.contour(
+          x = ji,
+          y = jj,
+          bandwidth.adjust = ifelse(i == 1, bandwidth.adjust, 2),
+          grid.points = 50,
+          level = 1,
+          plot = plot,
+          xlab = pulse.pairs[[i]][1],
+          ylab = pulse.pairs[[i]][2]
+        )
+      },
+      env = list(ji = pulse.pairs[[i]][1], jj = pulse.pairs[[i]][2])
+    ]
+    flowstate.data[
+      ,
+      j = select.population := as.logical(sp::point.in.polygon(ji, jj, bounds[[i]]$x, bounds[[i]]$y)),
+      env = list(ji = pulse.pairs[[i]][1], jj = pulse.pairs[[i]][2])
+    ]
+    flowstate.data <- flowstate.data[(select.population)]
+    data.table::setattr(bounds[[i]], name = 'pulse.pair', value = pulse.pairs[[i]])
+
+  }
+  return(bounds)
 }

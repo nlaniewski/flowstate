@@ -482,10 +482,13 @@ select_contour.singlets <- function(
 contour_pulses <- function(flowstate.data, bandwidth.adjust = 2, plot = F){
   ## pulse.pairs can be derived to generate successive selection depending on if H and/or W are present;
   ## hard-coding for now...
+  # pulse.pairs <- list(
+  #   c('FSC_A', 'SSC_A'),
+  #   c('FSC_A', 'FSC_H'),
+  #   c('SSC_A', 'SSC_H')
+  # )
   pulse.pairs <- list(
-    c('FSC_A', 'SSC_A'),
-    c('FSC_A', 'FSC_H'),
-    c('SSC_A', 'SSC_H')
+    c('FSC_A', 'SSC_A')
   )
   ## initialize a list to store the resultant contour bounds
   bounds <- vector(mode = 'list', length = length(pulse.pairs))
@@ -494,7 +497,6 @@ contour_pulses <- function(flowstate.data, bandwidth.adjust = 2, plot = F){
   ## successive selection to refine the bounds using remaining pulses
   ## return a single contour line/bound using 'level' -- either outermost (1) or 2nd outermost (2)
   for(i in seq(pulse.pairs)){
-    source("R/funcs/kde_contour.R", local = T)
     bounds[[i]] <- flowstate.data[
       ,
       j = {

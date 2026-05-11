@@ -87,3 +87,66 @@ peak.height.cut <- function(x,which.peak=1,height.cut = 0.25,bisect.peak=NULL,pl
   }
   return(res$d$x[cuts])
 }
+
+kde.contour <- function (
+    x,
+    y,
+    bandwidth.adjust = 4,
+    grid.points = 50,
+    threshold = 0.75,
+    plot = F,
+    ...
+)
+{
+  ## pre-calculate bandwidth
+  h <- sapply(list(x, y), function(j) MASS::bandwidth.nrd(j))
+  ## adjust bandwidth
+  if (!is.null(bandwidth.adjust)) {
+    h <- h * bandwidth.adjust
+  }
+  ## kernel density estimate
+  dens <- MASS::kde2d(x = x, y = y, h = h, n = grid.points)
+  ## contour lines
+  cl <- grDevices::contourLines(dens)
+  ## set an index; start with outermost contour
+  i <- 1
+  ## calculate the fraction of total points within the indexed contour;
+  ## repeat (move inward) until defined 'threshold' is met and return the index
+  repeat{
+    in.contour <- sp::point.in.polygon(
+      point.x = x,
+      point.y = y,
+      pol.x = cl[[i]]$x,
+      pol.y = cl[[i]]$y
+    )
+    fraction.in.contour <- sum(in.contour) / length(in.contour)
+    if(fraction.in.contour >= threshold){
+      i <- i + 1
+    }else{
+      i <- i - 1
+      break
+    }
+  }
+  ## indexed contour line
+  cl.i <- cl[[i]]
+  ## visualize
+  if (plot) {
+    p <- ggplot2::ggplot(data = NULL) +
+      ggplot2::geom_hex(ggplot2::aes(x = x, y = y), bins = 200) +
+      viridis::scale_fill_viridis(
+        option = 'plasma',
+        limits = c(0, 5),
+        oob = scales::squish) +
+      ggplot2::geom_path(ggplot2::aes(x = cl.i$x, y = cl.i$y), linewidth = 1, color = "red") +
+      ggplot2::guides(fill = 'none') +
+      ggplot2::labs(
+        x = sub("\\[top.i\\]", "",deparse(substitute(x))),
+        y = sub("\\[top.i\\]", "",deparse(substitute(y)))
+      ) +
+      ggplot2::xlim(0, 4E6) +
+      ggplot2::ylim(0, 4E6)
+    suppressWarnings(print(p))
+  }
+  ## return the indexed contour line
+  return(cl.i[c("x", "y")])
+}

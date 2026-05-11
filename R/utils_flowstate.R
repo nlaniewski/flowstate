@@ -314,29 +314,6 @@ select_quantile <- function(flowstate, probs = c(0.0005, 0.9995)){
 
 cosine.similarity <- function(x,y){crossprod(x, y) / sqrt(crossprod(x) * crossprod(y))}
 
-kde.contour <- function(x, y, bandwidth.adjust = 1, grid.points = 100, level = 1, plot = F, ...){
-  ## pre-calculate bandwidth
-  h <- sapply(list(x,y), function(j) MASS::bandwidth.nrd(j))
-  ## adjust bandwidth
-  if(!is.null(bandwidth.adjust)){
-    h <- h * bandwidth.adjust
-  }
-  ## kernel density estimate
-  dens <- MASS::kde2d(x = x, y = y, h = h, n = grid.points)
-  ## contour lines
-  cl <- grDevices::contourLines(dens)
-  ## contour line indexed by defined level; 1 = outermost; increasing levels working inward
-  cl.i <- cl[[level]]
-  ##
-  if(plot){
-    graphics::plot(x, y, pch = 19, col = "gray", ...)
-    graphics::contour(dens, add = TRUE)
-    graphics::lines(cl.i, col = "red")
-  }
-  ##
-  return(cl.i[c('x', 'y')])
-}
-
 ## SpectroFlo Reference Group-specific function
 select_scatter.population.contour <- function(
     flowstate,

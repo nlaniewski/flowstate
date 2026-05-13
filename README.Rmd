@@ -35,7 +35,7 @@ You can install the development version of flowstate from [GitHub](https://githu
 
 ``` r
 # install.packages("pak")
-pak::pak("nlaniewski/flowstate")
+pak::pak("nlaniewski/flowstate@dev")
 ```
 
 ## `flowstate` Generalized Workflow
@@ -50,26 +50,34 @@ fcs.file.paths <- system.file("extdata", package = "flowstate") |>
 Read/concatenate:
 
 ```{r read.flowstate}
-fs <- flowstate::read.flowstate(fcs.file.paths,colnames.type = "S",concatenate = TRUE)
+fs <- flowstate::read.flowstate(
+  fcs.file.paths,
+  colnames.type = "S",
+  concatenate = TRUE
+)
 ```
 
 Transform:
 ```{r flowstate.transform}
-flowstate::flowstate.transform(fs,transform.type = 'asinh',cofactor = 5000)
+flowstate::flowstate.transform(fs)
 ```
 
 Visualize:
 ```{r plot_CD3_Viability}
-plot(fs,CD3,Viability) + ggplot2::guides(fill = 'none') + ggplot2::facet_wrap(~sample.id)
+plot(fs, CD3, Viability) + 
+  ggplot2::guides(fill = 'none') + 
+  ggplot2::facet_wrap(~sample.id)
 ```
+
+Compensate:
 ```{r plot_CD4_CD8}
 ##needs compensation correction
-plot(fs,CD4,CD8) + ggplot2::guides(fill = 'none')
+plot(fs, CD4, CD8) + ggplot2::guides(fill = 'none')
 ##update [['spill']] with a correction value
-flowstate::spillover.update.value(fs,CD8,CD4,0.03)
+flowstate::spillover.update.value(fs, CD8, CD4, 0.03)
 ##apply spillover correction
 flowstate::spillover.apply(fs)
 ##compensated data
-plot(fs,CD4,CD8) + ggplot2::guides(fill = 'none')
+plot(fs, CD4, CD8) + ggplot2::guides(fill = 'none')
 ```
 

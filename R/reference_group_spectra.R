@@ -17,6 +17,46 @@ reference.group.keywords <- function(flowstate){
   if(!'sample.id' %in% intersect(names(flowstate$data), names(flowstate$keywords))){
     stop("'sample.id' identifier not found.")
   }
+  ## CREATOR/software
+  software <- ref$keywords[, unique(CREATOR)]
+  stopifnot(
+    "Mixed software (keyword: CREATOR); can't reliably derive metadata" = length(software) == 1
+  )
+  if(grepl("SpectroFlo", software)) reference.group.keywords.spectroflo(flowstate)
+  # ## add keyword metadata based on splitting sample.id;
+  # ## following SpectroFlo naming convention: marker(S) fluorophore(N) (type) -- literal spaces separating
+  # keywords.to.add <- c('tissue.type', 'N', 'S')
+  # ## test
+  # if(any(flowstate$data[, unique(sample.id)] != flowstate$keywords[, unique(sample.id)])){
+  #   stop("Sample order does not match between [['data']] and [['keywords']].")
+  # }
+  # ## add keyword/value pairs based on gsub/regex; dependent on SpectrolFlo naming convention
+  # ## updates [['keywords']]
+  # flowstate$keywords[
+  #   ,
+  #   j = (keywords.to.add) := {
+  #     tissue.type <- factor(gsub("^.*\\((.*?)\\).*$", "\\1", sample.id))
+  #     res <- sub(" \\(.*$", "", sample.id)
+  #     marker <- factor(ifelse(
+  #       tissue.type %in% c("Beads", "Cells") & grepl("unstained", res, ignore.case = T),
+  #       NA,
+  #       sub(" +.*$", "", res)
+  #     ))
+  #     fluorophore <- factor(ifelse(
+  #       tissue.type %in% c("Beads", "Cells") & is.na(marker),
+  #       "AF",
+  #       sub(".*? ", "", res)
+  #     ))
+  #     list(tissue.type, N = fluorophore, S = marker)
+  #   }
+  # ]
+  ## updates [['data']]
+  add.keywords.to.data(flowstate, keywords.to.add)
+  ## return
+  invisible(flowstate)
+}
+
+reference.group.keywords.spectroflo <- function(flowstate){
   ## add keyword metadata based on splitting sample.id;
   ## following SpectroFlo naming convention: marker(S) fluorophore(N) (type) -- literal spaces separating
   keywords.to.add <- c('tissue.type', 'N', 'S')
@@ -44,10 +84,6 @@ reference.group.keywords <- function(flowstate){
       list(tissue.type, N = fluorophore, S = marker)
     }
   ]
-  ## updates [['data']]
-  add.keywords.to.data(flowstate, keywords.to.add)
-  ## return
-  invisible(flowstate)
 }
 
 #' @title Add scatter-specific populations to `[['data']]`

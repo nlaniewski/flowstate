@@ -46,27 +46,28 @@ flowstate <- function(...){
 #' #transform
 #' flowstate.transform(fs,'CD3')
 #'
-#' #plot;visualize valley
-#' fs$data[,plot(density(CD3))]
-#' abline(v = 1.1)#not data-driven; just for example
+#' #plot; visualize valley
+#' plot(fs, CD3) + ggplot2::geom_vline(xintercept = 1.1, color = "red")
 #'
 #' #subset
-#' fs.cd3_positive <- subset(fs,CD3 > 1.1)
+#' fs.cd3_positive <- subset(fs, CD3 > 1.1)
 #'
 #' #totals
 #' fs$data[,.N]
 #' fs.cd3_positive$data[,.N]
 subset.flowstate <- function(x,...){
-  ##a new (empty) flowstate object
+  ## a new (empty) flowstate object
   x.subset <- flowstate()
-  ##S3 method dispatch of subset; data.table:::subset.data.table()
-  ##returns a subset of [['data']] which needs assignment
-  x.subset$data <- subset(x$data,...)
-  ##copy other flowstate list elements (data.tables)
+  ## S3 method dispatch of subset; data.table:::subset.data.table()
+  ## returns a subset of [['data']] which needs assignment
+  x.subset$data <- subset(x$data, ...)
+  ## copy other flowstate list elements (data.tables)
   for(i in names(x)[!names(x) %in% "data"]){
     x.subset[[i]] <- data.table::copy(x[[i]])
   }
-  ##return
+  ## copy class attributes
+  data.table::setattr(x.subset, 'class', value = attr(x, 'class'))
+  ## return
   invisible(x.subset)
 }
 

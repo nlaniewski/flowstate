@@ -219,3 +219,143 @@ select_singlets <- function(flowstate, quantiles = c(0.85, 0.95)){
   ##
   invisible(flowstate)
 }
+
+#' @title Create a column (logical) for selecting scatter/population-specific events
+#' @description
+#' A new column (logical) named `select.population` is created in `[['data']]` along with a respective annotation column (character) named `population`. Through the defined `population` argument, a specific column in `[['data']]` -- a cluster of differentiation (CD)/lineage surface marker -- is used to derive a scatter/population-specific landmark/profile for restricting cellular events to a population-of-interest.  Classical/specific cell types (e.g., lymphocytes (CD3+), monocytes (CD14+)) can be defined in this fashion.
+#'
+#' Based on the the defined `population` argument:
+#' \itemize{
+#'    \item the top 25% expressing events in the `'marker'` column are indexed;
+#'    \item contour lines are derived using [kde2d][MASS::kde2d()] on the indexed events;
+#'    \item the contour line that meets the `threshold` (% of events in-bounds) is derived;
+#'    \item the 'in-bounds' contour line is applied to the entire concatenate to generate both a logical and annotation column
+#'}
+#'
+#' @param flowstate A flowstate as returned from [read.flowstate].
+#' @param population Named character vector -- default `NULL`; `population` MUST be defined. The named character vector should take the following form:
+#' \itemize{
+#'   \item `c(population.name = 'marker')`, where `population.name` is a cell-type annotation and `'marker'` is a CD/lineage marker used to stain those respective cell types.
+#'   \itemize{
+#'     \item e.g., `c(lymphocytes = 'CD3')` ;  `c(monocytes = 'CD14')`
+#'   }
+#' }
+#' @param bandwidth.adjust Numeric -- default `4`; adjusts the 'smoothness' of the [density estimation][MASS::bandwidth.nrd()]
+#' @param threshold Numeric -- default `0.75`; fraction of cells/events bound by a contour line.
+#' @param plot Logical -- default `FALSE`; plot the derived contour line.
+#'
+#' @returns UPDATES BY REFERENCE:
+#' \itemize{
+#'   \item `flowstate[['data']]`:
+#'   \itemize{
+#'     \item adds a column (logical) named `select.population`
+#'     \item adds a column (character) named `population` -- indexed against `select.population`
+#'   }
+#' }
+#'
+#' Invisibly returns `flowstate`.
+#' @export
+#'
+#' @examples
+#' fcs.file.paths <- system.file("extdata", package = "flowstate") |>
+#' list.files(full.names = TRUE, pattern = "BLOCK.*.fcs")
+#'
+#' #read all .fcs files as flowstates; concatenate into a single object
+#' fs <- read.flowstate(
+#'   fcs.file.paths,
+#'   colnames.type = "S",
+#'   concatenate = TRUE
+#' )
+#'
+#' #transform
+#' flowstate.transform(fs)
+#'
+#' #UPDATES BY REFERENCE -- adds two columns: 'select.singlets' and 'population'
+#' select_population(fs, population = c(lymphocytes = 'CD3'))
+#' fs$data[, .N, by = .(select.population, population)]
+#'
+#' #visualize
+#' plot(fs, FSC_A, SSC_A) + ggplot2::facet_wrap( ~ population)
+#'
+#' #subset to retain only population-specific events
+#' fs <- subset(fs, population == 'lymphocytes')
+#' fs$data[, .N, by = .(select.population, population)]
+#'
+#' #after the subset, the logical column is now redundant; save the annotation
+#' all(fs$data[['select.population']])
+#'
+#' #NULL it out
+#' fs$data[,'select.population' := NULL]
+#'
+select_population <- function(flowstate, population, bandwidth.adjust = 4, threshold = 0.75, plot = F){
+  ## NULL out columns, if present
+  drop.cols <- flowstate$data[, grep('population|select.population', names(.SD), value = T)]
+  flowstate$data[, (drop.cols) := NULL]
+  ## conditional
+  stopifnot("`population` must be a named vector" = !is.null(names(population)))
+  ##
+  if(inherits(flowstate, 'reference.group')){
+    ## conditional
+    stopifnot(
+      "marker used to define 'population' is not found" = flowstate$keywords[, population %in% S]
+    )
+    ## variables needed
+    detector.names <- flowstate$parameters[TYPE == 'Raw_Fluorescence', N]
+    cols.detector <- names(flowstate$data)[flowstate$data[, sapply(.SD, attr, which = "N") %in% detector.names]]
+    col <- flowstate$data[
+      S == population,
+      j = {
+        ## 'lineage' markers -- abundant/dense expression -- should be readily detected using sorted vectors
+        detector.peak <- names(which.max(sapply(.SD, function(j){
+          mean(sort(j, decreasing = T)[1:100])
+        })))
+      },
+      .SDcols = cols.detector
+    ]
+  }else{
+    stopifnot(
+      "marker used to define 'population' is not found" =
+        flowstate$data[, any(sapply(.SD, function(j){population %in% attr(j, 'alias')}))]
+    )
+    ## variable needed
+    col <- flowstate$data[, names(which(sapply(.SD, function(j){population %in% attr(j, 'alias')})))]
+  }
+  ## derive bounds/contour
+  bounds <- flowstate$data[
+    i = if(inherits(flowstate, 'reference.group')) S == population else TRUE,
+    j = {
+      ## quantile to detect the top 25% expressing events
+      q <- stats::quantile(unlist(.SD), probs = 0.85)
+      ## index the top 25% expressing events
+      top.i <- .SD > q
+      ## derive a contour that bounds the scatter-pulse geometry
+      kde.contour(
+        x = FSC_A[top.i],
+        y = SSC_A[top.i],
+        bandwidth.adjust = bandwidth.adjust,
+        threshold = threshold,
+        plot = plot
+      )
+    },
+    .SDcols = col
+  ]
+  ## derive a logical to select for in-bounds events
+  flowstate$data[
+    ,
+    j = select.population := {
+      as.logical(sp::point.in.polygon(
+        point.x = FSC_A,
+        point.y = SSC_A,
+        pol.x = bounds$x,
+        pol.y = bounds$y
+      ))
+    }
+  ]
+  ## index the logical and annotate a population (factor) name
+  flowstate$data[
+    i = (select.population),
+    j = population := names(population)
+  ][, population := factor(population)]
+  ##
+  invisible(flowstate)
+}

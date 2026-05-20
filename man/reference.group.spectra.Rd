@@ -63,6 +63,4 @@ This function is entirely dependent -- as of now -- on the following:
 }
 }
 }
-\examples{
-# placeholder
-}
+\keyword{internal}

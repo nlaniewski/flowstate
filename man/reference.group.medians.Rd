@@ -26,3 +26,4 @@ A \link[data.table:data.table]{data.table} containing normalized reference contr
 \description{
 The 'spectral events' returned from \link{reference.group.spectral.events} are used to generate normalized \verb{[0,1]} medians/spectra for use in spectral unmixing.
 }
+\keyword{internal}

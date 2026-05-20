@@ -38,3 +38,4 @@ UPDATES BY REFERENCE and invisibly returns \code{flowstate}; a new column (facto
 \description{
 Effective processing of single-color controls first involves defining dominant scatter-specific populations that are free of debris/aggregates and contain max-expressing events.  To efficiently select these populations in cellular controls, a defined set of cluster of differentiation (CD)/lineage surface markers are used to restrict peak-finding/cutting methods to the scatter profile of specific immune cell types.  Once these profiles/populations are defined, they are applied to all of \verb{[['data']]}.
 }
+\keyword{internal}

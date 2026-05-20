@@ -173,7 +173,7 @@ spill.to.string<-function(fs.obj){
 #' @param endianness Character string -- default `"little"`; see [endian][base::writeBin].
 #'
 #' @returns The FCS 3.1 file is written to disk and a summary message is displayed.
-#' @export
+#' @keywords internal
 #'
 #' @examples
 #'
@@ -201,7 +201,7 @@ spill.to.string<-function(fs.obj){
 #'   transform.func = "asinh",
 #'   cofactor = 5000
 #' )
-#'
+#' #
 write.flowstate <- function(
     flowstate,
     new.fil = NULL,

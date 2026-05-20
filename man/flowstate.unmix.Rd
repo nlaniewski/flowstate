@@ -19,3 +19,4 @@ A \code{flowstate} containing unmixed data.
 \description{
 A raw/overdetermined \code{flowstate} is unmixed using a corresponding \code{ref.medians}. Data is unmixed using \link[stats:lsfit]{Ordinary Least Squares}.
 }
+\keyword{internal}

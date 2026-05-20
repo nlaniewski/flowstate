@@ -9,7 +9,7 @@
 #' @param syntactically.valid Logical -- default `FALSE`; if `TRUE`, spaces, dashes, and dots are removed from strings.
 #'
 #' @returns A [data.table][data.table::data.table] containing normalized reference control medians.
-#' @export
+#' @keywords internal
 #'
 reference.group.medians <- function(
     flowstate.object.reference,
@@ -175,7 +175,7 @@ flowstate.unmixed.object <- function(flowstate.object.raw,ref.medians){
 #' @param hash.historic Character string -- default `NULL`; for internal/reproducibility purposes, a hash string of the 'unmixing matrix' can be defined.
 #'
 #' @returns A `flowstate` containing unmixed data.
-#' @export
+#' @keywords internal
 #'
 flowstate.unmix <- function(
     flowstate.object.raw,

@@ -81,8 +81,7 @@ reference.group.keywords.spectroflo <- function(flowstate){
 #' @param plot.output.dir A character vector of a full path name -- default [tempdir()][base::tempdir]; any/all generated plots will be saved to this directory.
 #'
 #' @returns UPDATES BY REFERENCE and invisibly returns `flowstate`; a new column (factored) named `population` is added to `[['data']]`.
-#' @export
-#'
+#' @keywords internal
 select_scatter.population <- function(
     flowstate,
     population.marker,
@@ -409,10 +408,7 @@ spectral.events.select.events <- function(spectral.events){
 #' @param plot Logical -- default `FALSE`; plots diagnostic/QC output for evaluating function performance.
 #'
 #' @returns A `flowstate` containing spectrally-associated bead/cellular events.
-#' @export
-#'
-#' @examples
-#' # placeholder
+#' @keywords internal
 reference.group.spectra <- function(
     raw.reference.group,
     name.fix = NULL,

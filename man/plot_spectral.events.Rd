@@ -15,3 +15,4 @@ A list of \link[ggplot2:ggplot]{ggplot} objects.
 \description{
 Plot the results of \link{reference.group.spectral.events}; visual assessment of selected 'spectral events' is used to gauge function performance.
 }
+\keyword{internal}

@@ -45,7 +45,7 @@
 #' @param verbose Logical -- default `FALSE`; print function-associated messages to the console.
 #'
 #' @returns A `flowstate` containing spectrally-associated bead/cellular events.
-#' @export
+#' @keywords internal
 #'
 #' @examples
 #' \dontrun{
@@ -320,7 +320,7 @@ reference.group.spectral.events <- function(
 #' @param flowstate.object.reference A `flowstate` object as returned from [reference.group.spectral.events].
 #'
 #' @returns A list of [ggplot][ggplot2::ggplot] objects.
-#' @export
+#' @keywords internal
 #'
 plot_spectral.events <- function(flowstate.object.reference){
   ##alias column

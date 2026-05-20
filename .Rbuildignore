@@ -7,3 +7,8 @@
 ^pkgdown$
 ^\.github$
 ^vignettes/articles$
+^temp/tests\.R$
+^inst/extdata/Raw$
+^inst/extdata/Unmixed$
+^\.positai$
+^\.claude$

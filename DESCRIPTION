@@ -1,26 +1,27 @@
 Package: flowstate
 Title: Flow Cytometry Standard (FCS) Processing, Analysis, and Visualization
-Version: 0.13.0
+Version: 0.16.0
 Authors@R: 
     person("Nathan", "Laniewski", email = "nathan_laniewski@urmc.rochester.edu", role = c("aut", "cre"))
 Description: Flow cytometry standard (.fcs) files are S3 structured to facilitate efficient processing, analysis, and visualization of data -- acheive your flow state.
-License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 Imports:
     data.table,
     digest,
     ggplot2,
-    ggridges,
     graphics,
     grDevices,
+    MASS,
     methods,
+    plotly,
     scales,
+    sp,
     stats,
-    stringr,
     utils,
     viridis
+Depends: R (>= 4.2.0)
 URL: https://github.com/nlaniewski/flowstate, https://nlaniewski.github.io/flowstate/
 BugReports: https://github.com/nlaniewski/flowstate/issues
 Suggests: 
@@ -29,3 +30,4 @@ Suggests:
     usethis
 VignetteBuilder: knitr
 Config/Needs/website: rmarkdown
+License: AGPL (>= 3)

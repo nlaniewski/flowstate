@@ -1,0 +1,116 @@
+[
+	{
+		"id": "parkOMIP10945colorFull2024",
+		"type": "article-journal",
+		"abstract": "The need for more in-depth exploration of the human immune system has moved the flow cytometry field forward with advances in instrumentation, reagent development and availability, and user-friendly implementation of data analysis methods. We developed a high-quality human 45-color panel, for comprehensive characterization of major cell lineages present in circulation including T cells, γδ T cells, NKT-like cells, B cells, NK cells, monocytes, basophils, dendritic cells, and ILCs. Assay optimization steps are described in detail to ensure that each marker in the panel was optimally resolved. In addition, we highlight the outstanding discernment of cell activation, exhaustion, memory, and differentiation states of CD4+ and CD8+ T cells using this 45-color panel. The panel enabled an in-depth description of very distinct phenotypes associated with the complexity of the T cell memory response. Furthermore, we present how this panel can be effectively used for cell sorting on instruments with a similar optical layout to achieve the same level of resolution. Functional evaluation of sorted specific rare cell subsets demonstrated significantly different patterns of immunological responses to stimulation, supporting functional and phenotypic differences within the T cell memory subsets. In summary, the combination of full spectrum profiling technology and careful assay design and optimization results in a high resolution multiparametric 45-color assay. This panel offers the opportunity to fully characterize immunological profiles present in peripheral blood in the context of infectious diseases, autoimmunity, neurodegeneration, immunotherapy, and biomarker discovery.",
+		"container-title": "Cytometry. Part A: The Journal of the International Society for Analytical Cytology",
+		"DOI": "10.1002/cyto.a.24900",
+		"ISSN": "1552-4930",
+		"issue": "11",
+		"journalAbbreviation": "Cytometry A",
+		"language": "eng",
+		"note": "PMID: 39466962",
+		"page": "807-815",
+		"source": "PubMed",
+		"title": "OMIP-109: 45-color full spectrum flow cytometry panel for deep immunophenotyping of the major lineages present in human peripheral blood mononuclear cells with emphasis on the T cell memory compartment",
+		"title-short": "OMIP-109",
+		"volume": "105",
+		"author": [
+			{
+				"family": "Park",
+				"given": "Lily M."
+			},
+			{
+				"family": "Lannigan",
+				"given": "Joanne"
+			},
+			{
+				"family": "Low",
+				"given": "Quentin"
+			},
+			{
+				"family": "Jaimes",
+				"given": "Maria C."
+			},
+			{
+				"family": "Bonilla",
+				"given": "Diana L."
+			}
+		],
+		"issued": {
+			"date-parts": [
+				[
+					"2024",
+					11
+				]
+			]
+		}
+	},
+	{
+		"id": "parkOMIP069Version22024",
+		"type": "article-journal",
+		"container-title": "Cytometry. Part A: The Journal of the International Society for Analytical Cytology",
+		"DOI": "10.1002/cyto.a.24898",
+		"ISSN": "1552-4930",
+		"issue": "11",
+		"journalAbbreviation": "Cytometry A",
+		"language": "eng",
+		"note": "PMID: 39268753",
+		"page": "791-799",
+		"source": "PubMed",
+		"title": "OMIP-069 version 2: Update to the 40-color full Spectrum flow cytometry panel for deep immunophenotyping of major cell subsets in human peripheral blood",
+		"title-short": "OMIP-069 version 2",
+		"volume": "105",
+		"author": [
+			{
+				"family": "Park",
+				"given": "Lily M."
+			},
+			{
+				"family": "Lannigan",
+				"given": "Joanne"
+			},
+			{
+				"family": "Low",
+				"given": "Quentin"
+			},
+			{
+				"family": "Jaimes",
+				"given": "Maria C."
+			},
+			{
+				"family": "Bonilla",
+				"given": "Diana L."
+			}
+		],
+		"issued": {
+			"date-parts": [
+				[
+					"2024",
+					11
+				]
+			]
+		}
+	},
+	{
+		"id": "Bonilla2024",
+		"type": "article-journal",
+		"DOI": "10.6084/m9.figshare.25901635.v1",
+		"title": "40-color commentary",
+		"URL": "https://figshare.com/articles/preprint/40-color_commentary/25901635",
+		"author": [
+			{
+				"family": "Bonilla",
+				"given": "Diana Lucia"
+			}
+		],
+		"issued": {
+			"date-parts": [
+				[
+					"2024",
+					5
+				]
+			]
+		}
+	}
+]

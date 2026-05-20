@@ -2,35 +2,35 @@
 % Please edit documentation in R/transform_flowstate.R
 \name{flowstate.transform}
 \alias{flowstate.transform}
-\title{Transform \code{flowstate[['data']]}}
+\title{Transform linear values}
 \usage{
 flowstate.transform(
-  flowstate.object,
-  .j = NULL,
-  transform.type = "asinh",
+  flowstate,
+  j = NULL,
+  transform.func = "asinh",
   cofactor = 5000
 )
 }
 \arguments{
-\item{flowstate.object}{A flowstate object as returned from \link{read.flowstate}.}
+\item{flowstate}{A flowstate object as returned from \link{read.flowstate}.}
 
-\item{.j}{Character vector -- default \code{NULL}; any/all parameters having a keyword-value pair of \code{TYPE/Raw|Unmixed_Fluorescence} will be transformed in \verb{[['data']]}.  If a character vector: specific columns in \verb{[['data']]} that are to be transformed.}
+\item{j}{Character vector -- default \code{NULL}; any/all parameters having a keyword-value pair of \code{TYPE/Raw|Unmixed_Fluorescence} will be transformed in \verb{[['data']]}.  If a defined character vector: specific columns in \verb{[['data']]} that are to be transformed.}
 
-\item{transform.type}{Character string -- default \link{asinh}; quoted function that will be used to transform \code{.j} in \verb{[['data']]}.}
+\item{transform.func}{Character vector -- default \link{asinh}; quoted function that will be used to transform \code{j} in \verb{[['data']]}.}
 
-\item{cofactor}{Numeric -- default 5000; if \code{transform.type} = \link{asinh} (default), the cofactor will be used to modify the transformation.}
+\item{cofactor}{Numeric -- default 5000; if \code{transform.func} = \link{asinh} (default), the cofactor will be used to modify the transformation.}
 }
 \value{
 UPDATES BY REFERENCE:
 \itemize{
-\item \code{flowstate[['data']]}; transformed values
-\item \code{flowstate[['parameters']]}; adds two columns ('transform' and 'cofactor')
+\item \code{flowstate[['data']]}; transformed values.
+\item \code{flowstate[['data']]}; an attribute -- \code{transformed} -- is added to each \code{j}.
 }
 
-Invisibly returns the \code{flowstate.object}.
+Invisibly returns \code{flowstate}.
 }
 \description{
-Transform \code{flowstate[['data']]}
+Linear values in \verb{[['data']]} are transformed using a defined function.  For full spectrum cytometry, transforming linear fluorescence values using \link{asinh} is preferred, with around-zero compression adjusted using a 'cofactor' of 5,000.
 }
 \examples{
 fcs.file.paths <- system.file("extdata", package = "flowstate") |>
@@ -39,37 +39,39 @@ list.files(full.names = TRUE, pattern = "BLOCK.*.fcs")
 #read .fcs files as a flowstate object; concatenate
 fs <- read.flowstate(
   fcs.file.paths,
-  colnames.type="S",
+  colnames.type = "S",
   concatenate = TRUE
 )
 
 #plot and mean values of linear columns
-plot(fs,CD3,CD8) + ggplot2::guides(fill = 'none')
-fs$data[,sapply(.SD,mean),.SDcols = c('CD3','CD4','CD8')]
+plot(fs, CD3, CD8) + ggplot2::guides(fill = 'none')
+fs$data[, sapply(.SD, mean), .SDcols = c('CD3', 'CD4', 'CD8')]
 
 #transform
 flowstate.transform(
   fs,
-  .j = c('CD3','CD4','CD8'),
-  transform.type = "asinh",
+  j = c('CD3', 'CD4', 'CD8'),
+  transform.func = "asinh",
   cofactor = 5000
 )
-#updated parameters
-fs$parameters[!is.na(transform)]
+
+#updated [['data']] attributes; applied transform function and cofactor
+fs$data[, lapply(.SD, attr, which = 'transformed')]
+fs$data[, attr(CD3, 'transformed')]
 
 #plot and mean values of transformed columns from updated fs[['data']]
-plot(fs,CD3,CD8) + ggplot2::guides(fill = 'none')
-fs$data[,sapply(.SD,mean),.SDcols = c('CD3','CD4','CD8')]
+plot(fs, CD3, CD8) + ggplot2::guides(fill = 'none')
+fs$data[, sapply(.SD, mean), .SDcols = c('CD3', 'CD4', 'CD8')]
 
-#transform all
+#transform all/remaining
 flowstate.transform(
   fs,
-  .j = NULL,
-  transform.type = "asinh",
+  j = NULL,
+  transform.func = "asinh",
   cofactor = 5000
 )
 
-#updated parameters
-fs$parameters[!is.na(transform)]
+#updated [['data']] attributes; applied transform function and cofactor
+fs$data[, lapply(.SD, attr, which = 'transformed')]
 
 }

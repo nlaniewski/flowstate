@@ -2,52 +2,58 @@
 % Please edit documentation in R/spillover_flowstate.R
 \name{spillover.apply}
 \alias{spillover.apply}
-\title{Compensate data using values stored in spill}
+\title{Compensate \code{flowstate[['data']]} using values stored in \code{flowstate[['spill']]}}
 \usage{
-spillover.apply(flowstate.object, decompensate = FALSE)
+spillover.apply(flowstate, decompensate = FALSE)
 }
 \arguments{
-\item{flowstate.object}{the return of \link{read.flowstate}.}
+\item{flowstate}{A flowstate object as returned from \link{read.flowstate}.}
 
 \item{decompensate}{Logical; if \code{TRUE}, will return data values to their original state.}
 }
 \value{
-Updated \code{flowstate$data}; !!!updates by reference -- no assignment.
+UPDATES BY REFERENCE:
+\itemize{
+\item \code{flowstate[['data']]}; applies compensation to data using values stored in spill.
+}
+
+Invisibly returns \code{flowstate}.
 }
 \description{
-Compensate data using values stored in spill
+Compensate \code{flowstate[['data']]} using values stored in \code{flowstate[['spill']]}
 }
 \examples{
 fcs.file.paths <- system.file("extdata", package = "flowstate") |>
 list.files(full.names = TRUE, pattern = "BLOCK.*.fcs")
 
-#read all .fcs files as flowstate objects; concatenate into a single object
+#read all .fcs files as flowstates; concatenate into a single object
 fs <- read.flowstate(
   fcs.file.paths,
-  colnames.type="S",
+  colnames.type = "S",
   concatenate = TRUE
 )
 
 #transform
-flowstate.transform(fs,c('CD4','CD8'))
+flowstate.transform(fs, c('CD4', 'CD8'))
 
 #row index; CD4 vs CD8
-index<-which(names(fs$spill) \%in\% c('CD4','CD8'))
+index <- which(names(fs$spill) \%in\% c('CD4', 'CD8'))
 
 #update a spill value
-spillover.update.value(fs,CD8,CD4,0.03)
+spillover.update.value(fs, CD8, CD4, 0.03)
 
 #over-compensated data
-plot(fs,CD4,CD8) + ggplot2::labs(title = "Over-compensated")
+plot(fs, CD4, CD8) + ggplot2::labs(title = "Over-compensated")
 
 #apply compensation
 spillover.apply(fs)
 
 #compensated data
-plot(fs,CD4,CD8) + ggplot2::labs(title = "Compensated")
+plot(fs, CD4, CD8) + ggplot2::labs(title = "Compensated")
 
 #return data values to original state by decompensating
-spillover.apply(fs,decompensate=TRUE)
+spillover.apply(fs, decompensate = TRUE)
 
-plot(fs,CD4,CD8) + ggplot2::labs(title = "Over-compensated")
+plot(fs, CD4, CD8) + ggplot2::labs(title = "Over-compensated")
+
 }

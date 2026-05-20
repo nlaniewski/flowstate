@@ -1,8 +1,8 @@
-#' @title Plot flowstate data
+#' @title Visualize `flowstate` data
 #'
 #' @param x A flowstate object as returned from [read.flowstate].
-#' @param ... ... \link[ggplot2]{aes} arguments (unquoted variables); essentially x and y. If a `z` aesthetic is defined, the plot will switch to \link[ggplot2]{stat_summary_hex}, using this defined third variable as a 'color-by'.
-#' @param bins \link[ggplot2]{geom_hex} argument; numeric giving the number of bins in both vertical and horizontal directions.
+#' @param ... ... \link[ggplot2]{aes} arguments (unquoted variables); essentially x and/or y. If a `z` aesthetic is defined, the plot will switch to \link[ggplot2]{stat_summary_hex}, using this defined third variable as a 'color-by'.
+#' @param bins \link[ggplot2]{geom_hex} argument; numeric giving the number of bins in both vertical and horizontal directions for bivariate and/or bivariate with 'color-by' plots.
 #' @param limits \link[ggplot2]{continuous_scale} argument.
 #' @param sample.n Numeric (length 1); if defined, will randomly sample events from `[[data]]`.
 #'
@@ -15,21 +15,21 @@
 #' #read all .fcs files as flowstate objects; concatenate into a single object
 #' fs <- read.flowstate(
 #'   fcs.file.paths,
-#'   colnames.type="S",
+#'   colnames.type = "S",
 #'   concatenate = TRUE
 #' )
 #'
 #' #transform
-#' flowstate.transform(fs,c('CD3','CD4','CD8','Viability'))
+#' flowstate.transform(fs, c('CD3', 'CD4', 'CD8', 'Viability'))
 #'
 #' #plot title
 #' no.fill.legend <- ggplot2::guides(fill = 'none')
-#' .title1 <- paste("Batch:",fs$keywords[,unique(`$PROJ`)])
+#' .title1 <- paste("Batch:", fs$keywords[, unique(`$PROJ`)])
 #' .title2 <- paste(
 #'   "Instrument Serial#:",
-#'   fs$keywords[,paste(.(unique(`$CYT`),unique(`$CYTSN`)),collapse = " ")]
+#'   fs$keywords[, paste(.(unique(`$CYT`), unique(`$CYTSN`)), collapse = " ")]
 #' )
-#' .title <- paste(.title1,.title2,sep = "\n")
+#' .title <- paste(.title1, .title2, sep = "\n")
 #' .title <- ggplot2::labs(title = .title)
 #'
 #' #plot: two variables
@@ -51,9 +51,13 @@ plot.flowstate <- function(x,..., bins = 200, limits = NULL, sample.n = NULL){
     },
     mapping = ggplot2::aes(...)
   )
-  if("z" %in% ...names()){
+  if(...length() == 1){
+    p <- p + ggplot2::geom_density()
+    return(p)
+  }
+  if(...length() == 3){
     dot.names = lapply(substitute(list(...))[-1], deparse)
-    z <- dot.names[...names() == "z"]
+    z <- dot.names[[3]]
     p <- p + ggplot2::stat_summary_hex(bins = bins) +
       viridis::scale_fill_viridis(
         option = "magma",

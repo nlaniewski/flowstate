@@ -2,26 +2,26 @@
 % Please edit documentation in R/transform_flowstate.R
 \name{flowstate.transform.inverse}
 \alias{flowstate.transform.inverse}
-\title{Transform \code{flowstate[['data']]} -- Inverse}
+\title{Transform values to linear -- inverse}
 \usage{
-flowstate.transform.inverse(flowstate.object, .j = NULL)
+flowstate.transform.inverse(flowstate, j = NULL)
 }
 \arguments{
-\item{flowstate.object}{A flowstate object as returned from \link{read.flowstate}.}
+\item{flowstate}{A flowstate object as returned from \link{read.flowstate}.}
 
-\item{.j}{Character vector -- default \code{NULL}; any/all parameters having a keyword-value pair of \code{transform/asinh} will be inverse transformed in \verb{[['data']]} using \code{\link[base:Hyperbolic]{base::sinh()}}.  If a character vector: specific columns in \verb{[['data']]} that are to be inverse transformed.}
+\item{j}{Character vector -- default \code{NULL}; any/all parameters having a stored \code{transformed} attribute -- from the result of \link{flowstate.transform} -- will be inverse transformed in \verb{[['data']]} using the stored function (default \code{\link[base:Hyperbolic]{base::sinh()}}).  If a defined character vector: specific columns in \verb{[['data']]} that are to be inverse transformed.}
 }
 \value{
 UPDATES BY REFERENCE:
 \itemize{
-\item \code{flowstate[['data']]}; inverse transformed values -- linear
-\item \code{flowstate[['parameters']]}; modifies two columns ('transform' and 'cofactor') -- sets to \code{NA}
+\item \code{flowstate[['data']]}; inverse transformed values -- linear.
+\item \code{flowstate[['data']]}; the stored attribute -- \code{transformed} -- is removed from each \code{j}.
 }
 
-Invisibly returns the \code{flowstate.object}.
+Invisibly returns \code{flowstate}.
 }
 \description{
-Transform \code{flowstate[['data']]} -- Inverse
+Transform values to linear -- inverse
 }
 \examples{
 fcs.file.paths <- system.file("extdata", package = "flowstate") |>
@@ -30,38 +30,43 @@ list.files(full.names = TRUE, pattern = "BLOCK.*.fcs")
 #read .fcs files as a flowstate object; concatenate
 fs <- read.flowstate(
   fcs.file.paths,
-  colnames.type="S",
+  colnames.type = "S",
   concatenate = TRUE
 )
 
 #plot and mean values of linear columns
-plot(fs,CD3,CD8) + ggplot2::guides(fill = 'none')
-res1.linear <- fs$data[,sapply(.SD,mean),.SDcols = c('CD3','CD8')]
+plot(fs, CD3, CD8) + ggplot2::guides(fill = 'none')
+res1.linear <- fs$data[, sapply(.SD, mean), .SDcols = c('CD3', 'CD8')]
 print(res1.linear)
 
 #transform
 flowstate.transform(
   fs,
-  .j = c('CD3','CD8'),
-  transform.type = "asinh",
+  j = c('CD3','CD4','CD8'),
+  transform.func = "asinh",
   cofactor = 5000
 )
-#updated parameters
-fs$parameters[!is.na(transform)]
+
+#updated [['data']] attributes; applied transform function and cofactor
+fs$data[, lapply(.SD, attr, which = 'transformed')]
+fs$data[, attr(CD3, 'transformed')]
 
 #plot and mean values of transformed columns from updated fs[['data']]
-plot(fs,CD3,CD8) + ggplot2::guides(fill = 'none')
-fs$data[,sapply(.SD,mean),.SDcols = c('CD3','CD8')]
+plot(fs, CD3, CD8) + ggplot2::guides(fill = 'none')
+fs$data[, sapply(.SD, mean), .SDcols = c('CD3', 'CD4', 'CD8')]
 
-#inverse transformation
-flowstate.transform.inverse(fs)
+#inverse transformation; defined `j` argument
+flowstate.transform.inverse(
+  fs,
+  j = c('CD3', 'CD8')
+)
 
-#updated parameters; transform and cofactor set to NA
-fs$parameters[S \%in\% c('CD3','CD8')]
+#updated [['data']] attributes; returns only `CD4` as all other transformations have been inversed
+fs$data[, lapply(.SD, attr, which = 'transformed')]
 
 #plot and mean values of linear columns
-plot(fs,CD3,CD8) + ggplot2::guides(fill = 'none')
-res2.linear <- fs$data[,sapply(.SD,mean),.SDcols = c('CD3','CD8')]
+plot(fs, CD3, CD8) + ggplot2::guides(fill = 'none')
+res2.linear <- fs$data[, sapply(.SD, mean), .SDcols = c('CD3', 'CD8')]
 print(res2.linear)
 
 #linear --> transformed --> inverse --> linear

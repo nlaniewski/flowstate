@@ -9,7 +9,7 @@
 #' @param syntactically.valid Logical -- default `FALSE`; if `TRUE`, spaces, dashes, and dots are removed from strings.
 #'
 #' @returns A [data.table][data.table::data.table] containing normalized reference control medians.
-#' @export
+#' @keywords internal
 #'
 reference.group.medians <- function(
     flowstate.object.reference,
@@ -94,66 +94,6 @@ reference.group.medians <- function(
   ##return the normalized reference control medians
   ref.medians[]
 }
-#' @title Plot Spectral Traces
-#' @description
-#' Plots a 'spectral trace' -- normalized `[0,1]` emission for all detectors.
-#'
-#' @param ref.medians The return of [reference.group.medians].
-#'
-#' @returns A list of [ggplot][ggplot2::ggplot] objects.
-#' @export
-#'
-plot_spectral.trace <- function(ref.medians){
-  cols.detector <- ref.medians[,names(.SD),.SDcols = is.numeric]
-  cols.by <- ref.medians[,names(.SD),.SDcols = !is.numeric]
-  ##
-  ref.medians.split <- split(
-    ref.medians,
-    by=c('sample.id','population'),
-    drop = TRUE,
-    sorted = FALSE
-  )
-  ##
-  ref.medians.melted <- lapply(ref.medians.split,data.table::melt,measure.vars = cols.detector)
-  ref.medians.melted <- lapply(ref.medians.melted,droplevels)
-  ##
-  p.list <-lapply(ref.medians.melted,function(dt){
-    ggplot2::ggplot(
-      data = dt,
-      mapping = ggplot2::aes(variable,value)
-    ) +
-      ggplot2::geom_line(linewidth=0.5,group=1) +
-      ggplot2::geom_point() +
-      ggplot2::geom_vline(
-        xintercept = dt[,levels(detector.peak)],
-        linetype = 'dashed'
-      ) +
-      ggplot2::theme_bw() +
-      ggplot2::theme(
-        axis.text.x = ggplot2::element_text(
-          color = "black",
-          angle = 90,
-          vjust = 0.5,
-          hjust=1)
-      ) +
-      ggplot2::labs(
-        title = paste0(
-          "Spectral Signature: Normalized Emission",
-          paste0(rep(" ",10),collapse = ""),
-          unique(dt[['sample.id']])
-        ),
-        subtitle = paste(
-          paste("Fluorophore:",unique(dt[['N']])),
-          paste("Marker:", unique(dt[['S']])),
-          sprintf("Group Type: %s     Population: %s",unique(dt[['group.type']]),unique(dt[['population']])),
-          sep = "\n"
-        ),
-        x = "Detector",
-        y = "Emission (Normalized)",
-        caption = paste("Peak Detector:", unique(dt[['detector.peak']]))
-      )
-  })
-}
 parameters.raw.to.unmixed <- function(flowstate.object.raw,ref.medians){
   ##copy raw/overdetermined parameters
   parms <- data.table::copy(flowstate.object.raw$parameters)
@@ -235,7 +175,7 @@ flowstate.unmixed.object <- function(flowstate.object.raw,ref.medians){
 #' @param hash.historic Character string -- default `NULL`; for internal/reproducibility purposes, a hash string of the 'unmixing matrix' can be defined.
 #'
 #' @returns A `flowstate` containing unmixed data.
-#' @export
+#' @keywords internal
 #'
 flowstate.unmix <- function(
     flowstate.object.raw,

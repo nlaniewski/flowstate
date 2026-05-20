@@ -22,11 +22,11 @@ The primary features of `flowstate`:
 
 ## Installation
 
-You can install the development version of flowstate from
-[GitHub](https://github.com/) with:
+You can install `flowstate` from [GitHub](https://github.com/) with:
 
 ``` r
-# install.packages("pak")
+pak::pak("nlaniewski/flowstate")
+## or the development version:
 pak::pak("nlaniewski/flowstate@dev")
 ```
 

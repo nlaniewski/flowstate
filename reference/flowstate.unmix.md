@@ -20,8 +20,7 @@ flowstate.unmix(flowstate.object.raw, ref.medians, hash.historic = NULL)
 
 - ref.medians:
 
-  A
-  [data.table](https://rdatatable.gitlab.io/data.table/reference/data.table.html)
+  A [data.table](https://rdrr.io/pkg/data.table/man/data.table.html)
   containing normalized `[0,1]` reference control medians – the return
   of
   [reference.group.medians](https://nlaniewski.github.io/flowstate/reference/reference.group.medians.md).

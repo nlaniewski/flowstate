@@ -1,41 +1,36 @@
-# Add keyword values to `flowstate[['data']]`
+# Add `[['keyword']]` values to `[['data']]`
 
-Used for efficient addition of factored keyword values to
-`flowstate[['data']]`; updates by reference.
+Used for efficient addition of factored keyword values to `[['data']]`;
+updates by reference.
 
 ## Usage
 
 ``` r
-add.keywords.to.data(flowstate.object, keywords, type.convert = TRUE)
+add.keywords.to.data(flowstate, keywords.to.add)
 ```
 
 ## Arguments
 
-- flowstate.object:
+- flowstate:
 
   A flowstate object as returned from
   [read.flowstate](https://nlaniewski.github.io/flowstate/reference/read.flowstate.md).
 
-- keywords:
+- keywords.to.add:
 
-  Character string; keyword names in `flowstate[['keywords']]` whose
-  factored values will be added to `flowstate[['data']]`.
-
-- type.convert:
-
-  Logical; default `TRUE`. For any `keywords` of class `character`,
-  conversion to `factor` will take place before addition to
-  `[['data']]`.
+  Character vector; keyword names in `[['keywords']]` whose factored
+  values will be added to `[['data']]`.
 
 ## Value
 
 UPDATES BY REFERENCE:
 
-- `flowstate[['data']]`; factored `keywords` are added as additional
+- `[['data']]`; factored `keywords.to.add` are added as additional
   columns.
 
-- `flowstate[['keywords']]`; if `type.convert`, `keywords` are converted
-  to class `factor`.
+- `[['keywords']]`; `keywords.to.add` are converted to class `factor`.
+
+Invisibly returns `flowstate`.
 
 ## Examples
 
@@ -43,22 +38,22 @@ UPDATES BY REFERENCE:
 fcs.file.paths <- system.file("extdata", package = "flowstate") |>
 list.files(full.names = TRUE, pattern = "BLOCK.*.fcs")
 
-#read all .fcs files as flowstate objects; concatenate into a single object
+#read all .fcs files as flowstates; concatenate into a single object
 fs <- read.flowstate(
   fcs.file.paths,
-  colnames.type="S",
+  colnames.type = "S",
   concatenate = TRUE
 )
 #> COVAIL_002_CYTOKINE_BLOCK1_1.fcs --> flowstate
 #> COVAIL_002_CYTOKINE_BLOCK1_2.fcs --> flowstate
 #> COVAIL_002_CYTOKINE_BLOCK1_3.fcs --> flowstate
-#> Concatenating 'flowstate.ojects'...
+#> Concatenating 'flowstates'...
 
 #create a new set of keywords/values
 fs$keywords[
 ,
-j = c('block.id','block.aliquot') := data.table::tstrsplit(
-TUBENAME,"_",type.convert = factor,keep=4:5)
+j = c('block.id', 'block.aliquot') := data.table::tstrsplit(
+sample.id, "_", keep = 4:5)
 ]
 #>          $BTIM   $CYT $CYTSN       $DATE       $ETIM
 #>         <char> <char> <char>      <char>      <char>
@@ -67,14 +62,14 @@ TUBENAME,"_",type.convert = factor,keep=4:5)
 #> 3: 09:50:46.94 Aurora  V0299 27-Feb-2025 10:03:26.16
 #>                                $FIL $FLOWRATE    $INST          $LAST_MODIFIED
 #>                              <char>    <char>   <char>                  <char>
-#> 1: COVAIL_002_CYTOKINE_BLOCK1_1.fcs    Medium Cytekbio 16-JAN-2026 18:46:28.83
-#> 2: COVAIL_002_CYTOKINE_BLOCK1_2.fcs    Medium Cytekbio 16-JAN-2026 18:46:28.85
-#> 3: COVAIL_002_CYTOKINE_BLOCK1_3.fcs    Medium Cytekbio 16-JAN-2026 18:46:28.86
-#>    $LAST_MODIFIER         $OP $ORIGINALITY   $PAR
-#>            <char>      <char>       <char> <char>
-#> 1:                aurora user DataModified     43
-#> 2:                aurora user DataModified     43
-#> 3:                aurora user DataModified     43
+#> 1: COVAIL_002_CYTOKINE_BLOCK1_1.fcs    Medium Cytekbio 20-MAY-2026 16:42:33.02
+#> 2: COVAIL_002_CYTOKINE_BLOCK1_2.fcs    Medium Cytekbio 20-MAY-2026 16:42:33.11
+#> 3: COVAIL_002_CYTOKINE_BLOCK1_3.fcs    Medium Cytekbio 20-MAY-2026 16:42:33.20
+#>      $LAST_MODIFIER         $OP $ORIGINALITY   $PAR
+#>              <char>      <char>       <char> <char>
+#> 1: flowstate_0.16.0 aurora user DataModified     43
+#> 2: flowstate_0.16.0 aurora user DataModified     43
+#> 3: flowstate_0.16.0 aurora user DataModified     43
 #>                             $PROJ $TIMESTEP   $TOT   $VOL APPLY COMPENSATION
 #>                            <char>    <char> <char> <char>             <char>
 #> 1: COVAIL_002_CYTOKINE_2025-02-27    0.0001   2000 326.86              FALSE
@@ -105,16 +100,23 @@ TUBENAME,"_",type.convert = factor,keep=4:5)
 #> 1: (FSC,150000)And(SSC,75000) COVAIL_002_CYTOKINE_BLOCK1_1 *COVAIL_CYTOKINE
 #> 2: (FSC,150000)And(SSC,75000) COVAIL_002_CYTOKINE_BLOCK1_2 *COVAIL_CYTOKINE
 #> 3: (FSC,150000)And(SSC,75000) COVAIL_002_CYTOKINE_BLOCK1_3 *COVAIL_CYTOKINE
-#>    WINDOW EXTENSION block.id block.aliquot
-#>              <char>   <fctr>        <fctr>
-#> 1:                3   BLOCK1             1
-#> 2:                3   BLOCK1             2
-#> 3:                3   BLOCK1             3
+#>    WINDOW EXTENSION                    sample.id block.id block.aliquot
+#>              <char>                       <fctr>   <char>        <char>
+#> 1:                3 COVAIL_002_CYTOKINE_BLOCK1_1   BLOCK1             1
+#> 2:                3 COVAIL_002_CYTOKINE_BLOCK1_2   BLOCK1             2
+#> 3:                3 COVAIL_002_CYTOKINE_BLOCK1_3   BLOCK1             3
+#new columns; character class
+fs$keywords[, .(block.id, block.aliquot)]
+#>    block.id block.aliquot
+#>      <char>        <char>
+#> 1:   BLOCK1             1
+#> 2:   BLOCK1             2
+#> 3:   BLOCK1             3
 
 #add the factored keyword values to fs[['data']]
-add.keywords.to.data(fs,c('block.id','block.aliquot'))
+add.keywords.to.data(fs, c('block.id', 'block.aliquot'))
 
-fs$data[,.(block.id,block.aliquot)]
+fs$data[, .(block.id, block.aliquot)]
 #>       block.id block.aliquot
 #>         <fctr>        <fctr>
 #>    1:   BLOCK1             1
@@ -129,10 +131,10 @@ fs$data[,.(block.id,block.aliquot)]
 #> 5999:   BLOCK1             3
 #> 6000:   BLOCK1             3
 
-#add to keyword [['data']] using type.convert argument
-add.keywords.to.data(fs,c('$DATE','$PROJ'),type.convert=TRUE)
+#add additional keywords to [['data']]
+add.keywords.to.data(fs, c('$DATE', '$PROJ'))
 
-fs$data[,.(`$DATE`,`$PROJ`)]
+fs$data[, .(`$DATE`, `$PROJ`)]
 #>             $DATE                          $PROJ
 #>            <fctr>                         <fctr>
 #>    1: 27-Feb-2025 COVAIL_002_CYTOKINE_2025-02-27
@@ -146,7 +148,7 @@ fs$data[,.(`$DATE`,`$PROJ`)]
 #> 5998: 27-Feb-2025 COVAIL_002_CYTOKINE_2025-02-27
 #> 5999: 27-Feb-2025 COVAIL_002_CYTOKINE_2025-02-27
 #> 6000: 27-Feb-2025 COVAIL_002_CYTOKINE_2025-02-27
-fs$keywords[,.(`$DATE`,`$PROJ`)]
+fs$keywords[, .(`$DATE`, `$PROJ`)]
 #>          $DATE                          $PROJ
 #>         <fctr>                         <fctr>
 #> 1: 27-Feb-2025 COVAIL_002_CYTOKINE_2025-02-27

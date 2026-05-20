@@ -1,18 +1,19 @@
-# Compensate data using values stored in spill
+# Compensate `flowstate[['data']]` using values stored in `flowstate[['spill']]`
 
-Compensate data using values stored in spill
+Compensate `flowstate[['data']]` using values stored in
+`flowstate[['spill']]`
 
 ## Usage
 
 ``` r
-spillover.apply(flowstate.object, decompensate = FALSE)
+spillover.apply(flowstate, decompensate = FALSE)
 ```
 
 ## Arguments
 
-- flowstate.object:
+- flowstate:
 
-  the return of
+  A flowstate object as returned from
   [read.flowstate](https://nlaniewski.github.io/flowstate/reference/read.flowstate.md).
 
 - decompensate:
@@ -21,7 +22,12 @@ spillover.apply(flowstate.object, decompensate = FALSE)
 
 ## Value
 
-Updated `flowstate$data`; !!!updates by reference – no assignment.
+UPDATES BY REFERENCE:
+
+- `flowstate[['data']]`; applies compensation to data using values
+  stored in spill.
+
+Invisibly returns `flowstate`.
 
 ## Examples
 
@@ -29,29 +35,29 @@ Updated `flowstate$data`; !!!updates by reference – no assignment.
 fcs.file.paths <- system.file("extdata", package = "flowstate") |>
 list.files(full.names = TRUE, pattern = "BLOCK.*.fcs")
 
-#read all .fcs files as flowstate objects; concatenate into a single object
+#read all .fcs files as flowstates; concatenate into a single object
 fs <- read.flowstate(
   fcs.file.paths,
-  colnames.type="S",
+  colnames.type = "S",
   concatenate = TRUE
 )
 #> COVAIL_002_CYTOKINE_BLOCK1_1.fcs --> flowstate
 #> COVAIL_002_CYTOKINE_BLOCK1_2.fcs --> flowstate
 #> COVAIL_002_CYTOKINE_BLOCK1_3.fcs --> flowstate
-#> Concatenating 'flowstate.ojects'...
+#> Concatenating 'flowstates'...
 
 #transform
-flowstate.transform(fs,c('CD4','CD8'))
-#> flowstate.object --> transforming...
+flowstate.transform(fs, c('CD4', 'CD8'))
+#> flowstate --> transforming...
 
 #row index; CD4 vs CD8
-index<-which(names(fs$spill) %in% c('CD4','CD8'))
+index <- which(names(fs$spill) %in% c('CD4', 'CD8'))
 
 #update a spill value
-spillover.update.value(fs,CD8,CD4,0.03)
+spillover.update.value(fs, CD8, CD4, 0.03)
 
 #over-compensated data
-plot(fs,CD4,CD8) + ggplot2::labs(title = "Over-compensated")
+plot(fs, CD4, CD8) + ggplot2::labs(title = "Over-compensated")
 #> Warning: Computation failed in `stat_binhex()`.
 #> Caused by error in `compute_group()`:
 #> ! The package "hexbin" is required for `stat_bin_hex()`.
@@ -59,21 +65,24 @@ plot(fs,CD4,CD8) + ggplot2::labs(title = "Over-compensated")
 
 #apply compensation
 spillover.apply(fs)
-#> flowstate.object --> transforming...
+#> flowstate --> transforming -- inverse...
+#> flowstate --> transforming...
 
 #compensated data
-plot(fs,CD4,CD8) + ggplot2::labs(title = "Compensated")
+plot(fs, CD4, CD8) + ggplot2::labs(title = "Compensated")
 #> Warning: Computation failed in `stat_binhex()`.
 #> Caused by error in `compute_group()`:
 #> ! The package "hexbin" is required for `stat_bin_hex()`.
 
 
 #return data values to original state by decompensating
-spillover.apply(fs,decompensate=TRUE)
-#> flowstate.object --> transforming...
+spillover.apply(fs, decompensate = TRUE)
+#> flowstate --> transforming -- inverse...
+#> flowstate --> transforming...
 
-plot(fs,CD4,CD8) + ggplot2::labs(title = "Over-compensated")
+plot(fs, CD4, CD8) + ggplot2::labs(title = "Over-compensated")
 #> Warning: Computation failed in `stat_binhex()`.
 #> Caused by error in `compute_group()`:
 #> ! The package "hexbin" is required for `stat_bin_hex()`.
+
 ```

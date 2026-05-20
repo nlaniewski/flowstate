@@ -5,54 +5,52 @@
 - [`add.keywords.to.data()`](https://nlaniewski.github.io/flowstate/reference/add.keywords.to.data.md)
   :
 
-  Add keyword values to `flowstate[['data']]`
+  Add `[['keyword']]` values to `[['data']]`
 
 - [`concatenate.flowstate()`](https://nlaniewski.github.io/flowstate/reference/concatenate.flowstate.md)
-  : Concatenate a list of flowstate objects
+  : Concatenate a list of flowstates
 
 - [`flowstate.transform()`](https://nlaniewski.github.io/flowstate/reference/flowstate.transform.md)
-  :
-
-  Transform `flowstate[['data']]`
+  : Transform linear values
 
 - [`flowstate.transform.inverse()`](https://nlaniewski.github.io/flowstate/reference/flowstate.transform.inverse.md)
-  :
-
-  Transform `flowstate[['data']]` – Inverse
-
-- [`flowstate.unmix()`](https://nlaniewski.github.io/flowstate/reference/flowstate.unmix.md)
-  :
-
-  Unmix a `flowstate`
+  : Transform values to linear – inverse
 
 - [`plot(`*`<flowstate>`*`)`](https://nlaniewski.github.io/flowstate/reference/plot.flowstate.md)
-  : Plot flowstate data
+  :
 
-- [`plot_spectral.events()`](https://nlaniewski.github.io/flowstate/reference/plot_spectral.events.md)
-  : Plot Spectral Events
-
-- [`plot_spectral.trace()`](https://nlaniewski.github.io/flowstate/reference/plot_spectral.trace.md)
-  : Plot Spectral Traces
+  Visualize `flowstate` data
 
 - [`read.flowstate()`](https://nlaniewski.github.io/flowstate/reference/read.flowstate.md)
   :
 
   `flowstate`: read, parse, and store .fcs data
 
-- [`reference.group.medians()`](https://nlaniewski.github.io/flowstate/reference/reference.group.medians.md)
-  : Generate normalized medians/spectra from reference group 'spectral
-  events'
+- [`select_nonsaturating()`](https://nlaniewski.github.io/flowstate/reference/select_nonsaturating.md)
+  : Create a column (logical) for selecting against saturating events
 
-- [`reference.group.spectral.events()`](https://nlaniewski.github.io/flowstate/reference/reference.group.spectral.events.md)
-  :
+- [`select_population()`](https://nlaniewski.github.io/flowstate/reference/select_population.md)
+  : Create a column (logical) for selecting scatter/population-specific
+  events
 
-  A `flowstate` containing spectrally-associated bead/cellular events.
+- [`select_quantile()`](https://nlaniewski.github.io/flowstate/reference/select_quantile.md)
+  : Create a column (logical) for selecting against events below/above a
+  quantile range
+
+- [`select_singlets()`](https://nlaniewski.github.io/flowstate/reference/select_singlets.md)
+  : Create a column (logical) for selecting singlet (scatter pulse)
+  events
 
 - [`spillover.apply()`](https://nlaniewski.github.io/flowstate/reference/spillover.apply.md)
-  : Compensate data using values stored in spill
+  :
+
+  Compensate `flowstate[['data']]` using values stored in
+  `flowstate[['spill']]`
 
 - [`spillover.update.value()`](https://nlaniewski.github.io/flowstate/reference/spillover.update.value.md)
-  : Update the values of a flowstate spill data.table
+  :
+
+  Update the values of `flowstate[['spill']]`
 
 - [`split(`*`<flowstate>`*`)`](https://nlaniewski.github.io/flowstate/reference/split.flowstate.md)
   :
@@ -63,8 +61,3 @@
   :
 
   Subset `flowstate[['data']]`
-
-- [`write.flowstate()`](https://nlaniewski.github.io/flowstate/reference/write.flowstate.md)
-  :
-
-  Write a `flowstate` as a Flow Cytometry Standard file (FCS 3.1)

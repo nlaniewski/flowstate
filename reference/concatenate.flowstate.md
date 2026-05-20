@@ -1,16 +1,16 @@
-# Concatenate a list of flowstate objects
+# Concatenate a list of flowstates
 
-Concatenate a list of flowstate objects
+Concatenate a list of flowstates
 
 ## Usage
 
 ``` r
-concatenate.flowstate(flowstate.objects)
+concatenate.flowstate(flowstates)
 ```
 
 ## Arguments
 
-- flowstate.objects:
+- flowstates:
 
   a list; the return of
   [read.flowstate](https://nlaniewski.github.io/flowstate/reference/read.flowstate.md)
@@ -25,27 +25,27 @@ An object of class flowstate.
 fcs.file.paths <- system.file("extdata", package = "flowstate") |>
 list.files(full.names = TRUE, pattern = "BLOCK.*.fcs")
 
-#read all .fcs files as flowstate objects
+#read all .fcs files as flowstates
 fs <- read.flowstate(
   fcs.file.paths,
-  colnames.type="S"
+  colnames.type = "S"
 )
 #> COVAIL_002_CYTOKINE_BLOCK1_1.fcs --> flowstate
 #> COVAIL_002_CYTOKINE_BLOCK1_2.fcs --> flowstate
 #> COVAIL_002_CYTOKINE_BLOCK1_3.fcs --> flowstate
 
-#a list of flowstate objects
+#a list of flowstates
 class(fs)
 #> [1] "list"
-sapply(fs,class)
+sapply(fs, class)
 #> COVAIL_002_CYTOKINE_BLOCK1_1.fcs COVAIL_002_CYTOKINE_BLOCK1_2.fcs 
 #>                      "flowstate"                      "flowstate" 
 #> COVAIL_002_CYTOKINE_BLOCK1_3.fcs 
 #>                      "flowstate" 
 
-#concatenate into a single flowstate object
-fs<-concatenate.flowstate(fs)
-#> Concatenating 'flowstate.ojects'...
+#concatenate into a single flowstate
+fs <- concatenate.flowstate(fs)
+#> Concatenating 'flowstates'...
 class(fs)
 #> [1] "flowstate"
 
@@ -189,100 +189,53 @@ fs$parameters
 #> 43:   $P43     32     LOG    0,0      APC-Fire 810-A 4194304     KLRG1
 #>        par      B DISPLAY      E                   N       R         S
 #>     <char> <char>  <char> <char>              <char>  <char>    <char>
-#>                     TYPE      V                           PROJ         N.alias
-#>                   <char> <char>                         <fctr>          <char>
-#>  1:                 Time   <NA> COVAIL_002_CYTOKINE_2025-02-27            Time
-#>  2:         Side_Scatter    220 COVAIL_002_CYTOKINE_2025-02-27           SSC_W
-#>  3:         Side_Scatter    220 COVAIL_002_CYTOKINE_2025-02-27           SSC_H
-#>  4:         Side_Scatter    220 COVAIL_002_CYTOKINE_2025-02-27           SSC_A
-#>  5:      Forward_Scatter     40 COVAIL_002_CYTOKINE_2025-02-27           FSC_W
-#>  6:      Forward_Scatter     40 COVAIL_002_CYTOKINE_2025-02-27           FSC_H
-#>  7:      Forward_Scatter     40 COVAIL_002_CYTOKINE_2025-02-27           FSC_A
-#>  8:         Side_Scatter    220 COVAIL_002_CYTOKINE_2025-02-27          SSCB_W
-#>  9:         Side_Scatter    220 COVAIL_002_CYTOKINE_2025-02-27          SSCB_H
-#> 10:         Side_Scatter    220 COVAIL_002_CYTOKINE_2025-02-27          SSCB_A
-#> 11: Unmixed_Fluorescence    258 COVAIL_002_CYTOKINE_2025-02-27          BUV395
-#> 12: Unmixed_Fluorescence    523 COVAIL_002_CYTOKINE_2025-02-27          BUV496
-#> 13: Unmixed_Fluorescence    535 COVAIL_002_CYTOKINE_2025-02-27          BUV563
-#> 14: Unmixed_Fluorescence      0 COVAIL_002_CYTOKINE_2025-02-27         SBUV605
-#> 15: Unmixed_Fluorescence    904 COVAIL_002_CYTOKINE_2025-02-27          BUV737
-#> 16: Unmixed_Fluorescence   1087 COVAIL_002_CYTOKINE_2025-02-27          BUV805
-#> 17: Unmixed_Fluorescence    301 COVAIL_002_CYTOKINE_2025-02-27           BV421
-#> 18: Unmixed_Fluorescence    347 COVAIL_002_CYTOKINE_2025-02-27     PacificBlue
-#> 19: Unmixed_Fluorescence      0 COVAIL_002_CYTOKINE_2025-02-27          SBV475
-#> 20: Unmixed_Fluorescence    330 COVAIL_002_CYTOKINE_2025-02-27           BV605
-#> 21: Unmixed_Fluorescence    306 COVAIL_002_CYTOKINE_2025-02-27           BV650
-#> 22: Unmixed_Fluorescence    254 COVAIL_002_CYTOKINE_2025-02-27           BV711
-#> 23: Unmixed_Fluorescence    327 COVAIL_002_CYTOKINE_2025-02-27           BV750
-#> 24: Unmixed_Fluorescence    539 COVAIL_002_CYTOKINE_2025-02-27           BV785
-#> 25: Unmixed_Fluorescence      0 COVAIL_002_CYTOKINE_2025-02-27  KIRAVIABlue520
-#> 26: Unmixed_Fluorescence    639 COVAIL_002_CYTOKINE_2025-02-27           RB545
-#> 27: Unmixed_Fluorescence    369 COVAIL_002_CYTOKINE_2025-02-27           RB613
-#> 28: Unmixed_Fluorescence    401 COVAIL_002_CYTOKINE_2025-02-27           PerCP
-#> 29: Unmixed_Fluorescence    479 COVAIL_002_CYTOKINE_2025-02-27  PerCPeFluor710
-#> 30: Unmixed_Fluorescence    253 COVAIL_002_CYTOKINE_2025-02-27           RB744
-#> 31: Unmixed_Fluorescence      0 COVAIL_002_CYTOKINE_2025-02-27    PerCPFire806
-#> 32: Unmixed_Fluorescence    616 COVAIL_002_CYTOKINE_2025-02-27           RB780
-#> 33: Unmixed_Fluorescence    312 COVAIL_002_CYTOKINE_2025-02-27              PE
-#> 34: Unmixed_Fluorescence    312 COVAIL_002_CYTOKINE_2025-02-27           RY586
-#> 35: Unmixed_Fluorescence      0 COVAIL_002_CYTOKINE_2025-02-27     PEDazzle594
-#> 36: Unmixed_Fluorescence    358 COVAIL_002_CYTOKINE_2025-02-27       PEFire640
-#> 37: Unmixed_Fluorescence      0 COVAIL_002_CYTOKINE_2025-02-27          SBY720
-#> 38: Unmixed_Fluorescence    296 COVAIL_002_CYTOKINE_2025-02-27           PECy7
-#> 39: Unmixed_Fluorescence    159 COVAIL_002_CYTOKINE_2025-02-27   AlexaFluor647
-#> 40: Unmixed_Fluorescence    159 COVAIL_002_CYTOKINE_2025-02-27     SparkNIR685
-#> 41: Unmixed_Fluorescence      0 COVAIL_002_CYTOKINE_2025-02-27 LIVEDEADScarlet
-#> 42: Unmixed_Fluorescence    388 COVAIL_002_CYTOKINE_2025-02-27           APCH7
-#> 43: Unmixed_Fluorescence    264 COVAIL_002_CYTOKINE_2025-02-27      APCFire810
-#>                     TYPE      V                           PROJ         N.alias
-#>                   <char> <char>                         <fctr>          <char>
-#>       S.alias                 S_N.alias
-#>        <char>                    <char>
-#>  1:      Time                      Time
-#>  2:     SSC_W                     SSC_W
-#>  3:     SSC_H                     SSC_H
-#>  4:     SSC_A                     SSC_A
-#>  5:     FSC_W                     FSC_W
-#>  6:     FSC_H                     FSC_H
-#>  7:     FSC_A                     FSC_A
-#>  8:    SSCB_W                    SSCB_W
-#>  9:    SSCB_H                    SSCB_H
-#> 10:    SSCB_A                    SSCB_A
-#> 11:    CD45RA             CD45RA_BUV395
-#> 12:    CD45RO             CD45RO_BUV496
-#> 13:     TCRgd              TCRgd_BUV563
-#> 14:   CD45BC1           CD45BC1_SBUV605
-#> 15:       IL2                IL2_BUV737
-#> 16:       CD8                CD8_BUV805
-#> 17:     CD197               CD197_BV421
-#> 18:   CD45BC2       CD45BC2_PacificBlue
-#> 19:   CD45BC3            CD45BC3_SBV475
-#> 20:      CD57                CD57_BV605
-#> 21:     CD193               CD193_BV650
-#> 22:   CD45BC4             CD45BC4_BV711
-#> 23:     CD127               CD127_BV750
-#> 24:      CD56                CD56_BV785
-#> 25:     CD199      CD199_KIRAVIABlue520
-#> 26:     CD49a               CD49a_RB545
-#> 27: GranzymeB           GranzymeB_RB613
-#> 28:   CD45BC5             CD45BC5_PerCP
-#> 29:      CD95       CD95_PerCPeFluor710
-#> 30:       CD3                 CD3_RB744
-#> 31:       CD4          CD4_PerCPFire806
-#> 32:      CD69                CD69_RB780
-#> 33:      TNFa                   TNFa_PE
-#> 34:     CD183               CD183_RY586
-#> 35:      IFNg          IFNg_PEDazzle594
-#> 36:     CD103           CD103_PEFire640
-#> 37:   CD45BC6            CD45BC6_SBY720
-#> 38:     CD122               CD122_PECy7
-#> 39:     ia4b7       ia4b7_AlexaFluor647
-#> 40:   CD45BC7       CD45BC7_SparkNIR685
-#> 41: Viability Viability_LIVEDEADScarlet
-#> 42:      CD27                CD27_APCH7
-#> 43:     KLRG1          KLRG1_APCFire810
-#>       S.alias                 S_N.alias
-#>        <char>                    <char>
+#>                     TYPE      V
+#>                   <char> <char>
+#>  1:                 Time   <NA>
+#>  2:         Side_Scatter    220
+#>  3:         Side_Scatter    220
+#>  4:         Side_Scatter    220
+#>  5:      Forward_Scatter     40
+#>  6:      Forward_Scatter     40
+#>  7:      Forward_Scatter     40
+#>  8:         Side_Scatter    220
+#>  9:         Side_Scatter    220
+#> 10:         Side_Scatter    220
+#> 11: Unmixed_Fluorescence    258
+#> 12: Unmixed_Fluorescence    523
+#> 13: Unmixed_Fluorescence    535
+#> 14: Unmixed_Fluorescence      0
+#> 15: Unmixed_Fluorescence    904
+#> 16: Unmixed_Fluorescence   1087
+#> 17: Unmixed_Fluorescence    301
+#> 18: Unmixed_Fluorescence    347
+#> 19: Unmixed_Fluorescence      0
+#> 20: Unmixed_Fluorescence    330
+#> 21: Unmixed_Fluorescence    306
+#> 22: Unmixed_Fluorescence    254
+#> 23: Unmixed_Fluorescence    327
+#> 24: Unmixed_Fluorescence    539
+#> 25: Unmixed_Fluorescence      0
+#> 26: Unmixed_Fluorescence    639
+#> 27: Unmixed_Fluorescence    369
+#> 28: Unmixed_Fluorescence    401
+#> 29: Unmixed_Fluorescence    479
+#> 30: Unmixed_Fluorescence    253
+#> 31: Unmixed_Fluorescence      0
+#> 32: Unmixed_Fluorescence    616
+#> 33: Unmixed_Fluorescence    312
+#> 34: Unmixed_Fluorescence    312
+#> 35: Unmixed_Fluorescence      0
+#> 36: Unmixed_Fluorescence    358
+#> 37: Unmixed_Fluorescence      0
+#> 38: Unmixed_Fluorescence    296
+#> 39: Unmixed_Fluorescence    159
+#> 40: Unmixed_Fluorescence    159
+#> 41: Unmixed_Fluorescence      0
+#> 42: Unmixed_Fluorescence    388
+#> 43: Unmixed_Fluorescence    264
+#>                     TYPE      V
+#>                   <char> <char>
 fs$keywords
 #>          $BTIM   $CYT $CYTSN       $DATE       $ETIM
 #>         <char> <char> <char>      <char>      <char>
@@ -291,14 +244,14 @@ fs$keywords
 #> 3: 09:50:46.94 Aurora  V0299 27-Feb-2025 10:03:26.16
 #>                                $FIL $FLOWRATE    $INST          $LAST_MODIFIED
 #>                              <char>    <char>   <char>                  <char>
-#> 1: COVAIL_002_CYTOKINE_BLOCK1_1.fcs    Medium Cytekbio 16-JAN-2026 18:46:29.35
-#> 2: COVAIL_002_CYTOKINE_BLOCK1_2.fcs    Medium Cytekbio 16-JAN-2026 18:46:29.36
-#> 3: COVAIL_002_CYTOKINE_BLOCK1_3.fcs    Medium Cytekbio 16-JAN-2026 18:46:29.37
-#>    $LAST_MODIFIER         $OP $ORIGINALITY   $PAR
-#>            <char>      <char>       <char> <char>
-#> 1:                aurora user DataModified     43
-#> 2:                aurora user DataModified     43
-#> 3:                aurora user DataModified     43
+#> 1: COVAIL_002_CYTOKINE_BLOCK1_1.fcs    Medium Cytekbio 20-MAY-2026 16:42:34.28
+#> 2: COVAIL_002_CYTOKINE_BLOCK1_2.fcs    Medium Cytekbio 20-MAY-2026 16:42:34.36
+#> 3: COVAIL_002_CYTOKINE_BLOCK1_3.fcs    Medium Cytekbio 20-MAY-2026 16:42:34.43
+#>      $LAST_MODIFIER         $OP $ORIGINALITY   $PAR
+#>              <char>      <char>       <char> <char>
+#> 1: flowstate_0.16.0 aurora user DataModified     43
+#> 2: flowstate_0.16.0 aurora user DataModified     43
+#> 3: flowstate_0.16.0 aurora user DataModified     43
 #>                             $PROJ $TIMESTEP   $TOT   $VOL APPLY COMPENSATION
 #>                            <char>    <char> <char> <char>             <char>
 #> 1: COVAIL_002_CYTOKINE_2025-02-27    0.0001   2000 326.86              FALSE
@@ -329,11 +282,11 @@ fs$keywords
 #> 1: (FSC,150000)And(SSC,75000) COVAIL_002_CYTOKINE_BLOCK1_1 *COVAIL_CYTOKINE
 #> 2: (FSC,150000)And(SSC,75000) COVAIL_002_CYTOKINE_BLOCK1_2 *COVAIL_CYTOKINE
 #> 3: (FSC,150000)And(SSC,75000) COVAIL_002_CYTOKINE_BLOCK1_3 *COVAIL_CYTOKINE
-#>    WINDOW EXTENSION
-#>              <char>
-#> 1:                3
-#> 2:                3
-#> 3:                3
+#>    WINDOW EXTENSION                    sample.id
+#>              <char>                       <fctr>
+#> 1:                3 COVAIL_002_CYTOKINE_BLOCK1_1
+#> 2:                3 COVAIL_002_CYTOKINE_BLOCK1_2
+#> 3:                3 COVAIL_002_CYTOKINE_BLOCK1_3
 fs$spill
 #>     CD45RA CD45RO TCRgd CD45BC1   IL2   CD8 CD197 CD45BC2 CD45BC3  CD57 CD193
 #>      <num>  <num> <num>   <num> <num> <num> <num>   <num>   <num> <num> <num>

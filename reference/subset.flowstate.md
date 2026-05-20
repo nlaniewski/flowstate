@@ -19,7 +19,7 @@ subset(x, ...)
 - ...:
 
   `subset` argument as defined by `data.table`'s
-  [subset](https://rdatatable.gitlab.io/data.table/reference/subset.data.table.html);
+  [subset](https://rdrr.io/pkg/data.table/man/subset.data.table.html);
   logical expression indicating elements or rows to keep.
 
 ## Value
@@ -43,20 +43,18 @@ fs <- read.flowstate(
 #> COVAIL_002_CYTOKINE_BLOCK1_1.fcs --> flowstate
 #> COVAIL_002_CYTOKINE_BLOCK1_2.fcs --> flowstate
 #> COVAIL_002_CYTOKINE_BLOCK1_3.fcs --> flowstate
-#> Concatenating 'flowstate.ojects'...
+#> Concatenating 'flowstates'...
 
 #transform
 flowstate.transform(fs,'CD3')
-#> flowstate.object --> transforming...
+#> flowstate --> transforming...
 
-#plot;visualize valley
-fs$data[,plot(density(CD3))]
-#> NULL
-abline(v = 1.1)#not data-driven; just for example
+#plot; visualize valley
+plot(fs, CD3) + ggplot2::geom_vline(xintercept = 1.1, color = "red")
 
 
 #subset
-fs.cd3_positive <- subset(fs,CD3 > 1.1)
+fs.cd3_positive <- subset(fs, CD3 > 1.1)
 
 #totals
 fs$data[,.N]

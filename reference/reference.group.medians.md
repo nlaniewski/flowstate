@@ -37,6 +37,5 @@ reference.group.medians(
 
 ## Value
 
-A
-[data.table](https://rdatatable.gitlab.io/data.table/reference/data.table.html)
+A [data.table](https://rdrr.io/pkg/data.table/man/data.table.html)
 containing normalized reference control medians.

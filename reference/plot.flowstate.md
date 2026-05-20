@@ -1,6 +1,6 @@
-# Plot flowstate data
+# Visualize `flowstate` data
 
-Plot flowstate data
+Visualize `flowstate` data
 
 ## Usage
 
@@ -19,7 +19,7 @@ plot(x, ..., bins = 200, limits = NULL, sample.n = NULL)
 - ...:
 
   ... [aes](https://ggplot2.tidyverse.org/reference/aes.html) arguments
-  (unquoted variables); essentially x and y. If a `z` aesthetic is
+  (unquoted variables); essentially x and/or y. If a `z` aesthetic is
   defined, the plot will switch to
   [stat_summary_hex](https://ggplot2.tidyverse.org/reference/stat_summary_2d.html),
   using this defined third variable as a 'color-by'.
@@ -28,7 +28,8 @@ plot(x, ..., bins = 200, limits = NULL, sample.n = NULL)
 
   [geom_hex](https://ggplot2.tidyverse.org/reference/geom_hex.html)
   argument; numeric giving the number of bins in both vertical and
-  horizontal directions.
+  horizontal directions for bivariate and/or bivariate with 'color-by'
+  plots.
 
 - limits:
 
@@ -53,26 +54,26 @@ list.files(full.names = TRUE, pattern = "BLOCK.*.fcs")
 #read all .fcs files as flowstate objects; concatenate into a single object
 fs <- read.flowstate(
   fcs.file.paths,
-  colnames.type="S",
+  colnames.type = "S",
   concatenate = TRUE
 )
 #> COVAIL_002_CYTOKINE_BLOCK1_1.fcs --> flowstate
 #> COVAIL_002_CYTOKINE_BLOCK1_2.fcs --> flowstate
 #> COVAIL_002_CYTOKINE_BLOCK1_3.fcs --> flowstate
-#> Concatenating 'flowstate.ojects'...
+#> Concatenating 'flowstates'...
 
 #transform
-flowstate.transform(fs,c('CD3','CD4','CD8','Viability'))
-#> flowstate.object --> transforming...
+flowstate.transform(fs, c('CD3', 'CD4', 'CD8', 'Viability'))
+#> flowstate --> transforming...
 
 #plot title
 no.fill.legend <- ggplot2::guides(fill = 'none')
-.title1 <- paste("Batch:",fs$keywords[,unique(`$PROJ`)])
+.title1 <- paste("Batch:", fs$keywords[, unique(`$PROJ`)])
 .title2 <- paste(
   "Instrument Serial#:",
-  fs$keywords[,paste(.(unique(`$CYT`),unique(`$CYTSN`)),collapse = " ")]
+  fs$keywords[, paste(.(unique(`$CYT`), unique(`$CYTSN`)), collapse = " ")]
 )
-.title <- paste(.title1,.title2,sep = "\n")
+.title <- paste(.title1, .title2, sep = "\n")
 .title <- ggplot2::labs(title = .title)
 
 #plot: two variables

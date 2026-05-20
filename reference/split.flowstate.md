@@ -49,7 +49,7 @@ fs <- read.flowstate(
 #> COVAIL_002_CYTOKINE_BLOCK1_1.fcs --> flowstate
 #> COVAIL_002_CYTOKINE_BLOCK1_2.fcs --> flowstate
 #> COVAIL_002_CYTOKINE_BLOCK1_3.fcs --> flowstate
-#> Concatenating 'flowstate.ojects'...
+#> Concatenating 'flowstates'...
 
 fs.split <- split(fs,'sample.id')
 
@@ -65,10 +65,10 @@ lapply(fs.split,'[[','keywords')
 #> 1: 09:22:51.62 Aurora  V0299 27-Feb-2025 09:33:47.32
 #>                                $FIL $FLOWRATE    $INST          $LAST_MODIFIED
 #>                              <char>    <char>   <char>                  <char>
-#> 1: COVAIL_002_CYTOKINE_BLOCK1_1.fcs    Medium Cytekbio 16-JAN-2026 18:46:34.76
-#>    $LAST_MODIFIER         $OP $ORIGINALITY   $PAR
-#>            <char>      <char>       <char> <char>
-#> 1:                aurora user DataModified     43
+#> 1: COVAIL_002_CYTOKINE_BLOCK1_1.fcs    Medium Cytekbio 20-MAY-2026 16:42:45.59
+#>      $LAST_MODIFIER         $OP $ORIGINALITY   $PAR
+#>              <char>      <char>       <char> <char>
+#> 1: flowstate_0.16.0 aurora user DataModified     43
 #>                             $PROJ $TIMESTEP   $TOT   $VOL APPLY COMPENSATION
 #>                            <char>    <char> <char> <char>             <char>
 #> 1: COVAIL_002_CYTOKINE_2025-02-27    0.0001   2000 326.86              FALSE
@@ -87,9 +87,9 @@ lapply(fs.split,'[[','keywords')
 #>                     THRESHOLD                     TUBENAME  USERSETTINGNAME
 #>                        <char>                       <char>           <char>
 #> 1: (FSC,150000)And(SSC,75000) COVAIL_002_CYTOKINE_BLOCK1_1 *COVAIL_CYTOKINE
-#>    WINDOW EXTENSION
-#>              <char>
-#> 1:                3
+#>    WINDOW EXTENSION                    sample.id
+#>              <char>                       <fctr>
+#> 1:                3 COVAIL_002_CYTOKINE_BLOCK1_1
 #> 
 #> $COVAIL_002_CYTOKINE_BLOCK1_2
 #>          $BTIM   $CYT $CYTSN       $DATE       $ETIM
@@ -97,10 +97,10 @@ lapply(fs.split,'[[','keywords')
 #> 1: 09:38:12.18 Aurora  V0299 27-Feb-2025 09:49:40.92
 #>                                $FIL $FLOWRATE    $INST          $LAST_MODIFIED
 #>                              <char>    <char>   <char>                  <char>
-#> 1: COVAIL_002_CYTOKINE_BLOCK1_2.fcs    Medium Cytekbio 16-JAN-2026 18:46:34.77
-#>    $LAST_MODIFIER         $OP $ORIGINALITY   $PAR
-#>            <char>      <char>       <char> <char>
-#> 1:                aurora user DataModified     43
+#> 1: COVAIL_002_CYTOKINE_BLOCK1_2.fcs    Medium Cytekbio 20-MAY-2026 16:42:45.67
+#>      $LAST_MODIFIER         $OP $ORIGINALITY   $PAR
+#>              <char>      <char>       <char> <char>
+#> 1: flowstate_0.16.0 aurora user DataModified     43
 #>                             $PROJ $TIMESTEP   $TOT   $VOL APPLY COMPENSATION
 #>                            <char>    <char> <char> <char>             <char>
 #> 1: COVAIL_002_CYTOKINE_2025-02-27    0.0001   2000 346.31              FALSE
@@ -119,9 +119,9 @@ lapply(fs.split,'[[','keywords')
 #>                     THRESHOLD                     TUBENAME  USERSETTINGNAME
 #>                        <char>                       <char>           <char>
 #> 1: (FSC,150000)And(SSC,75000) COVAIL_002_CYTOKINE_BLOCK1_2 *COVAIL_CYTOKINE
-#>    WINDOW EXTENSION
-#>              <char>
-#> 1:                3
+#>    WINDOW EXTENSION                    sample.id
+#>              <char>                       <fctr>
+#> 1:                3 COVAIL_002_CYTOKINE_BLOCK1_2
 #> 
 #> $COVAIL_002_CYTOKINE_BLOCK1_3
 #>          $BTIM   $CYT $CYTSN       $DATE       $ETIM
@@ -129,10 +129,10 @@ lapply(fs.split,'[[','keywords')
 #> 1: 09:50:46.94 Aurora  V0299 27-Feb-2025 10:03:26.16
 #>                                $FIL $FLOWRATE    $INST          $LAST_MODIFIED
 #>                              <char>    <char>   <char>                  <char>
-#> 1: COVAIL_002_CYTOKINE_BLOCK1_3.fcs    Medium Cytekbio 16-JAN-2026 18:46:34.78
-#>    $LAST_MODIFIER         $OP $ORIGINALITY   $PAR
-#>            <char>      <char>       <char> <char>
-#> 1:                aurora user DataModified     43
+#> 1: COVAIL_002_CYTOKINE_BLOCK1_3.fcs    Medium Cytekbio 20-MAY-2026 16:42:45.75
+#>      $LAST_MODIFIER         $OP $ORIGINALITY   $PAR
+#>              <char>      <char>       <char> <char>
+#> 1: flowstate_0.16.0 aurora user DataModified     43
 #>                             $PROJ $TIMESTEP   $TOT   $VOL APPLY COMPENSATION
 #>                            <char>    <char> <char> <char>             <char>
 #> 1: COVAIL_002_CYTOKINE_2025-02-27    0.0001   2000 350.19              FALSE
@@ -151,9 +151,9 @@ lapply(fs.split,'[[','keywords')
 #>                     THRESHOLD                     TUBENAME  USERSETTINGNAME
 #>                        <char>                       <char>           <char>
 #> 1: (FSC,150000)And(SSC,75000) COVAIL_002_CYTOKINE_BLOCK1_3 *COVAIL_CYTOKINE
-#>    WINDOW EXTENSION
-#>              <char>
-#> 1:                3
+#>    WINDOW EXTENSION                    sample.id
+#>              <char>                       <fctr>
+#> 1:                3 COVAIL_002_CYTOKINE_BLOCK1_3
 #> 
 
 #remove all rows associated with sample 1; level will remain

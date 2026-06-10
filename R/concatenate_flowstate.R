@@ -29,7 +29,7 @@ parameters.diff <- function(flowstates){
   ## a list of [['parameters']]
   parameters.list <- lapply(flowstates,'[[','parameters')
   ## differences occur in both range (R) and volts (V)
-  ## find the vector indicies where they do differ (namely 'Time' for R and scatter for V)
+  ## find the vector indices where they do differ (namely 'Time' for R and scatter for V)
   RV.diff <- sapply(c('R', 'V'), function(j){
     res <- lapply(parameters.list, function(i){
       as.numeric(i[[j]])
@@ -37,6 +37,8 @@ parameters.diff <- function(flowstates){
     res <- do.call(rbind, res)
     which(apply(res, 2, function(x) length(unique(x)) > 1))
   }, simplify = F)
+  ## drop empty list element
+  RV.diff <- RV.diff[sapply(RV.diff, length) != 0]
   ## return a sample-specific list of the unique values for R and V
   res <- lapply(parameters.list, function(i){
     sapply(names(RV.diff), function(j){

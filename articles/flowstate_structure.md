@@ -364,9 +364,9 @@ fs$keywords
 #> 3: 09:50:46.94 Aurora  V0299 27-Feb-2025 10:03:26.16
 #>                                $FIL $FLOWRATE    $INST          $LAST_MODIFIED
 #>                              <char>    <char>   <char>                  <char>
-#> 1: COVAIL_002_CYTOKINE_BLOCK1_1.fcs    Medium Cytekbio 25-MAY-2026 00:06:04.73
-#> 2: COVAIL_002_CYTOKINE_BLOCK1_2.fcs    Medium Cytekbio 25-MAY-2026 00:06:04.83
-#> 3: COVAIL_002_CYTOKINE_BLOCK1_3.fcs    Medium Cytekbio 25-MAY-2026 00:06:04.92
+#> 1: COVAIL_002_CYTOKINE_BLOCK1_1.fcs    Medium Cytekbio 10-JUN-2026 19:32:07.76
+#> 2: COVAIL_002_CYTOKINE_BLOCK1_2.fcs    Medium Cytekbio 10-JUN-2026 19:32:07.86
+#> 3: COVAIL_002_CYTOKINE_BLOCK1_3.fcs    Medium Cytekbio 10-JUN-2026 19:32:07.95
 #>      $LAST_MODIFIER         $OP $ORIGINALITY   $PAR
 #>              <char>      <char>       <char> <char>
 #> 1: flowstate_0.16.1 aurora user DataModified     43
@@ -420,9 +420,9 @@ fs$keywords[,.(`$CYT`,TUBENAME)]
 fs$keywords[,.(`$LAST_MODIFIED`,`$LAST_MODIFIER`,`$ORIGINALITY`)]
 #>             $LAST_MODIFIED   $LAST_MODIFIER $ORIGINALITY
 #>                     <char>           <char>       <char>
-#> 1: 25-MAY-2026 00:06:04.73 flowstate_0.16.1 DataModified
-#> 2: 25-MAY-2026 00:06:04.83 flowstate_0.16.1 DataModified
-#> 3: 25-MAY-2026 00:06:04.92 flowstate_0.16.1 DataModified
+#> 1: 10-JUN-2026 19:32:07.76 flowstate_0.16.1 DataModified
+#> 2: 10-JUN-2026 19:32:07.86 flowstate_0.16.1 DataModified
+#> 3: 10-JUN-2026 19:32:07.95 flowstate_0.16.1 DataModified
 ```
 
 ### `[['spill']]`

@@ -66,7 +66,7 @@ fs <- read.flowstate(
 #transform
 flowstate.transform(fs)
 
-#UPDATES BY REFERENCE -- adds two columns: 'select.singlets' and 'population'
+#UPDATES BY REFERENCE -- adds two columns: 'select.population' and 'population'
 select_population(fs, population = c(lymphocytes = 'CD3'))
 fs$data[, .N, by = .(select.population, population)]
 

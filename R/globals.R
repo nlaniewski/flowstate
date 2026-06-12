@@ -4,19 +4,14 @@
 # dput(sort(c(...)))
 # c(...) |> sort() |> dput()
 utils::globalVariables(
-  c("$FIL", "$TOT", ".", "..keywords.to.add", ".mean", "add.reference.keywords.to.data",
-    "alias", "autofluorescence", "barcode", "barcode.alias", "barcode.censor",
-    "cellular.anchors", "cluster", "combn.drop", "detector", "detector.peak",
-    "detector.select", "emission", "emission.normalized", "fluor",
-    "FSC_A", "FSC_H", "group.type", "i", "id", "index", "j", "j.match", "j.match.parameters.to.data",
-    "js", "k", "marker", "means", "N", "N.alias", "node_barcode",
-    "nodes.assigned", "ord", "peak.values", "population", "PROJ",
-    "R", "reference.type", "ribbon", "S", "S.alias", "S_N.alias",
-    "sample.id", "scatter.population", "scatter.select", "select.contour",
-    "select.detector", "select.nonsaturating", "select.population",
-    "select.quantile", "select.scatter", "select.scatter.population", "select.singlets",
-    "select.spectral", "select.spectral.events", "SSC_A", "SSCB_A", "SSC_H",
-    "subtract.type", "tissue.type", "total.events", "totals", "type",
-    "TYPE", "V1", "value", "value.x", "value.y", "variable", "variable.x",
-    "variable.y")
+  c(
+    "$TOT", ".", "..keywords.to.add", "FSC_A", "FSC_H", "N", "N.alias",
+    "R", "S", "S.alias", "SSC_A", "SSC_H", "TYPE", "V1", "alias",
+    "barcode", "barcode.alias", "barcode.censor", "combn.drop", "detector.peak",
+    "detector.select", "id", "j", "j.match", "j.match.parameters.to.data",
+    "node_barcode", "nodes.assigned", "ord", "sample.id", "scatter.select",
+    "select.nonsaturating", "select.population", "select.quantile",
+    "select.singlets", "totals", "value", "value.x", "value.y", "variable",
+    "variable.x", "variable.y"
+  )
 )

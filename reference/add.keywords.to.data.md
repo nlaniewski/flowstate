@@ -62,14 +62,14 @@ sample.id, "_", keep = 4:5)
 #> 3: 09:50:46.94 Aurora  V0299 27-Feb-2025 10:03:26.16
 #>                                $FIL $FLOWRATE    $INST          $LAST_MODIFIED
 #>                              <char>    <char>   <char>                  <char>
-#> 1: COVAIL_002_CYTOKINE_BLOCK1_1.fcs    Medium Cytekbio 12-JUN-2026 18:58:02.06
-#> 2: COVAIL_002_CYTOKINE_BLOCK1_2.fcs    Medium Cytekbio 12-JUN-2026 18:58:02.15
-#> 3: COVAIL_002_CYTOKINE_BLOCK1_3.fcs    Medium Cytekbio 12-JUN-2026 18:58:02.24
+#> 1: COVAIL_002_CYTOKINE_BLOCK1_1.fcs    Medium Cytekbio 12-JUN-2026 19:19:29.40
+#> 2: COVAIL_002_CYTOKINE_BLOCK1_2.fcs    Medium Cytekbio 12-JUN-2026 19:19:29.49
+#> 3: COVAIL_002_CYTOKINE_BLOCK1_3.fcs    Medium Cytekbio 12-JUN-2026 19:19:29.58
 #>           $LAST_MODIFIER         $OP $ORIGINALITY   $PAR
 #>                   <char>      <char>       <char> <char>
-#> 1: flowstate_0.16.1.9000 aurora user DataModified     43
-#> 2: flowstate_0.16.1.9000 aurora user DataModified     43
-#> 3: flowstate_0.16.1.9000 aurora user DataModified     43
+#> 1: flowstate_0.16.1.9001 aurora user DataModified     43
+#> 2: flowstate_0.16.1.9001 aurora user DataModified     43
+#> 3: flowstate_0.16.1.9001 aurora user DataModified     43
 #>                             $PROJ $TIMESTEP   $TOT   $VOL APPLY COMPENSATION
 #>                            <char>    <char> <char> <char>             <char>
 #> 1: COVAIL_002_CYTOKINE_2025-02-27    0.0001   2000 326.86              FALSE

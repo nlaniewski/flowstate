@@ -9,13 +9,11 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
 Imports:
     data.table,
-    digest,
     ggplot2,
     graphics,
     grDevices,
     MASS,
     methods,
-    plotly,
     scales,
     sp,
     stats,

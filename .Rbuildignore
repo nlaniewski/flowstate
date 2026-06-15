@@ -12,3 +12,4 @@
 ^inst/extdata/Unmixed$
 ^\.positai$
 ^\.claude$
+^scratch$

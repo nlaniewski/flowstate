@@ -6,25 +6,33 @@
 \usage{
 write.flowstate(
   flowstate,
-  new.fil = NULL,
-  add.fil.mod = TRUE,
-  file.dir,
+  file.dir = tempdir(),
   endianness = c("little", "big")
 )
 }
 \arguments{
-\item{flowstate}{A \code{flowstate}}
+\item{flowstate}{A \code{flowstate} as returned from \link{read.flowstate}.}
 
-\item{new.fil}{Character string -- default \code{NULL}; if defined, the keyword \code{'$FIL'} will be updated with the provided value.}
-
-\item{add.fil.mod}{Logical -- default \code{TRUE}; the suffix \code{'flowstateMOD'}(string) will be appended to the value of \code{'$FIL'}.}
-
-\item{file.dir}{Character vector -- a \link[=file.path]{base}; a file directory for saving the output FCS 3.1 file.}
+\item{file.dir}{A \link{file.path} -- default \link{tempdir}; a file directory for saving the output FCS 3.1 file(s).}
 
 \item{endianness}{Character string -- default \code{"little"}; see \link[base:readBin]{endian}.}
 }
 \value{
-The FCS 3.1 file is written to disk and a summary message is displayed.
+\itemize{
+\item FCS 3.1 file(s) are written to disk and a summary message is displayed.
+\item UPDATES BY REFERENCE:
+\itemize{
+\item \code{flowstate[['data']]} -- non-numeric (logical and/or factor) columns are converted to numeric
+\item \code{flowstate[['keywords']]} -- non-character (factor) columns are converted to character
+\item \code{flowstate[['spill']]} -- column names are matched/updated using \verb{[['parameters']][['N']]}
+}
+\item UPDATES BY ASSIGNMENT to environment:
+\itemize{
+\item \code{flowstate[['parameters']]} -- \verb{[['parameters']]} is updated by row-binding derived columns found in \verb{[['data']]}
+}
+}
+
+Invisibly returns \code{flowstate}.
 }
 \description{
 A \code{flowstate} -- following \href{https://pmc.ncbi.nlm.nih.gov/articles/PMC2892967/}{Flow Cytometry Standard} conventions -- is converted to FCS 3.1 and written to disk. The conversion is as follows:
@@ -33,7 +41,7 @@ A \code{flowstate} -- following \href{https://pmc.ncbi.nlm.nih.gov/articles/PMC2
 \itemize{
 \item this string forms the \code{TEXT} segment of the FCS file.
 }
-\item \verb{[['data']]} is written as binary.
+\item \verb{[['data']]} is written as row-major binary.
 \itemize{
 \item this forms the \code{DATA} segment of the FCS file.
 }
@@ -49,27 +57,71 @@ The FCS 3.1 compliant file is then written to disk.
 fcs.file.paths <- system.file("extdata", package = "flowstate") |>
 list.files(full.names = TRUE, pattern = "BLOCK.*.fcs")
 
-#read .fcs files as a flowstate object; concatenate
+## read .fcs files as a flowstate object; concatenate
 fs <- read.flowstate(
   fcs.file.paths,
   colnames.type = "S",
   concatenate = TRUE
 )
 
-#remove saturating events
+## saturating events -- logical
 select_nonsaturating(fs)
 
-#subset to retain only non-saturating events
-fs <- subset(fs, select.nonsaturating)
-fs$data[, select.nonsaturating := NULL]
+## singlet events -- logical
+select_singlets(fs)
 
-#transform
-flowstate.transform(
-  fs,
-  j = c('CD3','CD4','CD8'),
-  transform.func = "asinh",
-  cofactor = 5000
+## transform
+flowstate.transform(fs)
+
+## simple logical to select CD3+
+fs$data[
+,
+j = select.CD3 := {
+ d <- stats::density(CD3[(select.nonsaturating) & (select.singlets)])
+ pv <- diff(sign(diff(d$y)))
+ valley <- which(pv == 2) + 1
+ CD3 > d$x[valley]
+ }
+]
+
+## add a factor -- 'aliquot'
+fs$keywords[
+ ,
+ j = aliquot := data.table::tstrsplit(sample.id, "_", keep = 5, type.convert = factor)
+]
+
+add.keywords.to.data(fs, 'aliquot')
+
+## write; reassign to capture the updated flowstate
+fs <- write.flowstate(fs)
+
+## read newly written files
+fcs.file.paths <- list.files(tempdir(), full.names = TRUE, pattern = "flowstateMOD.fcs")
+
+fs <- read.flowstate(
+  fcs.file.paths,
+  colnames.type = "S",
+  concatenate = TRUE
 )
-#
+
+## derived [['data']] columns
+fs[['data']][, .(select.nonsaturating, select.singlets, select.CD3, aliquot)]
+
+## derived [['parameters']] columns
+fs$parameters[grep("Logical|Factor", TYPE)]
+
+## derived [['keyword']] columns -- retains original factor levels
+fs[['keywords']][, .(aliquot)]
+## recover the factor levels -- optional
+levels.aliquot <- unique(fs[['keywords']][, sub('FACTOR::', "", aliquot)])
+levels.aliquot <- strsplit(levels.aliquot, ';')[[1]]
+fs$keywords[, aliquot := factor(levels.aliquot)]
+fs$data[, aliquot := NULL]
+add.keywords.to.data(fs, 'aliquot')
+
+## plot derived [['data']] logicals (now numeric)
+plot(fs, FSC_A, FSC_H) + ggplot2::facet_wrap(~select.singlets)
+flowstate.transform(fs)
+plot(fs, CD3) + ggplot2::facet_wrap(~select.CD3)
+
 }
-\keyword{internal}

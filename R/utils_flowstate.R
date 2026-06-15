@@ -12,6 +12,11 @@ fcs.text.primary.required.keywords <-
     '$NEXTDATA'
   )
 
+fcs.text.primary.required.keywords.zero <- stats::setNames(
+  nm = fcs.text.primary.required.keywords,
+  rep("0", length(fcs.text.primary.required.keywords))
+)
+
 flowstate.parameter.keywords <-
   c(
     'B',

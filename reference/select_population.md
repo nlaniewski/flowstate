@@ -39,7 +39,7 @@ select_population(
 
 - flowstate:
 
-  A flowstate as returned from
+  A `flowstate` as returned from
   [read.flowstate](https://nlaniewski.github.io/flowstate/reference/read.flowstate.md).
 
 - population:

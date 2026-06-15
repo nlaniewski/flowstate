@@ -61,3 +61,8 @@
   :
 
   Subset `flowstate[['data']]`
+
+- [`write.flowstate()`](https://nlaniewski.github.io/flowstate/reference/write.flowstate.md)
+  :
+
+  Write a `flowstate` as a Flow Cytometry Standard file (FCS 3.1)

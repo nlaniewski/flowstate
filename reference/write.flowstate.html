@@ -3,7 +3,7 @@
 [['keywords']], [['parameters']], and [['spill']] (if present) are converted to character string using a delimiter &quot;|&quot; to separate keyword-value pairs.
 this string forms the TEXT segment of the FCS file.
 
-[['data']] is written as binary.
+[['data']] is written as row-major binary.
 this forms the DATA segment of the FCS file.
 
 The HEADER segment (string) – containing the required offsets – is derived from TEXT and DATA.
@@ -14,7 +14,7 @@ N.B.: During testing, FCS 3.1 files written to disk by write.flowstate were full
 [['keywords']], [['parameters']], and [['spill']] (if present) are converted to character string using a delimiter &quot;|&quot; to separate keyword-value pairs.
 this string forms the TEXT segment of the FCS file.
 
-[['data']] is written as binary.
+[['data']] is written as row-major binary.
 this forms the DATA segment of the FCS file.
 
 The HEADER segment (string) – containing the required offsets – is derived from TEXT and DATA.
@@ -61,7 +61,7 @@ N.B.: During testing, FCS 3.1 files written to disk by write.flowstate were full
     <div class="ref-description section level2">
     <p>A <code>flowstate</code> – following <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC2892967/" class="external-link">Flow Cytometry Standard</a> conventions – is converted to FCS 3.1 and written to disk. The conversion is as follows:</p><ul><li><p><code>[['keywords']]</code>, <code>[['parameters']]</code>, and <code>[['spill']]</code> (if present) are converted to character string using a delimiter <code>"|"</code> to separate keyword-value pairs.</p><ul><li><p>this string forms the <code>TEXT</code> segment of the FCS file.</p></li>
 </ul></li>
-<li><p><code>[['data']]</code> is written as binary.</p><ul><li><p>this forms the <code>DATA</code> segment of the FCS file.</p></li>
+<li><p><code>[['data']]</code> is written as row-major binary.</p><ul><li><p>this forms the <code>DATA</code> segment of the FCS file.</p></li>
 </ul></li>
 <li><p>The <code>HEADER</code> segment (string) – containing the required offsets – is derived from <code>TEXT</code> and <code>DATA</code>.</p></li>
 </ul><p>The FCS 3.1 compliant file is then written to disk.</p>
@@ -72,9 +72,7 @@ N.B.: During testing, FCS 3.1 files written to disk by write.flowstate were full
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">write.flowstate</span><span class="op">(</span></span>
 <span>  <span class="va">flowstate</span>,</span>
-<span>  new.fil <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  add.fil.mod <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  <span class="va">file.dir</span>,</span>
+<span>  file.dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  endianness <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"little"</span>, <span class="st">"big"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -84,19 +82,11 @@ N.B.: During testing, FCS 3.1 files written to disk by write.flowstate were full
 
 
 <dl><dt id="arg-flowstate">flowstate<a class="anchor" aria-label="anchor" href="#arg-flowstate"></a></dt>
-<dd><p>A <code>flowstate</code></p></dd>
-
-
-<dt id="arg-new-fil">new.fil<a class="anchor" aria-label="anchor" href="#arg-new-fil"></a></dt>
-<dd><p>Character string – default <code>NULL</code>; if defined, the keyword <code>'$FIL'</code> will be updated with the provided value.</p></dd>
-
-
-<dt id="arg-add-fil-mod">add.fil.mod<a class="anchor" aria-label="anchor" href="#arg-add-fil-mod"></a></dt>
-<dd><p>Logical – default <code>TRUE</code>; the suffix <code>'flowstateMOD'</code>(string) will be appended to the value of <code>'$FIL'</code>.</p></dd>
+<dd><p>A <code>flowstate</code> as returned from <a href="read.flowstate.html">read.flowstate</a>.</p></dd>
 
 
 <dt id="arg-file-dir">file.dir<a class="anchor" aria-label="anchor" href="#arg-file-dir"></a></dt>
-<dd><p>Character vector – a <a href="https://rdrr.io/r/base/file.path.html" class="external-link">base</a>; a file directory for saving the output FCS 3.1 file.</p></dd>
+<dd><p>A <a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a> – default <a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a>; a file directory for saving the output FCS 3.1 file(s).</p></dd>
 
 
 <dt id="arg-endianness">endianness<a class="anchor" aria-label="anchor" href="#arg-endianness"></a></dt>
@@ -105,7 +95,15 @@ N.B.: During testing, FCS 3.1 files written to disk by write.flowstate were full
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>The FCS 3.1 file is written to disk and a summary message is displayed.</p>
+
+<ul><li><p>FCS 3.1 file(s) are written to disk and a summary message is displayed.</p></li>
+<li><p>UPDATES BY REFERENCE:</p><ul><li><p><code>flowstate[['data']]</code> – non-numeric (logical and/or factor) columns are converted to numeric</p></li>
+<li><p><code>flowstate[['keywords']]</code> – non-character (factor) columns are converted to character</p></li>
+<li><p><code>flowstate[['spill']]</code> – column names are matched/updated using <code>[['parameters']][['N']]</code></p></li>
+</ul></li>
+<li><p>UPDATES BY ASSIGNMENT to environment:</p><ul><li><p><code>flowstate[['parameters']]</code> – <code>[['parameters']]</code> is updated by row-binding derived columns found in <code>[['data']]</code></p></li>
+</ul></li>
+</ul><p>Invisibly returns <code>flowstate</code>.</p>
     </div>
 
     <div class="section level2">
@@ -114,7 +112,7 @@ N.B.: During testing, FCS 3.1 files written to disk by write.flowstate were full
 <span class="r-in"><span><span class="va">fcs.file.paths</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, package <span class="op">=</span> <span class="st">"flowstate"</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span>full.names <span class="op">=</span> <span class="cn">TRUE</span>, pattern <span class="op">=</span> <span class="st">"BLOCK.*.fcs"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co">#read .fcs files as a flowstate object; concatenate</span></span></span>
+<span class="r-in"><span><span class="co">## read .fcs files as a flowstate object; concatenate</span></span></span>
 <span class="r-in"><span><span class="va">fs</span> <span class="op">&lt;-</span> <span class="fu"><a href="read.flowstate.html">read.flowstate</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>  <span class="va">fcs.file.paths</span>,</span></span>
 <span class="r-in"><span>  colnames.type <span class="op">=</span> <span class="st">"S"</span>,</span></span>
@@ -125,12 +123,26 @@ N.B.: During testing, FCS 3.1 files written to disk by write.flowstate were full
 <span class="r-msg co"><span class="r-pr">#&gt;</span> COVAIL_002_CYTOKINE_BLOCK1_3.fcs --&gt; flowstate</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Concatenating 'flowstates'...</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co">#remove saturating events</span></span></span>
+<span class="r-in"><span><span class="co">## saturating events -- logical</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="select_nonsaturating.html">select_nonsaturating</a></span><span class="op">(</span><span class="va">fs</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co">#subset to retain only non-saturating events</span></span></span>
-<span class="r-in"><span><span class="va">fs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">fs</span>, <span class="va">select.nonsaturating</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">fs</span><span class="op">$</span><span class="va">data</span><span class="op">[</span>, <span class="va">select.nonsaturating</span> <span class="op">:=</span> <span class="cn">NULL</span><span class="op">]</span></span></span>
+<span class="r-in"><span><span class="co">## singlet events -- logical</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="select_singlets.html">select_singlets</a></span><span class="op">(</span><span class="va">fs</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## transform</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="flowstate.transform.html">flowstate.transform</a></span><span class="op">(</span><span class="va">fs</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> flowstate --&gt; transforming...</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## simple logical to select CD3+</span></span></span>
+<span class="r-in"><span><span class="va">fs</span><span class="op">$</span><span class="va">data</span><span class="op">[</span></span></span>
+<span class="r-in"><span>,</span></span>
+<span class="r-in"><span>j <span class="op">=</span> <span class="va">select.CD3</span> <span class="op">:=</span> <span class="op">{</span></span></span>
+<span class="r-in"><span> <span class="va">d</span> <span class="op">&lt;-</span> <span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/density.html" class="external-link">density</a></span><span class="op">(</span><span class="va">CD3</span><span class="op">[</span><span class="op">(</span><span class="va">select.nonsaturating</span><span class="op">)</span> <span class="op">&amp;</span> <span class="op">(</span><span class="va">select.singlets</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span></span>
+<span class="r-in"><span> <span class="va">pv</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/diff.html" class="external-link">diff</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sign.html" class="external-link">sign</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diff.html" class="external-link">diff</a></span><span class="op">(</span><span class="va">d</span><span class="op">$</span><span class="va">y</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span> <span class="va">valley</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">pv</span> <span class="op">==</span> <span class="fl">2</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1</span></span></span>
+<span class="r-in"><span> <span class="va">CD3</span> <span class="op">&gt;</span> <span class="va">d</span><span class="op">$</span><span class="va">x</span><span class="op">[</span><span class="va">valley</span><span class="op">]</span></span></span>
+<span class="r-in"><span> <span class="op">}</span></span></span>
+<span class="r-in"><span><span class="op">]</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        Time    SSC_W  SSC_H    SSC_A    FSC_W  FSC_H     FSC_A   SSCB_W SSCB_H</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;num&gt;    &lt;num&gt;  &lt;num&gt;    &lt;num&gt;    &lt;num&gt;  &lt;num&gt;     &lt;num&gt;    &lt;num&gt;  &lt;num&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    1:     0 730290.7 759933 924953.4 774044.6 997371 1286682.8 714389.4 873960</span>
@@ -139,11 +151,299 @@ N.B.: During testing, FCS 3.1 files written to disk by write.flowstate were full
 <span class="r-out co"><span class="r-pr">#&gt;</span>    4:     4 707174.8 516909 609241.7 719956.1 819074  982828.9 700778.6 463030</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    5:     5 743404.2 484976 600888.7 764667.1 754833  961993.2 726898.2 419073</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ---                                                                         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5974:  2454 755967.8 529870 667607.8 752809.6 781192  980148.1 748563.8 386375</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5975:  2454 681458.6 362164 411332.9 704912.6 856891 1006722.2 675241.8 333285</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5976:  2455 677347.4 701711 792170.2 702094.4 810637  948572.9 668789.1 506809</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5977:  2455 696805.0 546994 635246.9 734241.6 960241 1175081.5 696149.9 465449</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5978:  2455 717597.9 481212 575527.9 713571.4 772944  919251.3 712120.8 452721</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5996:  2454 755967.8 529870 667607.8 752809.6 781192  980148.1 748563.8 386375</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5997:  2454 681458.6 362164 411332.9 704912.6 856891 1006722.2 675241.8 333285</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5998:  2455 677347.4 701711 792170.2 702094.4 810637  948572.9 668789.1 506809</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5999:  2455 696805.0 546994 635246.9 734241.6 960241 1175081.5 696149.9 465449</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6000:  2455 717597.9 481212 575527.9 713571.4 772944  919251.3 712120.8 452721</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          SSCB_A     CD45RA    CD45RO       TCRgd     CD45BC1          IL2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;num&gt;      &lt;num&gt;     &lt;num&gt;       &lt;num&gt;       &lt;num&gt;        &lt;num&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    1: 1040579.6  1.9602522 1.0533564  0.65068112  0.20973741 -0.546068006</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    2:  514300.5  1.0537953 0.2130998  0.46825933  2.16524387  0.132831825</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    3:  705412.0 -0.2470649 2.7199076  0.42499041  0.02931124  0.002875278</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    4:  540802.5  0.6402557 1.0834556  1.47050773  2.52534304 -0.286119841</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    5:  507705.7 -0.3323608 2.8483141  0.95952195  3.09759163 -0.127382318</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ---                                                                    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5996:  482043.9  1.4767335 0.4264906  0.55609505  1.91829081 -0.221414160</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5997:  375079.9  1.9744866 0.4855015  0.63566630  2.78721332 -0.069965438</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5998:  564913.9  0.6691388 0.5834009  0.45495254 -0.20379971 -0.149373139</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5999:  540037.1  0.3137090 2.5537604 -1.05616639  2.59122142 -0.345124066</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6000:  537320.1  0.7515709 1.0826886  0.01604491  1.15698274 -0.388759405</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               CD8     CD197      CD45BC2   CD45BC3       CD57       CD193</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             &lt;num&gt;     &lt;num&gt;        &lt;num&gt;     &lt;num&gt;      &lt;num&gt;       &lt;num&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    1:  4.47423555 0.3339797  2.325265211 2.1200846  0.4858091  0.33297371</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    2:  0.05208613 2.0420686  1.802065427 0.7825755  0.7681877  0.03257206</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    3: -0.07537308 0.1394232  0.221454119 2.1781596  0.5285062  0.18497058</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    4:  0.22413649 0.3200305 -0.060624216 0.6324386  0.8329555  0.01681209</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    5:  0.04736568 0.5260895 -0.181077517 0.9196392  1.2416150  0.03452835</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ---                                                                    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5996:  3.25657085 1.1282877  2.573546353 1.6551860  0.7314523  0.08843720</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5997:  0.89578615 1.1070193 -0.020792172 0.6242733  0.5823043  0.06865744</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5998: -0.10649677 0.2172071 -0.007154095 1.5797494  1.1161867 -0.06789374</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5999:  3.78228758 0.1653123  0.816983086 1.6096684  0.3560706  0.11389195</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6000:  3.89311017 0.3112947  0.323274511 1.9627009 -0.1271375  0.16204775</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          CD45BC4      CD127       CD56      CD199       CD49a GranzymeB</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            &lt;num&gt;      &lt;num&gt;      &lt;num&gt;      &lt;num&gt;       &lt;num&gt;     &lt;num&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    1: 2.25571508  0.2654731  1.0365955 0.26015922  0.21261395 3.0785197</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    2: 0.08195645 -0.1281904  0.1969144 0.24933465  0.27731941 0.3867369</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    3: 2.50902951  0.3982770 -0.3097284 0.36984053  0.10228633 0.4111196</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    4: 2.53696619  0.6737886 -0.3552034 0.21008710  0.04358495 0.9020600</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    5: 0.20317909  0.9920337  0.2890994 0.59912921 -0.15121887 0.3605579</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ---                                                                  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5996: 0.14893465  0.2368386  0.3587825 0.30724193  0.05792273 0.3401447</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5997: 2.36004109  0.2004310  0.2651959 0.15327944  0.18236537 0.4410127</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5998: 1.53575739 -0.1055638  0.2869923 0.18433622  0.36100071 4.1810228</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5999: 0.28483815  0.2902687  0.5406996 0.01392175  0.24232233 0.4616495</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6000: 2.23598496  0.5944382 -0.4291759 0.24747923  0.23265734 0.2892711</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            CD45BC5        CD95        CD3       CD4       CD69        TNFa</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              &lt;num&gt;       &lt;num&gt;      &lt;num&gt;     &lt;num&gt;      &lt;num&gt;       &lt;num&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    1: -0.001297575  0.18746983 2.69082752 1.2802729 0.84368803  0.19731991</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    2: -0.022959761  0.54632690 0.01885507 0.1265832 0.18153395  0.13630370</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    3:  1.833859938  0.18342249 2.37362055 3.0389426 0.33745353  0.16262134</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    4:  2.083767364 -0.04675416 3.01898121 0.9824303 1.06530766  0.10870415</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    5:  1.904147247  0.73400722 2.76351777 2.8095455 0.34187409  0.41362935</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ---                                                                     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5996:  0.018050321  0.10407491 2.96421569 0.9984873 0.20297311  0.07247157</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5997:  0.169925098  0.25472133 0.22108311 0.5370170 0.81398521 -0.05947342</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5998: -0.056550341 -0.47791574 0.21997191 0.2438694 0.02834284  0.31989659</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5999:  0.051065304  0.03560712 2.23361417 0.8138703 0.60032416  0.94063443</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6000:  0.087254093  0.15002880 2.61817586 1.1960332 0.58147692  0.40816981</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             CD183        IFNg        CD103     CD45BC6       CD122       ia4b7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             &lt;num&gt;       &lt;num&gt;        &lt;num&gt;       &lt;num&gt;       &lt;num&gt;       &lt;num&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    1:  0.09448468 -0.05122809  0.033316724  0.16362894  0.14664735  0.86302787</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    2: -0.09547814 -0.02191905 -0.004354057  1.62068087  0.14230851  0.28037717</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    3: -0.08047263  0.07897691 -0.016781683  0.38182910 -0.34775417 -0.06421969</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    4: -0.17537332 -0.03203706 -0.197617536  0.34049109 -0.09530003  0.09739852</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    5: -0.59861754  0.00556097  0.031120678 -0.16426801 -0.13013797 -0.38354094</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ---                                                                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5996: -0.10381037  0.06009857 -0.066759366  0.06645741  0.02427680  0.24056226</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5997: -0.05725193  0.04123291 -0.048209601  2.08779599  0.11879013  0.50354839</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5998: -0.24981715 -0.26144068 -0.664655057  1.50539922  0.08400778  0.40524360</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5999: -0.15688068 -0.28882696 -0.007405709  0.17537962  0.02251314  0.03999534</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6000: -0.15752388 -0.23164842 -0.004791846  1.77689384  0.01874891  0.17845059</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           CD45BC7  Viability        CD27        KLRG1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             &lt;num&gt;      &lt;num&gt;       &lt;num&gt;        &lt;num&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    1:  0.20472459 0.28207831 -1.21213861  0.938003692</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    2: -0.08181203 2.18518658  0.14843193  0.679568376</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    3:  0.09550062 0.10841467 -0.08966891  1.299490619</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    4: -0.18382007 0.20431878  0.06644138  1.760542679</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    5:  1.83632802 0.15839596 -0.08930684  0.145310328</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ---                                                </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5996:  0.08948143 0.05401049  0.52100895 -0.003516618</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5997:  0.09389797 0.15050223 -0.15401834  0.161060456</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5998: -0.09233305 0.76145557 -0.08473685  0.208461477</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5999:  1.65542359 0.36379373 -0.28865046  0.619277393</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6000: -0.09068621 0.33323843 -0.41485464  0.886418310</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                          sample.id select.nonsaturating select.singlets</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                             &lt;fctr&gt;               &lt;lgcl&gt;          &lt;lgcl&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    1: COVAIL_002_CYTOKINE_BLOCK1_1                 TRUE            TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    2: COVAIL_002_CYTOKINE_BLOCK1_1                 TRUE            TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    3: COVAIL_002_CYTOKINE_BLOCK1_1                 TRUE            TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    4: COVAIL_002_CYTOKINE_BLOCK1_1                 TRUE            TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    5: COVAIL_002_CYTOKINE_BLOCK1_1                 TRUE            TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ---                                                                  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5996: COVAIL_002_CYTOKINE_BLOCK1_3                 TRUE            TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5997: COVAIL_002_CYTOKINE_BLOCK1_3                 TRUE            TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5998: COVAIL_002_CYTOKINE_BLOCK1_3                 TRUE            TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5999: COVAIL_002_CYTOKINE_BLOCK1_3                 TRUE            TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6000: COVAIL_002_CYTOKINE_BLOCK1_3                 TRUE            TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       select.CD3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;lgcl&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    1:       TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    2:      FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    3:       TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    4:       TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    5:       TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ---           </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5996:       TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5997:      FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5998:      FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5999:       TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6000:       TRUE</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## add a factor -- 'aliquot'</span></span></span>
+<span class="r-in"><span><span class="va">fs</span><span class="op">$</span><span class="va">keywords</span><span class="op">[</span></span></span>
+<span class="r-in"><span> ,</span></span>
+<span class="r-in"><span> j <span class="op">=</span> <span class="va">aliquot</span> <span class="op">:=</span> <span class="fu">data.table</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/data.table/man/tstrsplit.html" class="external-link">tstrsplit</a></span><span class="op">(</span><span class="va">sample.id</span>, <span class="st">"_"</span>, keep <span class="op">=</span> <span class="fl">5</span>, type.convert <span class="op">=</span> <span class="va">factor</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">]</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          $BTIM   $CYT $CYTSN       $DATE       $ETIM</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;char&gt; &lt;char&gt; &lt;char&gt;      &lt;char&gt;      &lt;char&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1: 09:22:51.62 Aurora  V0299 27-Feb-2025 09:33:47.32</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2: 09:38:12.18 Aurora  V0299 27-Feb-2025 09:49:40.92</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3: 09:50:46.94 Aurora  V0299 27-Feb-2025 10:03:26.16</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                $FIL $FLOWRATE    $INST          $LAST_MODIFIED</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                              &lt;char&gt;    &lt;char&gt;   &lt;char&gt;                  &lt;char&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1: COVAIL_002_CYTOKINE_BLOCK1_1.fcs    Medium Cytekbio 15-JUN-2026 22:36:02.98</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2: COVAIL_002_CYTOKINE_BLOCK1_2.fcs    Medium Cytekbio 15-JUN-2026 22:36:03.06</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3: COVAIL_002_CYTOKINE_BLOCK1_3.fcs    Medium Cytekbio 15-JUN-2026 22:36:03.15</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           $LAST_MODIFIER         $OP $ORIGINALITY   $PAR</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   &lt;char&gt;      &lt;char&gt;       &lt;char&gt; &lt;char&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1: flowstate_0.16.1.9001 aurora user DataModified     43</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2: flowstate_0.16.1.9001 aurora user DataModified     43</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3: flowstate_0.16.1.9001 aurora user DataModified     43</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                             $PROJ $TIMESTEP   $TOT   $VOL APPLY COMPENSATION</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                            &lt;char&gt;    &lt;char&gt; &lt;char&gt; &lt;char&gt;             &lt;char&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1: COVAIL_002_CYTOKINE_2025-02-27    0.0001   2000 326.86              FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2: COVAIL_002_CYTOKINE_2025-02-27    0.0001   2000 346.31              FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3: COVAIL_002_CYTOKINE_2025-02-27    0.0001   2000 350.19              FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    CHARSET          CREATOR FSC ASF    GROUPNAME</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     &lt;char&gt;           &lt;char&gt;  &lt;char&gt;       &lt;char&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1:   utf-8 SpectroFlo 3.3.0    1.26 BarcodedPool</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2:   utf-8 SpectroFlo 3.3.0    1.26 BarcodedPool</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3:   utf-8 SpectroFlo 3.3.0    1.26 BarcodedPool</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                    GUID LASER1ASF LASER1DELAY  LASER1NAME</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                  &lt;char&gt;    &lt;char&gt;      &lt;char&gt;      &lt;char&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1: 0fffcae2-2163-49f9-98a3-8f17bb4ecc13      1.14       -41.7 YellowGreen</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2: 6ff1ded1-96f6-4784-8a70-3cbef2e01427      1.14       -41.7 YellowGreen</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3: 2c9682b4-473f-4375-a851-48f9f2fe3bf7      1.14       -41.7 YellowGreen</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    LASER2ASF LASER2DELAY LASER2NAME LASER3ASF LASER3DELAY LASER3NAME LASER4ASF</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;char&gt;      &lt;char&gt;     &lt;char&gt;    &lt;char&gt;      &lt;char&gt;     &lt;char&gt;    &lt;char&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1:      1.26     -20.375     Violet      1.18           0       Blue      1.14</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2:      1.26     -20.375     Violet      1.18           0       Blue      1.14</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3:      1.26     -20.375     Violet      1.18           0       Blue      1.14</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    LASER4DELAY LASER4NAME LASER5ASF LASER5DELAY LASER5NAME</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;char&gt;     &lt;char&gt;    &lt;char&gt;      &lt;char&gt;     &lt;char&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1:      20.675        Red      1.08      41.675         UV</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2:      20.675        Red      1.08      41.675         UV</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3:      20.675        Red      1.08      41.675         UV</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                     THRESHOLD                     TUBENAME  USERSETTINGNAME</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                        &lt;char&gt;                       &lt;char&gt;           &lt;char&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1: (FSC,150000)And(SSC,75000) COVAIL_002_CYTOKINE_BLOCK1_1 *COVAIL_CYTOKINE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2: (FSC,150000)And(SSC,75000) COVAIL_002_CYTOKINE_BLOCK1_2 *COVAIL_CYTOKINE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3: (FSC,150000)And(SSC,75000) COVAIL_002_CYTOKINE_BLOCK1_3 *COVAIL_CYTOKINE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    WINDOW EXTENSION                    sample.id aliquot</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              &lt;char&gt;                       &lt;fctr&gt;  &lt;fctr&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1:                3 COVAIL_002_CYTOKINE_BLOCK1_1       1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2:                3 COVAIL_002_CYTOKINE_BLOCK1_2       2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3:                3 COVAIL_002_CYTOKINE_BLOCK1_3       3</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="add.keywords.to.data.html">add.keywords.to.data</a></span><span class="op">(</span><span class="va">fs</span>, <span class="st">'aliquot'</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## write; reassign to capture the updated flowstate</span></span></span>
+<span class="r-in"><span><span class="va">fs</span> <span class="op">&lt;-</span> <span class="fu">write.flowstate</span><span class="op">(</span><span class="va">fs</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> flowstate --&gt; /tmp/Rtmpeox2Sg/COVAIL_002_CYTOKINE_BLOCK1_1_flowstateMOD.fcs</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> flowstate --&gt; /tmp/Rtmpeox2Sg/COVAIL_002_CYTOKINE_BLOCK1_2_flowstateMOD.fcs</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> flowstate --&gt; /tmp/Rtmpeox2Sg/COVAIL_002_CYTOKINE_BLOCK1_3_flowstateMOD.fcs</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## read newly written files</span></span></span>
+<span class="r-in"><span><span class="va">fcs.file.paths</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, full.names <span class="op">=</span> <span class="cn">TRUE</span>, pattern <span class="op">=</span> <span class="st">"flowstateMOD.fcs"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">fs</span> <span class="op">&lt;-</span> <span class="fu"><a href="read.flowstate.html">read.flowstate</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="va">fcs.file.paths</span>,</span></span>
+<span class="r-in"><span>  colnames.type <span class="op">=</span> <span class="st">"S"</span>,</span></span>
+<span class="r-in"><span>  concatenate <span class="op">=</span> <span class="cn">TRUE</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> COVAIL_002_CYTOKINE_BLOCK1_1_flowstateMOD.fcs --&gt; flowstate</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> COVAIL_002_CYTOKINE_BLOCK1_2_flowstateMOD.fcs --&gt; flowstate</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> COVAIL_002_CYTOKINE_BLOCK1_3_flowstateMOD.fcs --&gt; flowstate</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Concatenating 'flowstates'...</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## derived [['data']] columns</span></span></span>
+<span class="r-in"><span><span class="va">fs</span><span class="op">[[</span><span class="st">'data'</span><span class="op">]</span><span class="op">]</span><span class="op">[</span>, <span class="fu">.</span><span class="op">(</span><span class="va">select.nonsaturating</span>, <span class="va">select.singlets</span>, <span class="va">select.CD3</span>, <span class="va">aliquot</span><span class="op">)</span><span class="op">]</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       select.nonsaturating select.singlets select.CD3 aliquot</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                      &lt;num&gt;           &lt;num&gt;      &lt;num&gt;   &lt;num&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    1:                    1               1          1       1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    2:                    1               1          0       1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    3:                    1               1          1       1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    4:                    1               1          1       1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    5:                    1               1          1       1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ---                                                        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5996:                    1               1          1       3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5997:                    1               1          0       3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5998:                    1               1          0       3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5999:                    1               1          1       3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6000:                    1               1          1       3</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## derived [['parameters']] columns</span></span></span>
+<span class="r-in"><span><span class="va">fs</span><span class="op">$</span><span class="va">parameters</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grep</a></span><span class="op">(</span><span class="st">"Logical|Factor"</span>, <span class="va">TYPE</span><span class="op">)</span><span class="op">]</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       par      B DISPLAY      E                    N      R      S</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    &lt;char&gt; &lt;char&gt;  &lt;char&gt; &lt;char&gt;               &lt;char&gt; &lt;char&gt; &lt;char&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1:   $P44     32     LIN    0,0 select.nonsaturating      1   &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2:   $P45     32     LIN    0,0      select.singlets      1   &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3:   $P46     32     LIN    0,0           select.CD3      1   &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4:   $P47     32     LIN    0,0              aliquot      3   &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               TYPE      V</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             &lt;char&gt; &lt;char&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1: Derived_Logical   &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2: Derived_Logical   &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3: Derived_Logical   &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4:  Derived_Factor   &lt;NA&gt;</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## derived [['keyword']] columns -- retains original factor levels</span></span></span>
+<span class="r-in"><span><span class="va">fs</span><span class="op">[[</span><span class="st">'keywords'</span><span class="op">]</span><span class="op">]</span><span class="op">[</span>, <span class="fu">.</span><span class="op">(</span><span class="va">aliquot</span><span class="op">)</span><span class="op">]</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          aliquot</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;char&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1: FACTOR::1;2;3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2: FACTOR::1;2;3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3: FACTOR::1;2;3</span>
+<span class="r-in"><span><span class="co">## recover the factor levels -- optional</span></span></span>
+<span class="r-in"><span><span class="va">levels.aliquot</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">fs</span><span class="op">[[</span><span class="st">'keywords'</span><span class="op">]</span><span class="op">]</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">sub</a></span><span class="op">(</span><span class="st">'FACTOR::'</span>, <span class="st">""</span>, <span class="va">aliquot</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">levels.aliquot</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/strsplit.html" class="external-link">strsplit</a></span><span class="op">(</span><span class="va">levels.aliquot</span>, <span class="st">';'</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></span>
+<span class="r-in"><span><span class="va">fs</span><span class="op">$</span><span class="va">keywords</span><span class="op">[</span>, <span class="va">aliquot</span> <span class="op">:=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">levels.aliquot</span><span class="op">)</span><span class="op">]</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          $BTIM   $CYT $CYTSN       $DATE       $ETIM</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;char&gt; &lt;char&gt; &lt;char&gt;      &lt;char&gt;      &lt;char&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1: 09:22:51.62 Aurora  V0299 27-Feb-2025 09:33:47.32</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2: 09:38:12.18 Aurora  V0299 27-Feb-2025 09:49:40.92</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3: 09:50:46.94 Aurora  V0299 27-Feb-2025 10:03:26.16</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                             $FIL $FLOWRATE    $INST</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                           &lt;char&gt;    &lt;char&gt;   &lt;char&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1: COVAIL_002_CYTOKINE_BLOCK1_1_flowstateMOD.fcs    Medium Cytekbio</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2: COVAIL_002_CYTOKINE_BLOCK1_2_flowstateMOD.fcs    Medium Cytekbio</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3: COVAIL_002_CYTOKINE_BLOCK1_3_flowstateMOD.fcs    Medium Cytekbio</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             $LAST_MODIFIED        $LAST_MODIFIER         $OP $ORIGINALITY</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                     &lt;char&gt;                &lt;char&gt;      &lt;char&gt;       &lt;char&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1: 15-JUN-2026 22:36:03.57 flowstate_0.16.1.9001 aurora user DataModified</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2: 15-JUN-2026 22:36:03.65 flowstate_0.16.1.9001 aurora user DataModified</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3: 15-JUN-2026 22:36:03.74 flowstate_0.16.1.9001 aurora user DataModified</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      $PAR                          $PROJ $TIMESTEP   $TOT   $VOL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    &lt;char&gt;                         &lt;char&gt;    &lt;char&gt; &lt;char&gt; &lt;char&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1:     47 COVAIL_002_CYTOKINE_2025-02-27    0.0001   2000 326.86</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2:     47 COVAIL_002_CYTOKINE_2025-02-27    0.0001   2000 346.31</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3:     47 COVAIL_002_CYTOKINE_2025-02-27    0.0001   2000 350.19</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    APPLY COMPENSATION CHARSET          CREATOR FSC ASF    GROUPNAME</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                &lt;char&gt;  &lt;char&gt;           &lt;char&gt;  &lt;char&gt;       &lt;char&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1:              FALSE   utf-8 SpectroFlo 3.3.0    1.26 BarcodedPool</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2:              FALSE   utf-8 SpectroFlo 3.3.0    1.26 BarcodedPool</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3:              FALSE   utf-8 SpectroFlo 3.3.0    1.26 BarcodedPool</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                    GUID LASER1ASF LASER1DELAY  LASER1NAME</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                  &lt;char&gt;    &lt;char&gt;      &lt;char&gt;      &lt;char&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1: 0fffcae2-2163-49f9-98a3-8f17bb4ecc13      1.14       -41.7 YellowGreen</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2: 6ff1ded1-96f6-4784-8a70-3cbef2e01427      1.14       -41.7 YellowGreen</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3: 2c9682b4-473f-4375-a851-48f9f2fe3bf7      1.14       -41.7 YellowGreen</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    LASER2ASF LASER2DELAY LASER2NAME LASER3ASF LASER3DELAY LASER3NAME LASER4ASF</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;char&gt;      &lt;char&gt;     &lt;char&gt;    &lt;char&gt;      &lt;char&gt;     &lt;char&gt;    &lt;char&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1:      1.26     -20.375     Violet      1.18           0       Blue      1.14</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2:      1.26     -20.375     Violet      1.18           0       Blue      1.14</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3:      1.26     -20.375     Violet      1.18           0       Blue      1.14</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    LASER4DELAY LASER4NAME LASER5ASF LASER5DELAY LASER5NAME</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;char&gt;     &lt;char&gt;    &lt;char&gt;      &lt;char&gt;     &lt;char&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1:      20.675        Red      1.08      41.675         UV</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2:      20.675        Red      1.08      41.675         UV</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3:      20.675        Red      1.08      41.675         UV</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                     THRESHOLD                     TUBENAME  USERSETTINGNAME</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                        &lt;char&gt;                       &lt;char&gt;           &lt;char&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1: (FSC,150000)And(SSC,75000) COVAIL_002_CYTOKINE_BLOCK1_1 *COVAIL_CYTOKINE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2: (FSC,150000)And(SSC,75000) COVAIL_002_CYTOKINE_BLOCK1_2 *COVAIL_CYTOKINE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3: (FSC,150000)And(SSC,75000) COVAIL_002_CYTOKINE_BLOCK1_3 *COVAIL_CYTOKINE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    WINDOW EXTENSION aliquot                    sample.id</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              &lt;char&gt;  &lt;fctr&gt;                       &lt;fctr&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1:                3       1 COVAIL_002_CYTOKINE_BLOCK1_1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2:                3       2 COVAIL_002_CYTOKINE_BLOCK1_2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3:                3       3 COVAIL_002_CYTOKINE_BLOCK1_3</span>
+<span class="r-in"><span><span class="va">fs</span><span class="op">$</span><span class="va">data</span><span class="op">[</span>, <span class="va">aliquot</span> <span class="op">:=</span> <span class="cn">NULL</span><span class="op">]</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        Time    SSC_W  SSC_H    SSC_A    FSC_W  FSC_H     FSC_A   SSCB_W SSCB_H</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;num&gt;    &lt;num&gt;  &lt;num&gt;    &lt;num&gt;    &lt;num&gt;  &lt;num&gt;     &lt;num&gt;    &lt;num&gt;  &lt;num&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    1:     0 730290.7 759933 924953.4 774044.6 997371 1286682.8 714389.4 873960</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    2:     1 753766.8 453137 569266.0 714706.8 444274  529209.4 749070.4 411951</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    3:     4 768520.5 599195 767489.4 729628.4 827274 1006004.3 730502.3 579392</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    4:     4 707174.8 516909 609241.7 719956.1 819074  982828.9 700778.6 463030</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    5:     5 743404.2 484976 600888.7 764667.1 754833  961993.2 726898.2 419073</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ---                                                                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5996:  2454 755967.8 529870 667607.8 752809.6 781192  980148.1 748563.8 386375</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5997:  2454 681458.6 362164 411332.9 704912.6 856891 1006722.2 675241.8 333285</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5998:  2455 677347.4 701711 792170.2 702094.4 810637  948572.9 668789.1 506809</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5999:  2455 696805.0 546994 635246.9 734241.6 960241 1175081.5 696149.9 465449</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6000:  2455 717597.9 481212 575527.9 713571.4 772944  919251.3 712120.8 452721</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          SSCB_A    CD45RA    CD45RO     TCRgd    CD45BC1         IL2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;num&gt;     &lt;num&gt;     &lt;num&gt;     &lt;num&gt;      &lt;num&gt;       &lt;num&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    1: 1040579.6 17400.736  6296.233  3487.889  1056.3926 -2868.07104</span>
@@ -152,11 +452,11 @@ N.B.: During testing, FCS 3.1 files written to disk by write.flowstate were full
 <span class="r-out co"><span class="r-pr">#&gt;</span>    4:  540802.5  3424.521  6541.122 10304.088 31037.8750 -1450.19849</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    5:  507705.7 -1692.568 43001.797  5568.431 55248.4922  -638.63544</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ---                                                               </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5974:  482043.9 10375.593  2197.690  2926.014 16656.1309 -1116.13855</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5975:  375079.9 17660.221  2524.003  3396.743 40435.3008  -350.11267</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5976:  564913.9  3601.014  3085.314  2354.051 -1026.0671  -749.64618</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5977:  540037.1  1594.400 31943.914 -6318.851 33177.8359 -1760.08154</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5978:  537320.1  4121.758  6534.809    80.228  7164.7236 -1993.13062</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5996:  482043.9 10375.593  2197.690  2926.014 16656.1309 -1116.13855</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5997:  375079.9 17660.221  2524.003  3396.743 40435.3008  -350.11267</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5998:  564913.9  3601.014  3085.314  2354.051 -1026.0671  -749.64618</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5999:  540037.1  1594.400 31943.914 -6318.851 33177.8359 -1760.08154</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6000:  537320.1  4121.758  6534.809    80.228  7164.7236 -1993.13062</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>               CD8      CD197     CD45BC2   CD45BC3      CD57      CD193</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             &lt;num&gt;      &lt;num&gt;       &lt;num&gt;     &lt;num&gt;     &lt;num&gt;      &lt;num&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    1: 219290.2812  1701.1161 25329.08789 20529.553 2525.7261 1695.80396</span>
@@ -165,11 +465,11 @@ N.B.: During testing, FCS 3.1 files written to disk by write.flowstate were full
 <span class="r-out co"><span class="r-pr">#&gt;</span>    4:   1130.0894  1627.6073  -303.30679  3377.251 4663.3604   84.06442</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    5:    236.9170  2753.4761  -910.34351  5274.306 7930.7036  172.67607</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ---                                                                  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5974:  64804.6055  6916.9336 32589.94531 12607.492 3992.2173  442.76263</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5975:   5102.4351  6736.9619  -103.96835  3328.096 3078.8726  343.55698</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5976:   -533.4910  1094.5952   -35.77078 11619.281 6814.1572 -339.72955</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5977: 109734.0469   830.3315  4554.74463 12002.997 1818.2131  570.69165</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5978: 122607.1562  1581.7339  1644.67358 17445.123 -637.4016  813.78949</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5996:  64804.6055  6916.9336 32589.94531 12607.492 3992.2173  442.76263</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5997:   5102.4351  6736.9619  -103.96835  3328.096 3078.8726  343.55698</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5998:   -533.4910  1094.5952   -35.77078 11619.281 6814.1572 -339.72955</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5999: 109734.0469   830.3315  4554.74463 12002.997 1818.2131  570.69165</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6000: 122607.1562  1581.7339  1644.67358 17445.123 -637.4016  813.78949</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          CD45BC4     CD127       CD56      CD199     CD49a  GranzymeB</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            &lt;num&gt;     &lt;num&gt;      &lt;num&gt;      &lt;num&gt;     &lt;num&gt;      &lt;num&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    1: 23593.2891 1343.0120  6162.3535 1315.51941 1071.0972  54200.477</span>
@@ -178,11 +478,11 @@ N.B.: During testing, FCS 3.1 files written to disk by write.flowstate were full
 <span class="r-out co"><span class="r-pr">#&gt;</span>    4: 31405.3887 3629.7041 -1813.6000 1058.17969  217.9938   5147.355</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    5:  1022.8995 5814.7285  1465.7168 3178.10767 -758.9792   1842.105</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ---                                                                </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5974:   747.4293 1195.2950  1832.6479 1560.49304  289.7756   1733.709</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5975: 26242.4258 1008.8782  1341.5767  769.40173  916.8894   2277.240</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5976: 11073.8740 -528.7997  1454.7413  926.90973 1844.4650 163543.656</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5977:  1443.5271 1471.8104  2837.1677   69.61098 1223.5042   2391.115</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5978: 23122.0137 3150.3503 -2212.3643 1250.06580 1173.8098   1466.612</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5996:   747.4293 1195.2950  1832.6479 1560.49304  289.7756   1733.709</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5997: 26242.4258 1008.8782  1341.5767  769.40173  916.8894   2277.240</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5998: 11073.8740 -528.7997  1454.7413  926.90973 1844.4650 163543.656</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5999:  1443.5271 1471.8104  2837.1677   69.61098 1223.5042   2391.115</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6000: 23122.0137 3150.3503 -2212.3643 1250.06580 1173.8098   1466.612</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            CD45BC5       CD95         CD3        CD4      CD69      TNFa</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>              &lt;num&gt;      &lt;num&gt;       &lt;num&gt;      &lt;num&gt;     &lt;num&gt;     &lt;num&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    1:    -6.487877   942.8493 36690.11719  8299.1494 4737.0107  993.0143</span>
@@ -191,11 +491,11 @@ N.B.: During testing, FCS 3.1 files written to disk by write.flowstate were full
 <span class="r-out co"><span class="r-pr">#&gt;</span>    4: 19775.552734  -233.8560 51053.93750  5741.3486 6392.7744  544.5918</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    5: 16411.826172  4008.5771 39481.12891 41355.3477 1742.8635 2127.6262</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ---                                                                   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5974:    90.256508   521.3145 48319.74219  5864.3413 1021.8483  362.6751</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5975:   853.720154  1287.4240  1114.44263  2816.0164 4534.4888 -297.5424</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5976:  -282.902435 -2481.5879  1108.75098  1231.4691  141.7332 1626.9031</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5977:   255.437500   178.0732 23065.99414  4533.7129 3185.1895 5428.0649</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5978:   436.824249   752.9613 34094.38672  7511.4536 3074.0154 2097.9915</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5996:    90.256508   521.3145 48319.74219  5864.3413 1021.8483  362.6751</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5997:   853.720154  1287.4240  1114.44263  2816.0164 4534.4888 -297.5424</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5998:  -282.902435 -2481.5879  1108.75098  1231.4691  141.7332 1626.9031</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5999:   255.437500   178.0732 23065.99414  4533.7129 3185.1895 5428.0649</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6000:   436.824249   752.9613 34094.38672  7511.4536 3074.0154 2097.9915</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            CD183        IFNg       CD103    CD45BC6       CD122      ia4b7</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            &lt;num&gt;       &lt;num&gt;       &lt;num&gt;      &lt;num&gt;       &lt;num&gt;      &lt;num&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    1:   473.1266  -256.25250   166.61444   821.8005   735.86768  4871.1104</span>
@@ -204,34 +504,53 @@ N.B.: During testing, FCS 3.1 files written to disk by write.flowstate were full
 <span class="r-out co"><span class="r-pr">#&gt;</span>    4:  -881.3683  -160.21269  -994.53149  1735.5421  -477.22177   487.7629</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    5: -3175.0767    27.80499   155.62851  -825.0389  -652.52808 -1965.0686</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ---                                                                     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5974:  -519.9846   300.67377  -334.04483   332.5317   121.39590  1214.4460</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5975:  -286.4161   206.22299  -241.14139 19857.8887   595.34851  2625.4993</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5976: -1262.1187 -1322.14587 -3573.42236 10710.0586   420.53311  2082.1335</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5977:  -787.6249 -1464.29724   -37.02888   881.4003   112.57523   200.0300</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5978:  -790.8807 -1168.62866   -23.95932 14355.7578    93.75003   896.9961</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          CD45BC7  Viability       CD27       KLRG1                    sample.id</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>            &lt;num&gt;      &lt;num&gt;      &lt;num&gt;       &lt;num&gt;                       &lt;fctr&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    1:  1030.7883  1429.1698 -7657.7598  5408.66895 COVAIL_002_CYTOKINE_BLOCK1_1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    2:  -409.5166 21949.6270   744.8879  3665.47559 COVAIL_002_CYTOKINE_BLOCK1_1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    3:   478.2293   543.1359  -448.9456  8486.89355 COVAIL_002_CYTOKINE_BLOCK1_1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    4:  -924.2852  1028.7167   332.4514 14109.10254 COVAIL_002_CYTOKINE_BLOCK1_1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    5: 15285.1455   795.2957  -447.1280   729.11121 COVAIL_002_CYTOKINE_BLOCK1_1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ---                                                                          </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5974:   448.0044   270.1838  2724.5115   -17.58312 COVAIL_002_CYTOKINE_BLOCK1_3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5975:   470.1801   755.3552  -773.1400   808.78845 COVAIL_002_CYTOKINE_BLOCK1_3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5976:  -462.3215  4186.0117  -424.1915  1049.87292 COVAIL_002_CYTOKINE_BLOCK1_3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5977: 12610.7148  1859.3572 -1463.3777  3298.12988 COVAIL_002_CYTOKINE_BLOCK1_3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5978:  -454.0528  1697.2017 -2134.2859  5035.73535 COVAIL_002_CYTOKINE_BLOCK1_3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5996:  -519.9846   300.67377  -334.04483   332.5317   121.39590  1214.4460</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5997:  -286.4161   206.22299  -241.14139 19857.8887   595.34851  2625.4993</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5998: -1262.1187 -1322.14587 -3573.42236 10710.0586   420.53311  2082.1335</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5999:  -787.6249 -1464.29724   -37.02888   881.4003   112.57523   200.0300</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6000:  -790.8807 -1168.62866   -23.95932 14355.7578    93.75003   896.9961</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          CD45BC7  Viability       CD27       KLRG1 select.nonsaturating</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            &lt;num&gt;      &lt;num&gt;      &lt;num&gt;       &lt;num&gt;                &lt;num&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    1:  1030.7883  1429.1698 -7657.7598  5408.66895                    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    2:  -409.5166 21949.6270   744.8879  3665.47559                    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    3:   478.2293   543.1359  -448.9456  8486.89355                    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    4:  -924.2852  1028.7167   332.4514 14109.10254                    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    5: 15285.1455   795.2957  -447.1280   729.11121                    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ---                                                                  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5996:   448.0044   270.1838  2724.5115   -17.58312                    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5997:   470.1801   755.3552  -773.1400   808.78845                    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5998:  -462.3215  4186.0117  -424.1915  1049.87292                    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5999: 12610.7148  1859.3572 -1463.3777  3298.12988                    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6000:  -454.0528  1697.2017 -2134.2859  5035.73535                    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       select.singlets select.CD3                    sample.id</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 &lt;num&gt;      &lt;num&gt;                       &lt;fctr&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    1:               1          1 COVAIL_002_CYTOKINE_BLOCK1_1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    2:               1          0 COVAIL_002_CYTOKINE_BLOCK1_1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    3:               1          1 COVAIL_002_CYTOKINE_BLOCK1_1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    4:               1          1 COVAIL_002_CYTOKINE_BLOCK1_1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    5:               1          1 COVAIL_002_CYTOKINE_BLOCK1_1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ---                                                        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5996:               1          1 COVAIL_002_CYTOKINE_BLOCK1_3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5997:               1          0 COVAIL_002_CYTOKINE_BLOCK1_3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5998:               1          0 COVAIL_002_CYTOKINE_BLOCK1_3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5999:               1          1 COVAIL_002_CYTOKINE_BLOCK1_3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6000:               1          1 COVAIL_002_CYTOKINE_BLOCK1_3</span>
+<span class="r-in"><span><span class="fu"><a href="add.keywords.to.data.html">add.keywords.to.data</a></span><span class="op">(</span><span class="va">fs</span>, <span class="st">'aliquot'</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co">#transform</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="flowstate.transform.html">flowstate.transform</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>  <span class="va">fs</span>,</span></span>
-<span class="r-in"><span>  j <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'CD3'</span>,<span class="st">'CD4'</span>,<span class="st">'CD8'</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  transform.func <span class="op">=</span> <span class="st">"asinh"</span>,</span></span>
-<span class="r-in"><span>  cofactor <span class="op">=</span> <span class="fl">5000</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co">## plot derived [['data']] logicals (now numeric)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fs</span>, <span class="va">FSC_A</span>, <span class="va">FSC_H</span><span class="op">)</span> <span class="op">+</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">select.singlets</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Computation failed in `stat_binhex()`.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> Caused by error in `compute_group()`:</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> The package "hexbin" is required for `stat_bin_hex()`.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Computation failed in `stat_binhex()`.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> Caused by error in `compute_group()`:</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> The package "hexbin" is required for `stat_bin_hex()`.</span>
+<span class="r-plt img"><img src="write.flowstate-1.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span><span class="fu"><a href="flowstate.transform.html">flowstate.transform</a></span><span class="op">(</span><span class="va">fs</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> flowstate --&gt; transforming...</span>
-<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fs</span>, <span class="va">CD3</span><span class="op">)</span> <span class="op">+</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">select.CD3</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="write.flowstate-2.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

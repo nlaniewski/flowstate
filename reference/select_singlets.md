@@ -15,7 +15,7 @@ select_singlets(flowstate, quantiles = c(0.85, 0.95))
 
 - flowstate:
 
-  A flowstate as returned from
+  A `flowstate` as returned from
   [read.flowstate](https://nlaniewski.github.io/flowstate/reference/read.flowstate.md).
 
 - quantiles:

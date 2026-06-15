@@ -156,6 +156,11 @@ plot(fs, CD4, CD8) + ggplot2::guides(fill = 'none')
 
   Subset `flowstate[['data']]`
 
+- [`write.flowstate()`](https://nlaniewski.github.io/flowstate/reference/write.flowstate.md)
+  :
+
+  Write a `flowstate` as a Flow Cytometry Standard file (FCS 3.1)
+
 # Articles
 
 ### All vignettes

@@ -7,7 +7,7 @@
 select_nonsaturating(flowstate)
 }
 \arguments{
-\item{flowstate}{A flowstate as returned from \link{read.flowstate}.}
+\item{flowstate}{A \code{flowstate} as returned from \link{read.flowstate}.}
 }
 \value{
 UPDATES BY REFERENCE:

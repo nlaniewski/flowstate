@@ -7,7 +7,7 @@
 select_quantile(flowstate, probs = c(5e-04, 0.9995))
 }
 \arguments{
-\item{flowstate}{A flowstate as returned from \link{read.flowstate}.}
+\item{flowstate}{A \code{flowstate} as returned from \link{read.flowstate}.}
 
 \item{probs}{numeric vector of probabilities with values in
     \eqn{[0,1]}.  (Values up to \samp{2e-14} outside that

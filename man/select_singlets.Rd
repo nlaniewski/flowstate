@@ -7,7 +7,7 @@
 select_singlets(flowstate, quantiles = c(0.85, 0.95))
 }
 \arguments{
-\item{flowstate}{A flowstate as returned from \link{read.flowstate}.}
+\item{flowstate}{A \code{flowstate} as returned from \link{read.flowstate}.}
 
 \item{quantiles}{Numeric vector (length 2) -- default \code{c(0.85, 0.95)}; respective quantile probabilities used to select singlet events first by \verb{FSC-A vs FSC-H}, then by \verb{SSC-A vs SSC-H}.}
 }

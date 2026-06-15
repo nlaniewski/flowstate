@@ -4,7 +4,7 @@
 #'
 #' Detection of saturating events requires linear (non-transformed) values and as such should be performed before [flowstate.transform].
 #'
-#' @param flowstate A flowstate as returned from [read.flowstate].
+#' @param flowstate A `flowstate` as returned from [read.flowstate].
 #'
 #' @returns UPDATES BY REFERENCE:
 #' \itemize{
@@ -75,7 +75,7 @@ select_nonsaturating <- function(flowstate){
 #' @title Create a column (logical) for selecting against events below/above a quantile range
 #'
 #' @inheritParams stats::quantile
-#' @param flowstate A flowstate as returned from [read.flowstate].
+#' @param flowstate A `flowstate` as returned from [read.flowstate].
 #'
 #' @returns UPDATES BY REFERENCE:
 #' \itemize{
@@ -157,7 +157,7 @@ select_quantile <- function(flowstate, probs = c(0.0005, 0.9995)){
 #' @description
 #' A new column (logical) named `select.singlets` is created in `[['data']]` and any/all singlet events will be marked as `TRUE` with doublet events marked as `FALSE`; singlet events are identified through scatter pulse geometry (FSC-A/FSC-H ; SSC-A/SSC-H).
 #'
-#' @param flowstate A flowstate as returned from [read.flowstate].
+#' @param flowstate A `flowstate` as returned from [read.flowstate].
 #' @param quantiles Numeric vector (length 2) -- default `c(0.85, 0.95)`; respective quantile probabilities used to select singlet events first by `FSC-A vs FSC-H`, then by `SSC-A vs SSC-H`.
 #'
 #' @returns UPDATES BY REFERENCE:
@@ -234,7 +234,7 @@ select_singlets <- function(flowstate, quantiles = c(0.85, 0.95)){
 #'    \item the 'in-bounds' contour line is applied to the entire concatenate to generate both a logical and annotation column
 #'}
 #'
-#' @param flowstate A flowstate as returned from [read.flowstate].
+#' @param flowstate A `flowstate` as returned from [read.flowstate].
 #' @param population Named character vector -- default `NULL`; `population` MUST be defined. The named character vector should take the following form:
 #' \itemize{
 #'   \item `c(population.name = 'marker')`, where `population.name` is a cell-type annotation and `'marker'` is a CD/lineage marker used to stain those respective cell types.

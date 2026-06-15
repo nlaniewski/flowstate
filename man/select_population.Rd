@@ -13,7 +13,7 @@ select_population(
 )
 }
 \arguments{
-\item{flowstate}{A flowstate as returned from \link{read.flowstate}.}
+\item{flowstate}{A \code{flowstate} as returned from \link{read.flowstate}.}
 
 \item{population}{Named character vector -- default \code{NULL}; \code{population} MUST be defined. The named character vector should take the following form:
 \itemize{

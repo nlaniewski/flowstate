@@ -7,6 +7,7 @@
 write.flowstate(
   flowstate,
   file.dir = tempdir(),
+  fil.suffix = NULL,
   endianness = c("little", "big")
 )
 }
@@ -15,11 +16,16 @@ write.flowstate(
 
 \item{file.dir}{A \link{file.path} -- default \link{tempdir}; a file directory for saving the output FCS 3.1 file(s).}
 
+\item{fil.suffix}{Character string -- default \code{NULL}; if defined, the suffix will be appended}
+
 \item{endianness}{Character string -- default \code{"little"}; see \link[base:readBin]{endian}.}
 }
 \value{
 \itemize{
 \item FCS 3.1 file(s) are written to disk and a summary message is displayed.
+\itemize{
+\item the original \verb{$FIL} will be appended with \code{'flowstateMOD'} as an explicit indicator of modification; if \code{fil.suffix} is defined, \code{'flowstateMOD'} will be further appended with the string value.
+}
 \item UPDATES BY REFERENCE:
 \itemize{
 \item \code{flowstate[['data']]} -- non-numeric (logical and/or factor) columns are converted to numeric

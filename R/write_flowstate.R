@@ -142,11 +142,15 @@ spill.to.string <- function(flowstate){
 #'
 #' @param flowstate A `flowstate` as returned from [read.flowstate].
 #' @param file.dir A [file.path] -- default [tempdir]; a file directory for saving the output FCS 3.1 file(s).
+#' @param fil.suffix Character string -- default `NULL`; if defined, the suffix will be appended
 #' @param endianness Character string -- default `"little"`; see [endian][base::writeBin].
 #'
 #' @returns
 #' \itemize{
 #'    \item FCS 3.1 file(s) are written to disk and a summary message is displayed.
+#'       \itemize{
+#'          \item the original `$FIL` will be appended with `'flowstateMOD'` as an explicit indicator of modification; if `fil.suffix` is defined, `'flowstateMOD'` will be further appended with the string value.
+#'       }
 #'    \item UPDATES BY REFERENCE:
 #'       \itemize{
 #'          \item `flowstate[['data']]` -- non-numeric (logical and/or factor) columns are converted to numeric
@@ -203,10 +207,14 @@ spill.to.string <- function(flowstate){
 #' add.keywords.to.data(fs, 'aliquot')
 #'
 #' ## write; reassign to capture the updated flowstate
-#' fs <- write.flowstate(fs)
+#' fs <- write.flowstate(fs, fil.suffix = "Example")
 #'
 #' ## read newly written files
-#' fcs.file.paths <- list.files(tempdir(), full.names = TRUE, pattern = "flowstateMOD.fcs")
+#' fcs.file.paths <- list.files(
+#'  tempdir(),
+#'  full.names = TRUE,
+#'  pattern = "flowstateMOD_Example.fcs"
+#' )
 #'
 #' fs <- read.flowstate(
 #'   fcs.file.paths,
@@ -237,6 +245,7 @@ spill.to.string <- function(flowstate){
 write.flowstate <- function(
     flowstate,
     file.dir = tempdir(),
+    fil.suffix = NULL,
     endianness = c('little', 'big')
 )
 {
@@ -297,7 +306,11 @@ write.flowstate <- function(
     keyword.list[['$PAR']] <- as.character(N.parameters)
     ## update '$FIL'
     fil <- sub(".fcs", "", keyword.list[['$FIL']], ignore.case = T)
-    fil <- sprintf("%s_flowstateMOD.fcs", fil)
+    suffix <- 'flowstateMOD'
+    if(!is.null(fil.suffix)){
+      suffix <- sprintf("%s_%s", suffix, fil.suffix)
+    }
+    fil <- sprintf("%s_%s.fcs", fil, suffix)
     keyword.list[['$FIL']] <- fil
     # if(!is.null(new.fil)){
     #   if(add.fil.mod){

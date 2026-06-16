@@ -30,23 +30,23 @@ Included with the package -- for the purpose of example(s) -- are a few (subsamp
 Read/parse them as a `flowstate` using `flowstate::read.flowstate()`.
 
 ```{r read.flowstate}
-##paths to example .fcs files
+## paths to example .fcs files
 fcs.files <- system.file("extdata", package = "flowstate") |> 
   list.files(full.names = T) |> 
   grep(pattern = "BLOCK.*.fcs", value = T)
 fcs.files |> basename() |> print()
 
-##read them in and concatenate; a flowstate object
+## read them in and concatenate; a flowstate object
 fs <- flowstate::read.flowstate(
   fcs.file.paths = fcs.files,
   colnames.type = "S",
   concatenate = TRUE
 )
 
-##S3 object of class "flowstate"
+## S3 object of class "flowstate"
 class(fs)
 
-##flowstate structure
+## flowstate structure
 names(fs)
 ```
 
@@ -56,14 +56,20 @@ Data can be accessed by name via: `fs$data` or `fs[['data']]`.
 
 `[['data']]` contains events as rows and instrument measurements (Time, scatter, fluorescence, etc.) as columns. By design, no transformation is applied to the linear measurement values during reading. In addition, a unique sample identifier (factored) is added for workflow purposes.
 
-```{r flowstate.data}
+```{r flowstate.data, eval=FALSE}
 ##
-fs$data |> head()
+fs$data[]
+```
 
-##parameter/variable names
+```{r flowstate.data.print, echo=FALSE}
+rmarkdown::paged_table(fs$data)
+```
+
+```{r flowstate.data.names}
+## column/variable names
 names(fs$data)
 
-##sample identifiers
+## sample identifiers
 fs$data[, levels(sample.id)]
 ```
 
@@ -78,14 +84,15 @@ fs$data[, attr(CD3, which = 'alias')]
 
 Parameters can be accessed by name via: `fs$parameters` or `fs[['parameters']]`.
 
-`[['parameters']]` contains instrument-specific measurement parameters -- keyword-value pairs denoted by '$P' (N, S, V, TYPE, etc.).
+`[['parameters']]` contains instrument-specific measurement parameters -- keyword-value pairs denoted by '$P|P' (N, S, V, TYPE, etc.).
 
-```{r flowstate.parameters}
+```{r flowstate.parameters, eval=FALSE}
 ##
 fs$parameters
+```
 
-##parameters: N, S, and TYPE
-fs$parameters[, .(N, S, TYPE)]
+```{r flowstate.parameters.print, echo=FALSE}
+rmarkdown::paged_table(fs$parameters)
 ```
 
 `[['parameters']]` also contains attribute-level metadata -- notably, a `parameters.diff` attribute (list) that serves the purpose of preserving sample-specific differences due to unique measurement values (e.g., differences in measured 'Time').
@@ -104,15 +111,18 @@ Keywords can be accessed by name via: `fs$keywords` or `fs[['keywords']]`.
 
 Following best practices as laid out by the Flow Cytometry Standard, a series of keywords are added to mark any `flowstate` object(s) as being modified -- no longer source data.  The inclusion of these keywords (`'$LAST_MODIFIED'`, `'$LAST_MODIFIER'`, `'$ORIGINALITY'`) ensures transparency and the indication that they are explicitly modified.
 
-```{r flowstate.keywords}
+```{r flowstate.keywords, eval=FALSE}
 ##
 fs$keywords
+```
 
-##some identifiers
-fs$keywords[,.(`$CYT`,TUBENAME)]
+```{r flowstate.keywords.print, echo=FALSE}
+rmarkdown::paged_table(fs$keywords)
+```
 
-##keywords to indicate/track modification
-fs$keywords[,.(`$LAST_MODIFIED`,`$LAST_MODIFIER`,`$ORIGINALITY`)]
+```{r flowstate.modified}
+## keywords to indicate/track modification
+fs$keywords[, .(`$LAST_MODIFIED`,`$LAST_MODIFIER`,`$ORIGINALITY`)]
 ```
 
 ## `[['spill']]`
@@ -123,10 +133,16 @@ Spill can be accessed by name via: `fs$spill` or `fs[['spill']]`.
 
 *N.B.: software manufacturers -- at least SpectroFlo -- write a small value (1E-6) to the first matrix pair; I think this is to overcome a bug with how FlowJo handles the matrix...*
 
-```{r flowstate.spill}
+```{r flowstate.spill, eval=FALSE}
 ##
-fs$spill |> head()
+fs$spill
+```
 
-##small value; there in the source data
+```{r flowstate.spill.print, echo=FALSE}
+rmarkdown::paged_table(fs$spill)
+```
+
+```{r spill.value}
+## small value; there in the source data
 fs$spill[2,1]
 ```

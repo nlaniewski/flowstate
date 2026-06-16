@@ -65,10 +65,10 @@ lapply(fs.split,'[[','keywords')
 #> 1: 09:22:51.62 Aurora  V0299 27-Feb-2025 09:33:47.32
 #>                                $FIL $FLOWRATE    $INST          $LAST_MODIFIED
 #>                              <char>    <char>   <char>                  <char>
-#> 1: COVAIL_002_CYTOKINE_BLOCK1_1.fcs    Medium Cytekbio 16-JUN-2026 18:06:08.92
+#> 1: COVAIL_002_CYTOKINE_BLOCK1_1.fcs    Medium Cytekbio 16-JUN-2026 19:03:45.88
 #>           $LAST_MODIFIER         $OP $ORIGINALITY   $PAR
 #>                   <char>      <char>       <char> <char>
-#> 1: flowstate_0.16.1.9001 aurora user DataModified     43
+#> 1: flowstate_0.16.1.9002 aurora user DataModified     43
 #>                             $PROJ $TIMESTEP   $TOT   $VOL APPLY COMPENSATION
 #>                            <char>    <char> <char> <char>             <char>
 #> 1: COVAIL_002_CYTOKINE_2025-02-27    0.0001   2000 326.86              FALSE
@@ -97,10 +97,10 @@ lapply(fs.split,'[[','keywords')
 #> 1: 09:38:12.18 Aurora  V0299 27-Feb-2025 09:49:40.92
 #>                                $FIL $FLOWRATE    $INST          $LAST_MODIFIED
 #>                              <char>    <char>   <char>                  <char>
-#> 1: COVAIL_002_CYTOKINE_BLOCK1_2.fcs    Medium Cytekbio 16-JUN-2026 18:06:09.00
+#> 1: COVAIL_002_CYTOKINE_BLOCK1_2.fcs    Medium Cytekbio 16-JUN-2026 19:03:45.96
 #>           $LAST_MODIFIER         $OP $ORIGINALITY   $PAR
 #>                   <char>      <char>       <char> <char>
-#> 1: flowstate_0.16.1.9001 aurora user DataModified     43
+#> 1: flowstate_0.16.1.9002 aurora user DataModified     43
 #>                             $PROJ $TIMESTEP   $TOT   $VOL APPLY COMPENSATION
 #>                            <char>    <char> <char> <char>             <char>
 #> 1: COVAIL_002_CYTOKINE_2025-02-27    0.0001   2000 346.31              FALSE
@@ -129,10 +129,10 @@ lapply(fs.split,'[[','keywords')
 #> 1: 09:50:46.94 Aurora  V0299 27-Feb-2025 10:03:26.16
 #>                                $FIL $FLOWRATE    $INST          $LAST_MODIFIED
 #>                              <char>    <char>   <char>                  <char>
-#> 1: COVAIL_002_CYTOKINE_BLOCK1_3.fcs    Medium Cytekbio 16-JUN-2026 18:06:09.08
+#> 1: COVAIL_002_CYTOKINE_BLOCK1_3.fcs    Medium Cytekbio 16-JUN-2026 19:03:46.05
 #>           $LAST_MODIFIER         $OP $ORIGINALITY   $PAR
 #>                   <char>      <char>       <char> <char>
-#> 1: flowstate_0.16.1.9001 aurora user DataModified     43
+#> 1: flowstate_0.16.1.9002 aurora user DataModified     43
 #>                             $PROJ $TIMESTEP   $TOT   $VOL APPLY COMPENSATION
 #>                            <char>    <char> <char> <char>             <char>
 #> 1: COVAIL_002_CYTOKINE_2025-02-27    0.0001   2000 350.19              FALSE

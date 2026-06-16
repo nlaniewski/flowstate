@@ -29,7 +29,7 @@ N.B.: During testing, FCS 3.1 files written to disk by write.flowstate were full
 
     <a class="navbar-brand me-2" href="../index.html">flowstate</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.16.1.9001</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.16.1.9002</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -73,6 +73,7 @@ N.B.: During testing, FCS 3.1 files written to disk by write.flowstate were full
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">write.flowstate</span><span class="op">(</span></span>
 <span>  <span class="va">flowstate</span>,</span>
 <span>  file.dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  fil.suffix <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  endianness <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"little"</span>, <span class="st">"big"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -89,6 +90,10 @@ N.B.: During testing, FCS 3.1 files written to disk by write.flowstate were full
 <dd><p>A <a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a> – default <a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a>; a file directory for saving the output FCS 3.1 file(s).</p></dd>
 
 
+<dt id="arg-fil-suffix">fil.suffix<a class="anchor" aria-label="anchor" href="#arg-fil-suffix"></a></dt>
+<dd><p>Character string – default <code>NULL</code>; if defined, the suffix will be appended</p></dd>
+
+
 <dt id="arg-endianness">endianness<a class="anchor" aria-label="anchor" href="#arg-endianness"></a></dt>
 <dd><p>Character string – default <code>"little"</code>; see <a href="https://rdrr.io/r/base/readBin.html" class="external-link">endian</a>.</p></dd>
 
@@ -96,7 +101,8 @@ N.B.: During testing, FCS 3.1 files written to disk by write.flowstate were full
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
 
-<ul><li><p>FCS 3.1 file(s) are written to disk and a summary message is displayed.</p></li>
+<ul><li><p>FCS 3.1 file(s) are written to disk and a summary message is displayed.</p><ul><li><p>the original <code>$FIL</code> will be appended with <code>'flowstateMOD'</code> as an explicit indicator of modification; if <code>fil.suffix</code> is defined, <code>'flowstateMOD'</code> will be further appended with the string value.</p></li>
+</ul></li>
 <li><p>UPDATES BY REFERENCE:</p><ul><li><p><code>flowstate[['data']]</code> – non-numeric (logical and/or factor) columns are converted to numeric</p></li>
 <li><p><code>flowstate[['keywords']]</code> – non-character (factor) columns are converted to character</p></li>
 <li><p><code>flowstate[['spill']]</code> – column names are matched/updated using <code>[['parameters']][['N']]</code></p></li>
@@ -273,14 +279,14 @@ N.B.: During testing, FCS 3.1 files written to disk by write.flowstate were full
 <span class="r-out co"><span class="r-pr">#&gt;</span> 3: 09:50:46.94 Aurora  V0299 27-Feb-2025 10:03:26.16</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                $FIL $FLOWRATE    $INST          $LAST_MODIFIED</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                              &lt;char&gt;    &lt;char&gt;   &lt;char&gt;                  &lt;char&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1: COVAIL_002_CYTOKINE_BLOCK1_1.fcs    Medium Cytekbio 16-JUN-2026 18:06:10.05</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2: COVAIL_002_CYTOKINE_BLOCK1_2.fcs    Medium Cytekbio 16-JUN-2026 18:06:10.13</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3: COVAIL_002_CYTOKINE_BLOCK1_3.fcs    Medium Cytekbio 16-JUN-2026 18:06:10.21</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1: COVAIL_002_CYTOKINE_BLOCK1_1.fcs    Medium Cytekbio 16-JUN-2026 19:03:47.07</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2: COVAIL_002_CYTOKINE_BLOCK1_2.fcs    Medium Cytekbio 16-JUN-2026 19:03:47.15</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3: COVAIL_002_CYTOKINE_BLOCK1_3.fcs    Medium Cytekbio 16-JUN-2026 19:03:47.24</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>           $LAST_MODIFIER         $OP $ORIGINALITY   $PAR</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                   &lt;char&gt;      &lt;char&gt;       &lt;char&gt; &lt;char&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1: flowstate_0.16.1.9001 aurora user DataModified     43</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2: flowstate_0.16.1.9001 aurora user DataModified     43</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3: flowstate_0.16.1.9001 aurora user DataModified     43</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1: flowstate_0.16.1.9002 aurora user DataModified     43</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2: flowstate_0.16.1.9002 aurora user DataModified     43</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3: flowstate_0.16.1.9002 aurora user DataModified     43</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                             $PROJ $TIMESTEP   $TOT   $VOL APPLY COMPENSATION</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                            &lt;char&gt;    &lt;char&gt; &lt;char&gt; &lt;char&gt;             &lt;char&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1: COVAIL_002_CYTOKINE_2025-02-27    0.0001   2000 326.86              FALSE</span>
@@ -321,9 +327,9 @@ N.B.: During testing, FCS 3.1 files written to disk by write.flowstate were full
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## write; reassign to capture the updated flowstate</span></span></span>
 <span class="r-in"><span><span class="va">fs</span> <span class="op">&lt;-</span> <span class="fu">write.flowstate</span><span class="op">(</span><span class="va">fs</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> flowstate --&gt; /tmp/RtmpKTkRUw/COVAIL_002_CYTOKINE_BLOCK1_1_flowstateMOD.fcs</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> flowstate --&gt; /tmp/RtmpKTkRUw/COVAIL_002_CYTOKINE_BLOCK1_2_flowstateMOD.fcs</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> flowstate --&gt; /tmp/RtmpKTkRUw/COVAIL_002_CYTOKINE_BLOCK1_3_flowstateMOD.fcs</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> flowstate --&gt; /tmp/RtmpKKqIft/COVAIL_002_CYTOKINE_BLOCK1_1_flowstateMOD.fcs</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> flowstate --&gt; /tmp/RtmpKKqIft/COVAIL_002_CYTOKINE_BLOCK1_2_flowstateMOD.fcs</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> flowstate --&gt; /tmp/RtmpKKqIft/COVAIL_002_CYTOKINE_BLOCK1_3_flowstateMOD.fcs</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## read newly written files</span></span></span>
 <span class="r-in"><span><span class="va">fcs.file.paths</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, full.names <span class="op">=</span> <span class="cn">TRUE</span>, pattern <span class="op">=</span> <span class="st">"flowstateMOD.fcs"</span><span class="op">)</span></span></span>
@@ -392,9 +398,9 @@ N.B.: During testing, FCS 3.1 files written to disk by write.flowstate were full
 <span class="r-out co"><span class="r-pr">#&gt;</span> 3: COVAIL_002_CYTOKINE_BLOCK1_3_flowstateMOD.fcs    Medium Cytekbio</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             $LAST_MODIFIED        $LAST_MODIFIER         $OP $ORIGINALITY</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                     &lt;char&gt;                &lt;char&gt;      &lt;char&gt;       &lt;char&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1: 16-JUN-2026 18:06:10.63 flowstate_0.16.1.9001 aurora user DataModified</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2: 16-JUN-2026 18:06:10.71 flowstate_0.16.1.9001 aurora user DataModified</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3: 16-JUN-2026 18:06:10.79 flowstate_0.16.1.9001 aurora user DataModified</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1: 16-JUN-2026 19:03:47.66 flowstate_0.16.1.9002 aurora user DataModified</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2: 16-JUN-2026 19:03:47.74 flowstate_0.16.1.9002 aurora user DataModified</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3: 16-JUN-2026 19:03:47.83 flowstate_0.16.1.9002 aurora user DataModified</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      $PAR                          $PROJ $TIMESTEP   $TOT   $VOL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    &lt;char&gt;                         &lt;char&gt;    &lt;char&gt; &lt;char&gt; &lt;char&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1:     47 COVAIL_002_CYTOKINE_2025-02-27    0.0001   2000 326.86</span>

@@ -39,9 +39,10 @@ FCSoffsets <- function(fcs.file.path, return.version = FALSE, update.data.offset
   if(offsets$TEXT[1] > 58){
     n <- offsets$TEXT[1] - 58
     seek(con,58)
-    string <- readChar(con, nchars = n)
-    m <- gregexpr('[0-9]+', string)
-    offsets$OTHER <- as.numeric(unlist(regmatches(string, m)))
+    string.binary <- readBin(con, what = "raw", n = n)
+    string.character <- rawToChar(string.binary)
+    m <- gregexpr('[0-9]+', string.character)
+    offsets$OTHER <- as.numeric(unlist(regmatches(string.character, m)))
   }
   ## for DATA segments larger than 99,999,999 bytes: header offsets will be '0'
   ## update DATA offsets using keyword-value pairs stored in TEXT segment

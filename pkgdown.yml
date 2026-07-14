@@ -1,9 +1,9 @@
 pandoc: 3.8.3
-pkgdown: 2.2.0
+pkgdown: 2.2.1
 pkgdown_sha: ~
 articles:
   flowstate_structure: flowstate_structure.html
-last_built: 2026-06-16T19:03Z
+last_built: 2026-07-14T20:18Z
 urls:
   reference: https://nlaniewski.github.io/flowstate/reference
   article: https://nlaniewski.github.io/flowstate/articles

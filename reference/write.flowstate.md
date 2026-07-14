@@ -256,9 +256,9 @@ fs$keywords[
 #> 3: 09:50:46.94 Aurora  V0299 27-Feb-2025 10:03:26.16
 #>                                $FIL $FLOWRATE    $INST          $LAST_MODIFIED
 #>                              <char>    <char>   <char>                  <char>
-#> 1: COVAIL_002_CYTOKINE_BLOCK1_1.fcs    Medium Cytekbio 16-JUN-2026 19:03:47.07
-#> 2: COVAIL_002_CYTOKINE_BLOCK1_2.fcs    Medium Cytekbio 16-JUN-2026 19:03:47.15
-#> 3: COVAIL_002_CYTOKINE_BLOCK1_3.fcs    Medium Cytekbio 16-JUN-2026 19:03:47.24
+#> 1: COVAIL_002_CYTOKINE_BLOCK1_1.fcs    Medium Cytekbio 14-JUL-2026 20:18:50.74
+#> 2: COVAIL_002_CYTOKINE_BLOCK1_2.fcs    Medium Cytekbio 14-JUL-2026 20:18:50.83
+#> 3: COVAIL_002_CYTOKINE_BLOCK1_3.fcs    Medium Cytekbio 14-JUL-2026 20:18:50.91
 #>           $LAST_MODIFIER         $OP $ORIGINALITY   $PAR
 #>                   <char>      <char>       <char> <char>
 #> 1: flowstate_0.16.1.9002 aurora user DataModified     43
@@ -303,22 +303,26 @@ fs$keywords[
 add.keywords.to.data(fs, 'aliquot')
 
 ## write; reassign to capture the updated flowstate
-fs <- write.flowstate(fs)
-#> flowstate --> /tmp/RtmpKKqIft/COVAIL_002_CYTOKINE_BLOCK1_1_flowstateMOD.fcs
-#> flowstate --> /tmp/RtmpKKqIft/COVAIL_002_CYTOKINE_BLOCK1_2_flowstateMOD.fcs
-#> flowstate --> /tmp/RtmpKKqIft/COVAIL_002_CYTOKINE_BLOCK1_3_flowstateMOD.fcs
+fs <- write.flowstate(fs, fil.suffix = "Example")
+#> flowstate --> /tmp/RtmpMjGxRL/COVAIL_002_CYTOKINE_BLOCK1_1_flowstateMOD_Example.fcs
+#> flowstate --> /tmp/RtmpMjGxRL/COVAIL_002_CYTOKINE_BLOCK1_2_flowstateMOD_Example.fcs
+#> flowstate --> /tmp/RtmpMjGxRL/COVAIL_002_CYTOKINE_BLOCK1_3_flowstateMOD_Example.fcs
 
 ## read newly written files
-fcs.file.paths <- list.files(tempdir(), full.names = TRUE, pattern = "flowstateMOD.fcs")
+fcs.file.paths <- list.files(
+ tempdir(),
+ full.names = TRUE,
+ pattern = "flowstateMOD_Example.fcs"
+)
 
 fs <- read.flowstate(
   fcs.file.paths,
   colnames.type = "S",
   concatenate = TRUE
 )
-#> COVAIL_002_CYTOKINE_BLOCK1_1_flowstateMOD.fcs --> flowstate
-#> COVAIL_002_CYTOKINE_BLOCK1_2_flowstateMOD.fcs --> flowstate
-#> COVAIL_002_CYTOKINE_BLOCK1_3_flowstateMOD.fcs --> flowstate
+#> COVAIL_002_CYTOKINE_BLOCK1_1_flowstateMOD_Example.fcs --> flowstate
+#> COVAIL_002_CYTOKINE_BLOCK1_2_flowstateMOD_Example.fcs --> flowstate
+#> COVAIL_002_CYTOKINE_BLOCK1_3_flowstateMOD_Example.fcs --> flowstate
 #> Concatenating 'flowstates'...
 
 ## derived [['data']] columns
@@ -368,16 +372,16 @@ fs$keywords[, aliquot := factor(levels.aliquot)]
 #> 1: 09:22:51.62 Aurora  V0299 27-Feb-2025 09:33:47.32
 #> 2: 09:38:12.18 Aurora  V0299 27-Feb-2025 09:49:40.92
 #> 3: 09:50:46.94 Aurora  V0299 27-Feb-2025 10:03:26.16
-#>                                             $FIL $FLOWRATE    $INST
-#>                                           <char>    <char>   <char>
-#> 1: COVAIL_002_CYTOKINE_BLOCK1_1_flowstateMOD.fcs    Medium Cytekbio
-#> 2: COVAIL_002_CYTOKINE_BLOCK1_2_flowstateMOD.fcs    Medium Cytekbio
-#> 3: COVAIL_002_CYTOKINE_BLOCK1_3_flowstateMOD.fcs    Medium Cytekbio
+#>                                                     $FIL $FLOWRATE    $INST
+#>                                                   <char>    <char>   <char>
+#> 1: COVAIL_002_CYTOKINE_BLOCK1_1_flowstateMOD_Example.fcs    Medium Cytekbio
+#> 2: COVAIL_002_CYTOKINE_BLOCK1_2_flowstateMOD_Example.fcs    Medium Cytekbio
+#> 3: COVAIL_002_CYTOKINE_BLOCK1_3_flowstateMOD_Example.fcs    Medium Cytekbio
 #>             $LAST_MODIFIED        $LAST_MODIFIER         $OP $ORIGINALITY
 #>                     <char>                <char>      <char>       <char>
-#> 1: 16-JUN-2026 19:03:47.66 flowstate_0.16.1.9002 aurora user DataModified
-#> 2: 16-JUN-2026 19:03:47.74 flowstate_0.16.1.9002 aurora user DataModified
-#> 3: 16-JUN-2026 19:03:47.83 flowstate_0.16.1.9002 aurora user DataModified
+#> 1: 14-JUL-2026 20:18:51.20 flowstate_0.16.1.9002 aurora user DataModified
+#> 2: 14-JUL-2026 20:18:51.29 flowstate_0.16.1.9002 aurora user DataModified
+#> 3: 14-JUL-2026 20:18:51.39 flowstate_0.16.1.9002 aurora user DataModified
 #>      $PAR                          $PROJ $TIMESTEP   $TOT   $VOL
 #>    <char>                         <char>    <char> <char> <char>
 #> 1:     47 COVAIL_002_CYTOKINE_2025-02-27    0.0001   2000 326.86

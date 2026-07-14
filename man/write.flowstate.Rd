@@ -99,10 +99,14 @@ fs$keywords[
 add.keywords.to.data(fs, 'aliquot')
 
 ## write; reassign to capture the updated flowstate
-fs <- write.flowstate(fs)
+fs <- write.flowstate(fs, fil.suffix = "Example")
 
 ## read newly written files
-fcs.file.paths <- list.files(tempdir(), full.names = TRUE, pattern = "flowstateMOD.fcs")
+fcs.file.paths <- list.files(
+ tempdir(),
+ full.names = TRUE,
+ pattern = "flowstateMOD_Example.fcs"
+)
 
 fs <- read.flowstate(
   fcs.file.paths,

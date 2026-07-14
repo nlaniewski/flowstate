@@ -22,12 +22,12 @@ knitr::opts_chunk$set(
 
 The primary features of `flowstate`:
 
-+ Read and parse .fcs files as flowstate objects (S3)
-+ Perform spectral unmixing (Full Spectrum Cytometry/Spectral Cytometry) -- in progress/testing
++ [Read and parse .fcs files as flowstate objects (S3)](https://nlaniewski.github.io/flowstate/articles/flowstate_structure.html)
++ [Perform spectral unmixing (Full Spectrum Cytometry/Spectral Cytometry)](https://github.com/nlaniewski/spectracle)
 + Perform spillover compensation/correction
 + Transform expression values (MFI/ion counts)
 + Visualize primary data
-+ Write FCS version 3.1 compliant files -- in progress/testing
++ Write FCS version 3.1 compliant files
 
 ## Installation
 

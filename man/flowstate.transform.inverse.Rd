@@ -9,7 +9,7 @@ flowstate.transform.inverse(flowstate, j = NULL)
 \arguments{
 \item{flowstate}{A flowstate object as returned from \link{read.flowstate}.}
 
-\item{j}{Character vector -- default \code{NULL}; any/all parameters having a stored \code{transformed} attribute -- from the result of \link{flowstate.transform} -- will be inverse transformed in \verb{[['data']]} using the stored function (default \code{\link[base:Hyperbolic]{base::sinh()}}).  If a defined character vector: specific columns in \verb{[['data']]} that are to be inverse transformed.}
+\item{j}{Character vector -- default \code{NULL}; any/all parameters having a stored \code{transformed} attribute -- from the result of \link{flowstate.transform} -- will be inverse transformed in \verb{[['data']]} using the stored function (default \code{\link[base:sinh]{base::sinh()}}).  If a defined character vector: specific columns in \verb{[['data']]} that are to be inverse transformed.}
 }
 \value{
 UPDATES BY REFERENCE:

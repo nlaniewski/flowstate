@@ -6,7 +6,6 @@ Authors@R:
 Description: Flow cytometry standard (.fcs) files are S3 structured to facilitate efficient processing, analysis, and visualization of data -- acheive your flow state.
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.3
 Imports:
     data.table,
     ggplot2,
@@ -29,3 +28,4 @@ Suggests:
 VignetteBuilder: knitr
 Config/Needs/website: rmarkdown
 License: AGPL (>= 3)
+Config/roxygen2/version: 8.0.0

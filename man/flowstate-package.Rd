@@ -20,5 +20,10 @@ Useful links:
 \author{
 \strong{Maintainer}: Nathan Laniewski \email{nathan_laniewski@urmc.rochester.edu}
 
+Authors:
+\itemize{
+  \item Nathan Laniewski \email{nathan_laniewski@urmc.rochester.edu}
+}
+
 }
 \keyword{internal}

@@ -18,7 +18,7 @@ write.flowstate(
 
 \item{fil.suffix}{Character string -- default \code{NULL}; if defined, the suffix will be appended}
 
-\item{endianness}{Character string -- default \code{"little"}; see \link[base:readBin]{endian}.}
+\item{endianness}{Character string -- default \code{"little"}; see \link[base:writeBin]{endian}.}
 }
 \value{
 \itemize{

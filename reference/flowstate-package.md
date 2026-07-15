@@ -17,3 +17,7 @@ Useful links:
 ## Author
 
 **Maintainer**: Nathan Laniewski <nathan_laniewski@urmc.rochester.edu>
+
+Authors:
+
+- Nathan Laniewski <nathan_laniewski@urmc.rochester.edu>

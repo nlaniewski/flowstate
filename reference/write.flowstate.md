@@ -256,9 +256,9 @@ fs$keywords[
 #> 3: 09:50:46.94 Aurora  V0299 27-Feb-2025 10:03:26.16
 #>                                $FIL $FLOWRATE    $INST          $LAST_MODIFIED
 #>                              <char>    <char>   <char>                  <char>
-#> 1: COVAIL_002_CYTOKINE_BLOCK1_1.fcs    Medium Cytekbio 15-JUL-2026 17:01:52.94
-#> 2: COVAIL_002_CYTOKINE_BLOCK1_2.fcs    Medium Cytekbio 15-JUL-2026 17:01:53.02
-#> 3: COVAIL_002_CYTOKINE_BLOCK1_3.fcs    Medium Cytekbio 15-JUL-2026 17:01:53.10
+#> 1: COVAIL_002_CYTOKINE_BLOCK1_1.fcs    Medium Cytekbio 15-JUL-2026 18:09:26.43
+#> 2: COVAIL_002_CYTOKINE_BLOCK1_2.fcs    Medium Cytekbio 15-JUL-2026 18:09:26.52
+#> 3: COVAIL_002_CYTOKINE_BLOCK1_3.fcs    Medium Cytekbio 15-JUL-2026 18:09:26.60
 #>           $LAST_MODIFIER         $OP $ORIGINALITY   $PAR
 #>                   <char>      <char>       <char> <char>
 #> 1: flowstate_0.16.1.9002 aurora user DataModified     43
@@ -304,9 +304,9 @@ add.keywords.to.data(fs, 'aliquot')
 
 ## write; reassign to capture the updated flowstate
 fs <- write.flowstate(fs, fil.suffix = "Example")
-#> flowstate --> /tmp/Rtmpp8nLj5/COVAIL_002_CYTOKINE_BLOCK1_1_flowstateMOD_Example.fcs
-#> flowstate --> /tmp/Rtmpp8nLj5/COVAIL_002_CYTOKINE_BLOCK1_2_flowstateMOD_Example.fcs
-#> flowstate --> /tmp/Rtmpp8nLj5/COVAIL_002_CYTOKINE_BLOCK1_3_flowstateMOD_Example.fcs
+#> flowstate --> /tmp/RtmpYAg6hA/COVAIL_002_CYTOKINE_BLOCK1_1_flowstateMOD_Example.fcs
+#> flowstate --> /tmp/RtmpYAg6hA/COVAIL_002_CYTOKINE_BLOCK1_2_flowstateMOD_Example.fcs
+#> flowstate --> /tmp/RtmpYAg6hA/COVAIL_002_CYTOKINE_BLOCK1_3_flowstateMOD_Example.fcs
 
 ## read newly written files
 fcs.file.paths <- list.files(
@@ -379,9 +379,9 @@ fs$keywords[, aliquot := factor(levels.aliquot)]
 #> 3: COVAIL_002_CYTOKINE_BLOCK1_3_flowstateMOD_Example.fcs    Medium Cytekbio
 #>             $LAST_MODIFIED        $LAST_MODIFIER         $OP $ORIGINALITY
 #>                     <char>                <char>      <char>       <char>
-#> 1: 15-JUL-2026 17:01:53.38 flowstate_0.16.1.9002 aurora user DataModified
-#> 2: 15-JUL-2026 17:01:53.48 flowstate_0.16.1.9002 aurora user DataModified
-#> 3: 15-JUL-2026 17:01:53.58 flowstate_0.16.1.9002 aurora user DataModified
+#> 1: 15-JUL-2026 18:09:26.88 flowstate_0.16.1.9002 aurora user DataModified
+#> 2: 15-JUL-2026 18:09:26.98 flowstate_0.16.1.9002 aurora user DataModified
+#> 3: 15-JUL-2026 18:09:27.08 flowstate_0.16.1.9002 aurora user DataModified
 #>      $PAR                          $PROJ $TIMESTEP   $TOT   $VOL
 #>    <char>                         <char>    <char> <char> <char>
 #> 1:     47 COVAIL_002_CYTOKINE_2025-02-27    0.0001   2000 326.86

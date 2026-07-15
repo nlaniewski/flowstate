@@ -3,7 +3,7 @@ pkgdown: 2.2.1
 pkgdown_sha: ~
 articles:
   flowstate_structure: flowstate_structure.html
-last_built: 2026-07-14T20:18Z
+last_built: 2026-07-15T17:01Z
 urls:
   reference: https://nlaniewski.github.io/flowstate/reference
   article: https://nlaniewski.github.io/flowstate/articles

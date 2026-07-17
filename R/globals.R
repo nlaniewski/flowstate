@@ -5,7 +5,7 @@
 # c(...) |> sort() |> dput()
 utils::globalVariables(
   c(
-    "$TOT", ".", "..keywords.to.add", "FSC_A", "FSC_H", "N", "N.alias",
+    "$CYT", "$TOT", ".", "..keywords.to.add", "FSC_A", "FSC_H", "N", "N.alias",
     "R", "S", "S.alias", "SSC_A", "SSC_H", "TYPE", "V1", "alias",
     "barcode", "barcode.alias", "barcode.censor", "combn.drop", "detector.peak",
     "detector.select", "id", "j", "j.match", "j.match.parameters.to.data",

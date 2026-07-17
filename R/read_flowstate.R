@@ -282,7 +282,12 @@ readFCSdata <- function(fcs.file.path, attribute.N = TRUE){
   invisible(dt)
 }
 
-flowstate.from.file.path <- function(fcs.file.path, alias.attributes = TRUE, alias = c('N.alias', 'S.alias')){
+flowstate.from.file.path <- function(
+    fcs.file.path,
+    alias.attributes = TRUE,
+    alias = c('N.alias', 'S.alias')
+)
+{
   ## keyword-value pairs from TEXT segment; based on offsets from 'FCSoffsets(...)[["TEXT"]]'
   keywords <- readFCStext(fcs.file.path)
   ## create a flowstate (fs) S3 object ; class 'flowstate'
@@ -293,21 +298,48 @@ flowstate.from.file.path <- function(fcs.file.path, alias.attributes = TRUE, ali
     keywords = keywords.to.data.table(keywords, drop.primary = TRUE, drop.spill = TRUE),
     spill = spill.to.data.table(keywords)
   )
+  ## instrument-depending: may not have [['spill']]
+  if(fs[['spill']][, .N]==0) {
+    fs[['spill']] <- NULL
+  }
+  ## BD FACSDiscover [AS]8-specific
+  if(grepl("FACSDiscover [AS]8", keywords[['$CYT']])){
+    if(any(facsdiscover.bdspectral.terms %in% names(keywords))){
+      fs[['BDSPECTRAL']] <- bdspectral.data.table(keywords)
+      fs[['keywords']][, (facsdiscover.bdspectral.terms) := NULL]
+    }
+    if(any(facsdiscover.json.terms %in% names(keywords))){
+      for(i in facsdiscover.json.terms){
+        if(!is.null(keywords[[i]])){
+          fs[['JSON']][[i]] <- jsonlite::fromJSON(keywords[[i]])
+          fs[['keywords']][, (i) := NULL]
+        }
+      }
+    }
+  }
+  ## any/all .fcs files should return:
+  ### [['data']], [['parameters']], and [['keywords']]
+  ### instrument-depending: may have [['JSON']]
+  ### instrument-depending: may have [['BDSPECTRAL']]
+
   ## add aliases
   if(alias.attributes){
     aliases(fs)
     setalias(fs, alias)
   }
-  ## any/all .fcs files should return:
-  ## [['data']], [['parameters']], and [['keywords']]
-  ## may not have spill (mass cytometry)
-  if(fs[['spill']][,.N]==0){fs[['spill']] <- NULL}
   ##
   return(fs)
 }
 
 aliases <- function(flowstate){
-  lapply(c('data', 'spill'), function(i){
+  ##
+  cyt <- flowstate$keywords[, unique(`$CYT`)]
+  # cytometer-specific aliases using make.names()
+  ##
+  ln <- c("data", "spill")#list names (ln)
+  ln <- ln[ln %in% names(flowstate)]
+  ##
+  for(i in ln){
     alias <- flowstate$parameters[
       i = match(flowstate[[i]][, names(sapply(.SD, attr, which = 'N'))], N),
       j = .SD,
@@ -317,17 +349,28 @@ aliases <- function(flowstate){
       alias[, S := NA]
     }
     ## make N syntactically valid
-    alias[
-      i = !grepl("[FS]SC|Time", N),
-      j = N.alias := gsub(" |-|/", "", sub("-A$", "", N))
-    ]
-    alias[
-      i = grepl("[FS]SC|Time", N),
-      j = N.alias := sub("-", "_", sub("SSC-B", "SSCB", N))
-    ]
-    ## make S syntactically valid
-    alias[, S.alias := gsub(" |-|/", "", S)]
-    alias[is.na(S.alias), S.alias := N.alias]
+    if(cyt == "Aurora"){
+      alias[
+        i = !grepl("[FS]SC|Time", N),
+        j = N.alias := gsub(" |-|/", "", sub("-A$", "", N))
+      ]
+      alias[
+        i = grepl("[FS]SC|Time", N),
+        j = N.alias := sub("-", "_", sub("SSC-B", "SSCB", N))
+      ]
+      ## make S syntactically valid
+      alias[, S.alias := gsub(" |-|/", "", S)]
+      alias[is.na(S.alias), S.alias := N.alias]
+    }else if(grepl("FACSDiscover [AS]8", cyt)){
+      for(j in names(alias)){
+        data.table::set(
+          x = alias,
+          i = which(!is.na(alias[[j]])),
+          j = sprintf("%s.alias", j),
+          value = gsub("..", ".", make.names(alias[[j]]), fixed = T)
+        )
+      }
+    }
     ## add attributes -- named vector -- to each column in [['data']] and [['spill']]
     for(j in names(flowstate[[i]])){
       data.table::setattr(
@@ -336,7 +379,7 @@ aliases <- function(flowstate){
         value = unlist(alias[N == j])
       )
     }
-  })
+  }
   ##
   invisible(flowstate)
 }
@@ -344,17 +387,20 @@ aliases <- function(flowstate){
 setalias <- function(flowstate, alias = c('N.alias', 'S.alias')){
   alias <- match.arg(alias)
   ##
-  invisible(lapply(c('data', 'spill'), function(type){
+  ln <- c("data", "spill")#list names (ln)
+  ln <- ln[ln %in% names(flowstate)]
+  for(i in ln){
     data.table::setnames(
-      x = flowstate[[type]],
-      old = names(flowstate[[type]]),
-      new = flowstate[[type]][
+      x = flowstate[[i]],
+      old = names(flowstate[[i]]),
+      new = flowstate[[i]][
         ,
-        sapply(.SD, function(j){
-          attr(j, which = 'alias')[[alias]]
-        })]
+        j = sapply(.SD, function(j) {
+          attr(j, which = "alias")[[alias]]
+        })
+      ]
     )
-  }))
+  }
   ##
   invisible(flowstate)
 }
@@ -461,6 +507,9 @@ read.flowstate<-function(
 {
   ## add names to fcs.files.paths
   fcs.file.paths <- stats::setNames(fcs.file.paths, nm = basename(fcs.file.paths))
+  ## cytometry type -- '$CYT'
+  cytometer.type <- check.keyword(fcs.file.paths, keyword = '$CYT')
+  stopifnot("Mixed cytometer types ('$CYT') are not supported" = length(cytometer.type) == 1)
   ## create the flowstate(s); set column aliases
   colnames.type <- sprintf("%s.alias", match.arg(colnames.type))
   fs <- lapply(fcs.file.paths, function(fcs.file.path, alias = colnames.type){

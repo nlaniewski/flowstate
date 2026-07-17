@@ -256,14 +256,14 @@ fs$keywords[
 #> 3: 09:50:46.94 Aurora  V0299 27-Feb-2025 10:03:26.16
 #>                                $FIL $FLOWRATE    $INST          $LAST_MODIFIED
 #>                              <char>    <char>   <char>                  <char>
-#> 1: COVAIL_002_CYTOKINE_BLOCK1_1.fcs    Medium Cytekbio 15-JUL-2026 18:09:26.43
-#> 2: COVAIL_002_CYTOKINE_BLOCK1_2.fcs    Medium Cytekbio 15-JUL-2026 18:09:26.52
-#> 3: COVAIL_002_CYTOKINE_BLOCK1_3.fcs    Medium Cytekbio 15-JUL-2026 18:09:26.60
-#>           $LAST_MODIFIER         $OP $ORIGINALITY   $PAR
-#>                   <char>      <char>       <char> <char>
-#> 1: flowstate_0.16.1.9002 aurora user DataModified     43
-#> 2: flowstate_0.16.1.9002 aurora user DataModified     43
-#> 3: flowstate_0.16.1.9002 aurora user DataModified     43
+#> 1: COVAIL_002_CYTOKINE_BLOCK1_1.fcs    Medium Cytekbio 17-JUL-2026 17:49:03.74
+#> 2: COVAIL_002_CYTOKINE_BLOCK1_2.fcs    Medium Cytekbio 17-JUL-2026 17:49:03.83
+#> 3: COVAIL_002_CYTOKINE_BLOCK1_3.fcs    Medium Cytekbio 17-JUL-2026 17:49:03.91
+#>      $LAST_MODIFIER         $OP $ORIGINALITY   $PAR
+#>              <char>      <char>       <char> <char>
+#> 1: flowstate_0.17.0 aurora user DataModified     43
+#> 2: flowstate_0.17.0 aurora user DataModified     43
+#> 3: flowstate_0.17.0 aurora user DataModified     43
 #>                             $PROJ $TIMESTEP   $TOT   $VOL APPLY COMPENSATION
 #>                            <char>    <char> <char> <char>             <char>
 #> 1: COVAIL_002_CYTOKINE_2025-02-27    0.0001   2000 326.86              FALSE
@@ -304,9 +304,9 @@ add.keywords.to.data(fs, 'aliquot')
 
 ## write; reassign to capture the updated flowstate
 fs <- write.flowstate(fs, fil.suffix = "Example")
-#> flowstate --> /tmp/RtmpYAg6hA/COVAIL_002_CYTOKINE_BLOCK1_1_flowstateMOD_Example.fcs
-#> flowstate --> /tmp/RtmpYAg6hA/COVAIL_002_CYTOKINE_BLOCK1_2_flowstateMOD_Example.fcs
-#> flowstate --> /tmp/RtmpYAg6hA/COVAIL_002_CYTOKINE_BLOCK1_3_flowstateMOD_Example.fcs
+#> flowstate --> /tmp/Rtmpw9CJgq/COVAIL_002_CYTOKINE_BLOCK1_1_flowstateMOD_Example.fcs
+#> flowstate --> /tmp/Rtmpw9CJgq/COVAIL_002_CYTOKINE_BLOCK1_2_flowstateMOD_Example.fcs
+#> flowstate --> /tmp/Rtmpw9CJgq/COVAIL_002_CYTOKINE_BLOCK1_3_flowstateMOD_Example.fcs
 
 ## read newly written files
 fcs.file.paths <- list.files(
@@ -377,21 +377,21 @@ fs$keywords[, aliquot := factor(levels.aliquot)]
 #> 1: COVAIL_002_CYTOKINE_BLOCK1_1_flowstateMOD_Example.fcs    Medium Cytekbio
 #> 2: COVAIL_002_CYTOKINE_BLOCK1_2_flowstateMOD_Example.fcs    Medium Cytekbio
 #> 3: COVAIL_002_CYTOKINE_BLOCK1_3_flowstateMOD_Example.fcs    Medium Cytekbio
-#>             $LAST_MODIFIED        $LAST_MODIFIER         $OP $ORIGINALITY
-#>                     <char>                <char>      <char>       <char>
-#> 1: 15-JUL-2026 18:09:26.88 flowstate_0.16.1.9002 aurora user DataModified
-#> 2: 15-JUL-2026 18:09:26.98 flowstate_0.16.1.9002 aurora user DataModified
-#> 3: 15-JUL-2026 18:09:27.08 flowstate_0.16.1.9002 aurora user DataModified
-#>      $PAR                          $PROJ $TIMESTEP   $TOT   $VOL
-#>    <char>                         <char>    <char> <char> <char>
-#> 1:     47 COVAIL_002_CYTOKINE_2025-02-27    0.0001   2000 326.86
-#> 2:     47 COVAIL_002_CYTOKINE_2025-02-27    0.0001   2000 346.31
-#> 3:     47 COVAIL_002_CYTOKINE_2025-02-27    0.0001   2000 350.19
-#>    APPLY COMPENSATION CHARSET          CREATOR FSC ASF    GROUPNAME
-#>                <char>  <char>           <char>  <char>       <char>
-#> 1:              FALSE   utf-8 SpectroFlo 3.3.0    1.26 BarcodedPool
-#> 2:              FALSE   utf-8 SpectroFlo 3.3.0    1.26 BarcodedPool
-#> 3:              FALSE   utf-8 SpectroFlo 3.3.0    1.26 BarcodedPool
+#>             $LAST_MODIFIED   $LAST_MODIFIER         $OP $ORIGINALITY   $PAR
+#>                     <char>           <char>      <char>       <char> <char>
+#> 1: 17-JUL-2026 17:49:04.18 flowstate_0.17.0 aurora user DataModified     47
+#> 2: 17-JUL-2026 17:49:04.27 flowstate_0.17.0 aurora user DataModified     47
+#> 3: 17-JUL-2026 17:49:04.37 flowstate_0.17.0 aurora user DataModified     47
+#>                             $PROJ $TIMESTEP   $TOT   $VOL APPLY COMPENSATION
+#>                            <char>    <char> <char> <char>             <char>
+#> 1: COVAIL_002_CYTOKINE_2025-02-27    0.0001   2000 326.86              FALSE
+#> 2: COVAIL_002_CYTOKINE_2025-02-27    0.0001   2000 346.31              FALSE
+#> 3: COVAIL_002_CYTOKINE_2025-02-27    0.0001   2000 350.19              FALSE
+#>    CHARSET          CREATOR FSC ASF    GROUPNAME
+#>     <char>           <char>  <char>       <char>
+#> 1:   utf-8 SpectroFlo 3.3.0    1.26 BarcodedPool
+#> 2:   utf-8 SpectroFlo 3.3.0    1.26 BarcodedPool
+#> 3:   utf-8 SpectroFlo 3.3.0    1.26 BarcodedPool
 #>                                    GUID LASER1ASF LASER1DELAY  LASER1NAME
 #>                                  <char>    <char>      <char>      <char>
 #> 1: 0fffcae2-2163-49f9-98a3-8f17bb4ecc13      1.14       -41.7 YellowGreen

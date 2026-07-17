@@ -39,7 +39,9 @@ flowstate.transform.types <-
 cytometer.identifier.types <- c(
   "Aurora" = "TUBENAME",
   "ID7000" = "$CELLS",
-  "DVS|FLUIDIGM|CYTOF" = "$FIL"
+  "DVS|FLUIDIGM|CYTOF" = "$FIL",
+  "FACSDiscover A8" = "$SMNO",# Sample Manager Name Object (?)
+  "FACSDiscover S8" = "$SMNO"# Sample Manager Name Object (?)
 )
 
 cytometer.identifier <- function(fcs.file.paths){

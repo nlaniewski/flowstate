@@ -3,7 +3,11 @@
 #' Linear values in `[['data']]` are transformed using a defined function.  For full spectrum cytometry, transforming linear fluorescence values using \link{asinh} is preferred, with around-zero compression adjusted using a 'cofactor' of 5,000.
 #'
 #' @param flowstate A flowstate object as returned from [read.flowstate].
-#' @param j Character vector -- default `NULL`; any/all parameters having a keyword-value pair of `TYPE/Raw|Unmixed_Fluorescence` will be transformed in `[['data']]`.  If a defined character vector: specific columns in `[['data']]` that are to be transformed.
+#' @param j Character vector -- default `NULL`; any/all parameters having a keyword-value pair of (instrument-specific):
+#' \itemize{
+#'    \item `Aurora`: `TYPE %in% c("Raw_Fluorescence", "Unmixed_Fluorescence")`
+#'    \item `FACSDiscover [AS]8`: `KIND %in% COLOR`
+#' } will be transformed in `[['data']]`.  If a defined character vector: specific columns in `[['data']]` that are to be transformed.
 #' @param transform.func Character vector -- default \link{asinh}; quoted function that will be used to transform `j` in `[['data']]`.
 #' @param cofactor Numeric -- default 5000; if `transform.func` = \link{asinh} (default), the cofactor will be used to modify the transformation.
 #'
@@ -59,11 +63,14 @@
 #' fs$data[, lapply(.SD, attr, which = 'transformed')]
 #'
 flowstate.transform<-function(flowstate, j = NULL, transform.func = "asinh", cofactor = 5000){
+  ## instrument-specific: parameter keyword encoding 'TYPE|KIND'
+  i <- flowstate.transform.keywords %in% names(flowstate$parameters)
   ## parameters to transform -- alias
   alias <- merge(
     x = flowstate$parameters[
-      i = TYPE %in% flowstate.transform.types,
-      j = .(N)
+      i = kw %in% flowstate.transform.strings,
+      j = .(N),
+      env = list(kw = flowstate.transform.keywords[i])
     ],
     y = alias_dt(flowstate),
     sort = F

@@ -30,18 +30,24 @@ flowstate.parameter.keywords <-
     'V'
   )
 
-flowstate.transform.types <-
-  c(
-    "Raw_Fluorescence",
-    "Unmixed_Fluorescence",
-    "Ion_Count"
-  )
+flowstate.transform.keywords <- c(
+  "KIND",#BD FACSDiscover [AS]8 -- BD Chorus
+  "TYPE"#Cytek Aurora -- SpectroFlo
+)
+
+flowstate.transform.strings <- c(
+  "Raw_Fluorescence",#Cytek Aurora -- SpectroFlo
+  "Unmixed_Fluorescence",#Cytek Aurora -- SpectroFlo
+  "Ion_Count",#DVS/Fluidigm -- CyTOF
+  'COLOR'#BD FACSDiscover [AS]8 -- BD Chorus
+)
+
 cytometer.identifier.types <- c(
   "Aurora" = "TUBENAME",
   "ID7000" = "$CELLS",
   "DVS|FLUIDIGM|CYTOF" = "$FIL",
-  "FACSDiscover A8" = "$SMNO",# Sample Manager Name Object (?)
-  "FACSDiscover S8" = "$SMNO"# Sample Manager Name Object (?)
+  "FACSDiscover A8" = "$SMNO",# Sample Manager Name Object (?) -- BD Chorus
+  "FACSDiscover S8" = "$SMNO"# Sample Manager Name Object (?) -- BD Chorus
 )
 
 cytometer.identifier <- function(fcs.file.paths){

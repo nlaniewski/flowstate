@@ -20,11 +20,12 @@ read.flowstate(
 \item \code{"S"} -- \verb{[['data']]} columns are named by using only their respective $PS (stain/user-defined) keyword value.
 }}
 
-\item{sample.id}{Keyword name -- default \code{NULL}; based on cytometer platform, the keyword name for \code{sample.id} will be automatically set and the respective keyword values will be added to \verb{[['data']]} as a factored sample identifier. One of:
-\itemize{
-\item Aurora (Cytek) -- \code{sample.id} = \code{'TUBENAME'}
-\item ID7000 (Sony)  -- \code{sample.id} = \code{'$CELLS'}
-\item Unspecified    -- \code{sample.id} = \code{'$FIL'}
+\item{sample.id}{Keyword name -- default \code{NULL}; based on cytometer platform, the keyword name for \code{sample.id} will be automatically set and the respective keyword values will be added to \verb{[['data']]} as a factored sample identifier. One of:\tabular{llll}{
+    \tab  \tab  \tab  \cr
+   Aurora \tab (Cytek) \tab  \tab \code{sample.id} = \code{'TUBENAME'} \cr
+   FACSDiscover \tab (BD) \tab  \tab \code{sample.id} = \code{'$SMNO'} \cr
+   ID7000 \tab (Sony) \tab  \tab \code{sample.id} = \code{'CELLS'} \cr
+   Unspecified \tab (Other) \tab  \tab \code{sample.id} = \code{'$FIL'} \cr
 }}
 
 \item{concatenate}{Logical -- default \code{FALSE}; if \code{TRUE}, the list of flowstates will be combined into a single flowstate.}

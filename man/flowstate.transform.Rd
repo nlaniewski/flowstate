@@ -14,7 +14,11 @@ flowstate.transform(
 \arguments{
 \item{flowstate}{A flowstate object as returned from \link{read.flowstate}.}
 
-\item{j}{Character vector -- default \code{NULL}; any/all parameters having a keyword-value pair of \code{TYPE/Raw|Unmixed_Fluorescence} will be transformed in \verb{[['data']]}.  If a defined character vector: specific columns in \verb{[['data']]} that are to be transformed.}
+\item{j}{Character vector -- default \code{NULL}; any/all parameters having a keyword-value pair of (instrument-specific):
+\itemize{
+\item \code{Aurora}: \code{TYPE \%in\% c("Raw_Fluorescence", "Unmixed_Fluorescence")}
+\item \verb{FACSDiscover [AS]8}: \code{KIND \%in\% COLOR}
+} will be transformed in \verb{[['data']]}.  If a defined character vector: specific columns in \verb{[['data']]} that are to be transformed.}
 
 \item{transform.func}{Character vector -- default \link{asinh}; quoted function that will be used to transform \code{j} in \verb{[['data']]}.}
 

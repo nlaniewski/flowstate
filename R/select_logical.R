@@ -198,25 +198,35 @@ select_quantile <- function(flowstate, probs = c(0.0005, 0.9995)){
 #' fs$data[,'select.singlets' := NULL]
 #'
 select_singlets <- function(flowstate, quantiles = c(0.85, 0.95)){
+  ##
+
+  ##
+  fsc <- sort(grep("FSC[._].*[AH]", names(flowstate$data), value = T))
+  ssc <- sort(grep("SSC[._].*[AH]", names(flowstate$data), value = T))
+  if(length(ssc) != 2 & any(grepl("Violet", ssc))){
+    ssc <- grep('Violet', ssc, value = T)
+  }
   ## remove doublets -- forward scatter geometry; initial selector
   ## selects events (collinear) based on quantile [1]
   flowstate$data[
     ,
     j = select.singlets := {
-      res <- FSC_A/FSC_H
+      res <- fsc.a/fsc.h
       res < stats::quantile(res, probs = quantiles[1])
     },
-    by = sample.id
+    by = sample.id,
+    env = list(fsc.a = fsc[1], fsc.h = fsc[2])
   ]
   ## remove doublets -- side scatter geometry; indexed against the initial selector
   ## selects events (collinear) based on quantile [2]
   flowstate$data[
     i = (select.singlets),
     j = select.singlets := {
-      res <- SSC_A/SSC_H
+      res <- ssc.a/ssc.h
       res < stats::quantile(res, probs = quantiles[2])
     },
-    by = sample.id
+    by = sample.id,
+    env = list(ssc.a = ssc[1], ssc.h = ssc[2])
   ]
   ##
   invisible(flowstate)

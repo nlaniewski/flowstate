@@ -26,9 +26,14 @@ flowstate.transform(
 - j:
 
   Character vector – default `NULL`; any/all parameters having a
-  keyword-value pair of `TYPE/Raw|Unmixed_Fluorescence` will be
-  transformed in `[['data']]`. If a defined character vector: specific
-  columns in `[['data']]` that are to be transformed.
+  keyword-value pair of (instrument-specific):
+
+  - `Aurora`: `TYPE %in% c("Raw_Fluorescence", "Unmixed_Fluorescence")`
+
+  - `FACSDiscover [AS]8`: `KIND %in% COLOR`
+
+  will be transformed in `[['data']]`. If a defined character vector:
+  specific columns in `[['data']]` that are to be transformed.
 
 - transform.func:
 

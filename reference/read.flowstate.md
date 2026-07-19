@@ -59,11 +59,13 @@ read.flowstate(
   respective keyword values will be added to `[['data']]` as a factored
   sample identifier. One of:
 
-  - Aurora (Cytek) – `sample.id` = `'TUBENAME'`
-
-  - ID7000 (Sony) – `sample.id` = `'$CELLS'`
-
-  - Unspecified – `sample.id` = `'$FIL'`
+  |              |         |     |                            |
+  |--------------|---------|-----|----------------------------|
+  |              |         |     |                            |
+  | Aurora       | (Cytek) |     | `sample.id` = `'TUBENAME'` |
+  | FACSDiscover | (BD)    |     | `sample.id` = `'$SMNO'`    |
+  | ID7000       | (Sony)  |     | `sample.id` = `'CELLS'`    |
+  | Unspecified  | (Other) |     | `sample.id` = `'$FIL'`     |
 
 - concatenate:
 
@@ -341,7 +343,7 @@ names(fs)
 #> 1: 09:22:51.62 Aurora  V0299 27-Feb-2025 09:33:47.32
 #>                                $FIL $FLOWRATE    $INST          $LAST_MODIFIED
 #>                              <char>    <char>   <char>                  <char>
-#> 1: COVAIL_002_CYTOKINE_BLOCK1_1.fcs    Medium Cytekbio 17-JUL-2026 17:48:54.71
+#> 1: COVAIL_002_CYTOKINE_BLOCK1_1.fcs    Medium Cytekbio 19-JUL-2026 18:16:29.36
 #>      $LAST_MODIFIER         $OP $ORIGINALITY   $PAR
 #>              <char>      <char>       <char> <char>
 #> 1: flowstate_0.17.0 aurora user DataModified     43
@@ -502,7 +504,7 @@ fs[[1]]$keywords
 #> 1: 09:22:51.62 Aurora  V0299 27-Feb-2025 09:33:47.32
 #>                                $FIL $FLOWRATE    $INST          $LAST_MODIFIED
 #>                              <char>    <char>   <char>                  <char>
-#> 1: COVAIL_002_CYTOKINE_BLOCK1_1.fcs    Medium Cytekbio 17-JUL-2026 17:48:54.81
+#> 1: COVAIL_002_CYTOKINE_BLOCK1_1.fcs    Medium Cytekbio 19-JUL-2026 18:16:29.46
 #>      $LAST_MODIFIER         $OP $ORIGINALITY   $PAR
 #>              <char>      <char>       <char> <char>
 #> 1: flowstate_0.17.0 aurora user DataModified     43
@@ -552,9 +554,9 @@ fs$keywords
 #> 3: 09:50:46.94 Aurora  V0299 27-Feb-2025 10:03:26.16
 #>                                $FIL $FLOWRATE    $INST          $LAST_MODIFIED
 #>                              <char>    <char>   <char>                  <char>
-#> 1: COVAIL_002_CYTOKINE_BLOCK1_1.fcs    Medium Cytekbio 17-JUL-2026 17:48:55.09
-#> 2: COVAIL_002_CYTOKINE_BLOCK1_2.fcs    Medium Cytekbio 17-JUL-2026 17:48:55.17
-#> 3: COVAIL_002_CYTOKINE_BLOCK1_3.fcs    Medium Cytekbio 17-JUL-2026 17:48:55.25
+#> 1: COVAIL_002_CYTOKINE_BLOCK1_1.fcs    Medium Cytekbio 19-JUL-2026 18:16:29.72
+#> 2: COVAIL_002_CYTOKINE_BLOCK1_2.fcs    Medium Cytekbio 19-JUL-2026 18:16:29.81
+#> 3: COVAIL_002_CYTOKINE_BLOCK1_3.fcs    Medium Cytekbio 19-JUL-2026 18:16:29.89
 #>      $LAST_MODIFIER         $OP $ORIGINALITY   $PAR
 #>              <char>      <char>       <char> <char>
 #> 1: flowstate_0.17.0 aurora user DataModified     43

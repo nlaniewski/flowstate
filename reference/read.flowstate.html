@@ -83,10 +83,7 @@ The individual segments (TEXT and DATA) of the FCS file are parsed and stored as
 
 
 <dt id="arg-sample-id">sample.id<a class="anchor" aria-label="anchor" href="#arg-sample-id"></a></dt>
-<dd><p>Keyword name – default <code>NULL</code>; based on cytometer platform, the keyword name for <code>sample.id</code> will be automatically set and the respective keyword values will be added to <code>[['data']]</code> as a factored sample identifier. One of:</p><ul><li><p>Aurora (Cytek) – <code>sample.id</code> = <code>'TUBENAME'</code></p></li>
-<li><p>ID7000 (Sony)  – <code>sample.id</code> = <code>'$CELLS'</code></p></li>
-<li><p>Unspecified    – <code>sample.id</code> = <code>'$FIL'</code></p></li>
-</ul></dd>
+<dd><p>Keyword name – default <code>NULL</code>; based on cytometer platform, the keyword name for <code>sample.id</code> will be automatically set and the respective keyword values will be added to <code>[['data']]</code> as a factored sample identifier. One of:</p><table class="table table"><tr><td></td><td></td><td></td><td></td></tr><tr><td>Aurora</td><td>(Cytek)</td><td></td><td><code>sample.id</code> = <code>'TUBENAME'</code></td></tr><tr><td>FACSDiscover</td><td>(BD)</td><td></td><td><code>sample.id</code> = <code>'$SMNO'</code></td></tr><tr><td>ID7000</td><td>(Sony)</td><td></td><td><code>sample.id</code> = <code>'CELLS'</code></td></tr><tr><td>Unspecified</td><td>(Other)</td><td></td><td><code>sample.id</code> = <code>'$FIL'</code></td></tr></table></dd>
 
 
 <dt id="arg-concatenate">concatenate<a class="anchor" aria-label="anchor" href="#arg-concatenate"></a></dt>
@@ -345,7 +342,7 @@ data.table: Extension of 'data.frame'. R package version 1.17.99, https://r-data
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1: 09:22:51.62 Aurora  V0299 27-Feb-2025 09:33:47.32</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                $FIL $FLOWRATE    $INST          $LAST_MODIFIED</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                              &lt;char&gt;    &lt;char&gt;   &lt;char&gt;                  &lt;char&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1: COVAIL_002_CYTOKINE_BLOCK1_1.fcs    Medium Cytekbio 17-JUL-2026 17:48:54.71</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1: COVAIL_002_CYTOKINE_BLOCK1_1.fcs    Medium Cytekbio 19-JUL-2026 18:16:29.36</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      $LAST_MODIFIER         $OP $ORIGINALITY   $PAR</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>              &lt;char&gt;      &lt;char&gt;       &lt;char&gt; &lt;char&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1: flowstate_0.17.0 aurora user DataModified     43</span>
@@ -506,7 +503,7 @@ data.table: Extension of 'data.frame'. R package version 1.17.99, https://r-data
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1: 09:22:51.62 Aurora  V0299 27-Feb-2025 09:33:47.32</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                $FIL $FLOWRATE    $INST          $LAST_MODIFIED</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                              &lt;char&gt;    &lt;char&gt;   &lt;char&gt;                  &lt;char&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1: COVAIL_002_CYTOKINE_BLOCK1_1.fcs    Medium Cytekbio 17-JUL-2026 17:48:54.81</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1: COVAIL_002_CYTOKINE_BLOCK1_1.fcs    Medium Cytekbio 19-JUL-2026 18:16:29.46</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      $LAST_MODIFIER         $OP $ORIGINALITY   $PAR</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>              &lt;char&gt;      &lt;char&gt;       &lt;char&gt; &lt;char&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1: flowstate_0.17.0 aurora user DataModified     43</span>
@@ -556,9 +553,9 @@ data.table: Extension of 'data.frame'. R package version 1.17.99, https://r-data
 <span class="r-out co"><span class="r-pr">#&gt;</span> 3: 09:50:46.94 Aurora  V0299 27-Feb-2025 10:03:26.16</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                $FIL $FLOWRATE    $INST          $LAST_MODIFIED</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                              &lt;char&gt;    &lt;char&gt;   &lt;char&gt;                  &lt;char&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1: COVAIL_002_CYTOKINE_BLOCK1_1.fcs    Medium Cytekbio 17-JUL-2026 17:48:55.09</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2: COVAIL_002_CYTOKINE_BLOCK1_2.fcs    Medium Cytekbio 17-JUL-2026 17:48:55.17</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3: COVAIL_002_CYTOKINE_BLOCK1_3.fcs    Medium Cytekbio 17-JUL-2026 17:48:55.25</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1: COVAIL_002_CYTOKINE_BLOCK1_1.fcs    Medium Cytekbio 19-JUL-2026 18:16:29.72</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2: COVAIL_002_CYTOKINE_BLOCK1_2.fcs    Medium Cytekbio 19-JUL-2026 18:16:29.81</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3: COVAIL_002_CYTOKINE_BLOCK1_3.fcs    Medium Cytekbio 19-JUL-2026 18:16:29.89</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      $LAST_MODIFIER         $OP $ORIGINALITY   $PAR</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>              &lt;char&gt;      &lt;char&gt;       &lt;char&gt; &lt;char&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1: flowstate_0.17.0 aurora user DataModified     43</span>

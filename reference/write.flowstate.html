@@ -279,9 +279,9 @@ N.B.: During testing, FCS 3.1 files written to disk by write.flowstate were full
 <span class="r-out co"><span class="r-pr">#&gt;</span> 3: 09:50:46.94 Aurora  V0299 27-Feb-2025 10:03:26.16</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                $FIL $FLOWRATE    $INST          $LAST_MODIFIED</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                              &lt;char&gt;    &lt;char&gt;   &lt;char&gt;                  &lt;char&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1: COVAIL_002_CYTOKINE_BLOCK1_1.fcs    Medium Cytekbio 17-JUL-2026 17:49:03.74</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2: COVAIL_002_CYTOKINE_BLOCK1_2.fcs    Medium Cytekbio 17-JUL-2026 17:49:03.83</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3: COVAIL_002_CYTOKINE_BLOCK1_3.fcs    Medium Cytekbio 17-JUL-2026 17:49:03.91</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1: COVAIL_002_CYTOKINE_BLOCK1_1.fcs    Medium Cytekbio 19-JUL-2026 18:16:38.39</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2: COVAIL_002_CYTOKINE_BLOCK1_2.fcs    Medium Cytekbio 19-JUL-2026 18:16:38.48</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3: COVAIL_002_CYTOKINE_BLOCK1_3.fcs    Medium Cytekbio 19-JUL-2026 18:16:38.56</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      $LAST_MODIFIER         $OP $ORIGINALITY   $PAR</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>              &lt;char&gt;      &lt;char&gt;       &lt;char&gt; &lt;char&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1: flowstate_0.17.0 aurora user DataModified     43</span>
@@ -327,9 +327,9 @@ N.B.: During testing, FCS 3.1 files written to disk by write.flowstate were full
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## write; reassign to capture the updated flowstate</span></span></span>
 <span class="r-in"><span><span class="va">fs</span> <span class="op">&lt;-</span> <span class="fu">write.flowstate</span><span class="op">(</span><span class="va">fs</span>, fil.suffix <span class="op">=</span> <span class="st">"Example"</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> flowstate --&gt; /tmp/Rtmpw9CJgq/COVAIL_002_CYTOKINE_BLOCK1_1_flowstateMOD_Example.fcs</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> flowstate --&gt; /tmp/Rtmpw9CJgq/COVAIL_002_CYTOKINE_BLOCK1_2_flowstateMOD_Example.fcs</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> flowstate --&gt; /tmp/Rtmpw9CJgq/COVAIL_002_CYTOKINE_BLOCK1_3_flowstateMOD_Example.fcs</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> flowstate --&gt; /tmp/Rtmpf2FX0Z/COVAIL_002_CYTOKINE_BLOCK1_1_flowstateMOD_Example.fcs</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> flowstate --&gt; /tmp/Rtmpf2FX0Z/COVAIL_002_CYTOKINE_BLOCK1_2_flowstateMOD_Example.fcs</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> flowstate --&gt; /tmp/Rtmpf2FX0Z/COVAIL_002_CYTOKINE_BLOCK1_3_flowstateMOD_Example.fcs</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## read newly written files</span></span></span>
 <span class="r-in"><span><span class="va">fcs.file.paths</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span></span></span>
@@ -402,9 +402,9 @@ N.B.: During testing, FCS 3.1 files written to disk by write.flowstate were full
 <span class="r-out co"><span class="r-pr">#&gt;</span> 3: COVAIL_002_CYTOKINE_BLOCK1_3_flowstateMOD_Example.fcs    Medium Cytekbio</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             $LAST_MODIFIED   $LAST_MODIFIER         $OP $ORIGINALITY   $PAR</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                     &lt;char&gt;           &lt;char&gt;      &lt;char&gt;       &lt;char&gt; &lt;char&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1: 17-JUL-2026 17:49:04.18 flowstate_0.17.0 aurora user DataModified     47</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2: 17-JUL-2026 17:49:04.27 flowstate_0.17.0 aurora user DataModified     47</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3: 17-JUL-2026 17:49:04.37 flowstate_0.17.0 aurora user DataModified     47</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1: 19-JUL-2026 18:16:38.85 flowstate_0.17.0 aurora user DataModified     47</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2: 19-JUL-2026 18:16:38.94 flowstate_0.17.0 aurora user DataModified     47</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3: 19-JUL-2026 18:16:39.04 flowstate_0.17.0 aurora user DataModified     47</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                             $PROJ $TIMESTEP   $TOT   $VOL APPLY COMPENSATION</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                            &lt;char&gt;    &lt;char&gt; &lt;char&gt; &lt;char&gt;             &lt;char&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1: COVAIL_002_CYTOKINE_2025-02-27    0.0001   2000 326.86              FALSE</span>

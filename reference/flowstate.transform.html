@@ -59,7 +59,9 @@
 
 
 <dt id="arg-j">j<a class="anchor" aria-label="anchor" href="#arg-j"></a></dt>
-<dd><p>Character vector – default <code>NULL</code>; any/all parameters having a keyword-value pair of <code>TYPE/Raw|Unmixed_Fluorescence</code> will be transformed in <code>[['data']]</code>.  If a defined character vector: specific columns in <code>[['data']]</code> that are to be transformed.</p></dd>
+<dd><p>Character vector – default <code>NULL</code>; any/all parameters having a keyword-value pair of (instrument-specific):</p><ul><li><p><code>Aurora</code>: <code>TYPE %in% c("Raw_Fluorescence", "Unmixed_Fluorescence")</code></p></li>
+<li><p><code>FACSDiscover [AS]8</code>: <code>KIND %in% COLOR</code></p></li>
+</ul><p>will be transformed in <code>[['data']]</code>.  If a defined character vector: specific columns in <code>[['data']]</code> that are to be transformed.</p></dd>
 
 
 <dt id="arg-transform-func">transform.func<a class="anchor" aria-label="anchor" href="#arg-transform-func"></a></dt>

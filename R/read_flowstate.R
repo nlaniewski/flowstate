@@ -147,7 +147,7 @@ parameters.to.data.table <- function(
   }
   ## add 'TYPE' keyword-value pair; encoded in CyteK/SpectroFlo files;
   ## add for other platforms; will need to be updated -- instrument-specific
-  if(!'TYPE' %in% names(dt.parameters)){
+  if(!any(c('TYPE', 'KIND') %in% names(dt.parameters))){
     dt.parameters[grep("Time", N, ignore.case = T), TYPE := "Time"]
     dt.parameters[grep("FSC", N), TYPE := "Forward_Scatter"]
     dt.parameters[grep("SSC", N), TYPE := "Side_Scatter"]
@@ -432,11 +432,14 @@ setalias <- function(flowstate, alias = c('N.alias', 'S.alias')){
 #'   \item `"S"` -- `[['data']]` columns are named by using only their respective $PS (stain/user-defined) keyword value.
 #' }
 #' @param sample.id Keyword name -- default `NULL`; based on cytometer platform, the keyword name for `sample.id` will be automatically set and the respective keyword values will be added to `[['data']]` as a factored sample identifier. One of:
-#' \itemize{
-#'   \item Aurora (Cytek) -- `sample.id` = `'TUBENAME'`
-#'   \item ID7000 (Sony)  -- `sample.id` = `'$CELLS'`
-#'   \item Unspecified    -- `sample.id` = `'$FIL'`
-#' }
+#'
+#' |              |         |   |                            |
+#' |--------------|---------|---|----------------------------|
+#' | Aurora       | (Cytek) |   | `sample.id` = `'TUBENAME'` |
+#' | FACSDiscover | (BD)    |   | `sample.id` = `'$SMNO'`    |
+#' | ID7000       | (Sony)  |   | `sample.id` = `'CELLS'`    |
+#' | Unspecified  | (Other) |   | `sample.id` = `'$FIL'`     |
+#'
 #' @param concatenate Logical -- default `FALSE`; if `TRUE`, the list of flowstates will be combined into a single flowstate.
 #'
 #' @returns For a single file: an object of class `flowstate`; for multiple files: a named list of `flowstates`; for concatenated files: an object of class `flowstate`

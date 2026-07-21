@@ -23,31 +23,34 @@ concatenate.test <- function(flowstates){
   message("Concatenating 'flowstates'...")
 }
 
-## a sample-specific list of the unique values for R and V
+## a sample-specific data.table of unique parameter values
 ## add as an attribute to [['parameters']] after concatenation
 parameters.diff <- function(flowstates){
-  ## a list of [['parameters']]
-  parameters.list <- lapply(flowstates,'[[','parameters')
-  ## differences occur in both range (R) and volts (V)
-  ## find the vector indices where they do differ (namely 'Time' for R and scatter for V)
-  RV.diff <- sapply(c('R', 'V'), function(j){
-    res <- lapply(parameters.list, function(i){
-      as.numeric(i[[j]])
+  ## a list of [['parameters']] -- bound as a single data.table
+  parameters <- data.table::rbindlist(
+    lapply(flowstates, '[[', 'parameters')
+  )
+  ## unique
+  parameters <- unique(parameters)
+  ## which N ('$PnN') occurs more than once
+  N.diff <- parameters[, names(which(table(N) > 1))]
+  ## subsetting rows by N, which parameter values are not unique
+  cols.diff <- parameters[
+    i = N %in% N.diff,
+    j = names(which(sapply(.SD, data.table::uniqueN) > 1))
+  ]
+  ## a list of [['parameters']] -- bound as a single data.table
+  ## use 'N.diff' and 'cols.diff' to subet the data.table
+  ## add an identifier -- 'sample.id'
+  data.table::rbindlist(
+    lapply(flowstates, function(.fs){
+      .fs[['parameters']][
+        i = N %in% N.diff,
+        j = .SD,
+        .SDcols = c(cols.diff, 'N')
+      ][, sample.id := .fs[['keywords']][['sample.id']]]
     })
-    res <- do.call(rbind, res)
-    which(apply(res, 2, function(x) length(unique(x)) > 1))
-  }, simplify = F)
-  ## drop empty list element
-  RV.diff <- RV.diff[sapply(RV.diff, length) != 0]
-  ## return a sample-specific list of the unique values for R and V
-  res <- lapply(parameters.list, function(i){
-    sapply(names(RV.diff), function(j){
-      i[
-        i = RV.diff[[j]],
-        j = stats::setNames(.SD[[j]], nm = N)
-      ]
-    },simplify = F)
-  })
+  )
 }
 
 parameters.unique <- function(flowstates){
@@ -57,7 +60,7 @@ parameters.unique <- function(flowstates){
   ## easiest way for now: store the individual sample-specific differences as a list (as an attribute)
   ## update the [['parameters']] slot with a 'representative' unique data.table
 
-  ## a sample-specific list of the unique values for R and V
+  ## a sample-specific data.table of unique parameter values
   .parameters.diff <- parameters.diff(flowstates)
   ## resolve to a unique [['parameters']]
   parameters <- unique(data.table::rbindlist(lapply(flowstates, '[[', 'parameters')))
@@ -77,11 +80,13 @@ parameters.unique <- function(flowstates){
   }
   ## drop
   parameters <- parameters[drop == FALSE][, drop := NULL]
-  ## reorder based on 'par'
-  data.table::setorder(
-    x = parameters[, ord := match(par, paste0("$P", seq(.N)))],
-    "ord"
-  )[,ord := NULL]
+
+  # ## reorder based on 'par'
+  # data.table::setorder(
+  #   x = parameters[, ord := match(par, paste0("$P", seq(.N)))],
+  #   "ord"
+  # )[,ord := NULL]
+
   ##
   data.table::setattr(
     x = parameters,

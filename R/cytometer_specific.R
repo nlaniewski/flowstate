@@ -40,4 +40,58 @@ bdspectral.data.table <- function(keywords){
   invisible(dt)
 }
 
+## 'conventional' BD FACSDiscover [AS]8 .fcs file
+### drop all imaging-related parameters
+### drop all 'time-to-peak' parameters
+### retain only 'conventional' parameters
+facsdiscover.conventional.parameters <- function(flowstate){
+  ##
+  cyt <- flowstate$keywords[, unique(`$CYT`)]
+  stopifnot(grepl("FACSDiscover [AS]8", cyt))
+  ## copy parameters
+  parameters <- data.table::copy(flowstate$parameters)
+  ## initialize a logical
+  parameters[, drop.params := FALSE]
+  ##
+  parameters[
+    i = !FEATURE %in% c("Area", "Height", "Width"),
+    j = drop.params := TRUE
+  ]
+  ##
+  parameters[
+    i = KIND == "COLOR" & MEAS != "A",
+    j = drop.params := TRUE
+  ]
+  ##
+  parameters[
+    i = !(drop.params) & grepl("Img|Imaging", N),
+    j = drop.params := TRUE
+  ]
+  ##
+  parameters[
+    i = N %in% c("Time", "Saturated"),
+    j = drop.params := FALSE
+  ]
+  ## subset to drop parameters
+  parameters <- (
+    subset(parameters, !drop.params)
+    [, drop.params := NULL]
+  )
+  ## needs reassignment
+  return(parameters)
+}
 
+## 'conventional' BD FACSDiscover [AS]8 .fcs file
+### drop all imaging-related data
+### drop all 'time-to-peak' data
+### retain only 'conventional' data -- greatly reduces object size
+facsdiscover.conventional.data <- function(flowstate){
+  ##
+  cols.keep <- flowstate$parameters[, N]
+  i.drop <- flowstate$data[, !sapply(.SD, attr, which = "N") %in% cols.keep]
+  cols.drop <- names(flowstate$data)[i.drop]
+  ##
+  flowstate$data[, (cols.drop) := NULL]
+  ##
+  invisible(flowstate)
+}

@@ -117,26 +117,15 @@ fs$parameters
 ```
 
 `[['parameters']]` also contains attribute-level metadata – notably, a
-`parameters.diff` attribute (list) that serves the purpose of preserving
-sample-specific differences due to unique measurement values (e.g.,
-differences in measured ‘Time’).
+`parameters.diff` attribute (data.table) that serves the purpose of
+preserving sample-specific differences due to unique measurement values
+(e.g., differences in measured ‘Time’).
 
 ``` r
 
 ##
 pd <- attr(fs$parameters, 'parameters.diff')
-lapply(pd, '[[', 'R')
-#> $COVAIL_002_CYTOKINE_BLOCK1_1.fcs
-#>      Time 
-#> "6557384" 
-#> 
-#> $COVAIL_002_CYTOKINE_BLOCK1_2.fcs
-#>      Time 
-#> "6888061" 
-#> 
-#> $COVAIL_002_CYTOKINE_BLOCK1_3.fcs
-#>      Time 
-#> "7593375"
+rmarkdown::paged_table(pd)
 ```
 
 ### `[['keywords']]`
@@ -168,9 +157,9 @@ fs$keywords
 fs$keywords[, .(`$LAST_MODIFIED`,`$LAST_MODIFIER`,`$ORIGINALITY`)]
 #>             $LAST_MODIFIED   $LAST_MODIFIER $ORIGINALITY
 #>                     <char>           <char>       <char>
-#> 1: 19-JUL-2026 18:16:41.23 flowstate_0.17.0 DataModified
-#> 2: 19-JUL-2026 18:16:41.32 flowstate_0.17.0 DataModified
-#> 3: 19-JUL-2026 18:16:41.41 flowstate_0.17.0 DataModified
+#> 1: 21-JUL-2026 20:56:44.52 flowstate_0.17.1 DataModified
+#> 2: 21-JUL-2026 20:56:44.60 flowstate_0.17.1 DataModified
+#> 3: 21-JUL-2026 20:56:44.66 flowstate_0.17.1 DataModified
 ```
 
 ### `[['spill']]`

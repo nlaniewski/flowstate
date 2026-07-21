@@ -10,13 +10,13 @@ Source:
 [`DESCRIPTION`](https://github.com/nlaniewski/flowstate/blob/master/DESCRIPTION)
 
 Laniewski N (2026). *flowstate: Flow Cytometry Standard (FCS)
-Processing, Analysis, and Visualization*. R package version 0.17.0,
+Processing, Analysis, and Visualization*. R package version 0.17.1,
 <https://github.com/nlaniewski/flowstate>.
 
     @Manual{,
       title = {flowstate: Flow Cytometry Standard (FCS) Processing, Analysis, and Visualization},
       author = {Nathan Laniewski},
       year = {2026},
-      note = {R package version 0.17.0},
+      note = {R package version 0.17.1},
       url = {https://github.com/nlaniewski/flowstate},
     }

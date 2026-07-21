@@ -144,96 +144,96 @@ fs$data
 fs$parameters
 #>        par      B DISPLAY      E                   N       R         S
 #>     <char> <char>  <char> <char>              <char>  <char>    <char>
-#>  1:    $P1     32     LOG    0,0                Time 7593375      <NA>
-#>  2:    $P2     32     LIN    0,0               SSC-W 4194304      <NA>
-#>  3:    $P3     32     LIN    0,0               SSC-H 4194304      <NA>
-#>  4:    $P4     32     LIN    0,0               SSC-A 4194304      <NA>
-#>  5:    $P5     32     LIN    0,0               FSC-W 4194304      <NA>
-#>  6:    $P6     32     LIN    0,0               FSC-H 4194304      <NA>
-#>  7:    $P7     32     LIN    0,0               FSC-A 4194304      <NA>
-#>  8:    $P8     32     LIN    0,0             SSC-B-W 4194304      <NA>
-#>  9:    $P9     32     LIN    0,0             SSC-B-H 4194304      <NA>
-#> 10:   $P10     32     LIN    0,0             SSC-B-A 4194304      <NA>
-#> 11:   $P11     32     LOG    0,0            BUV395-A 4194304    CD45RA
-#> 12:   $P12     32     LOG    0,0            BUV496-A 4194304    CD45RO
-#> 13:   $P13     32     LOG    0,0            BUV563-A 4194304     TCRgd
-#> 14:   $P14     32     LOG    0,0           SBUV605-A 4194304   CD45BC1
-#> 15:   $P15     32     LOG    0,0            BUV737-A 4194304       IL2
-#> 16:   $P16     32     LOG    0,0            BUV805-A 4194304       CD8
-#> 17:   $P17     32     LOG    0,0             BV421-A 4194304     CD197
-#> 18:   $P18     32     LOG    0,0      Pacific Blue-A 4194304   CD45BC2
-#> 19:   $P19     32     LOG    0,0            SBV475-A 4194304   CD45BC3
-#> 20:   $P20     32     LOG    0,0             BV605-A 4194304      CD57
-#> 21:   $P21     32     LOG    0,0             BV650-A 4194304     CD193
-#> 22:   $P22     32     LOG    0,0             BV711-A 4194304   CD45BC4
-#> 23:   $P23     32     LOG    0,0             BV750-A 4194304     CD127
-#> 24:   $P24     32     LOG    0,0             BV785-A 4194304      CD56
-#> 25:   $P25     32     LOG    0,0  KIRAVIA Blue 520-A 4194304     CD199
-#> 26:   $P26     32     LOG    0,0             RB545-A 4194304     CD49a
-#> 27:   $P27     32     LOG    0,0             RB613-A 4194304 GranzymeB
-#> 28:   $P28     32     LOG    0,0             PerCP-A 4194304   CD45BC5
-#> 29:   $P29     32     LOG    0,0  PerCP-eFluor 710-A 4194304      CD95
-#> 30:   $P30     32     LOG    0,0             RB744-A 4194304       CD3
-#> 31:   $P31     32     LOG    0,0    PerCP-Fire 806-A 4194304       CD4
-#> 32:   $P32     32     LOG    0,0             RB780-A 4194304      CD69
-#> 33:   $P33     32     LOG    0,0                PE-A 4194304      TNFa
-#> 34:   $P34     32     LOG    0,0             RY586-A 4194304     CD183
-#> 35:   $P35     32     LOG    0,0     PE-Dazzle 594-A 4194304      IFNg
-#> 36:   $P36     32     LOG    0,0       PE-Fire 640-A 4194304     CD103
-#> 37:   $P37     32     LOG    0,0            SBY720-A 4194304   CD45BC6
-#> 38:   $P38     32     LOG    0,0            PE-Cy7-A 4194304     CD122
-#> 39:   $P39     32     LOG    0,0   Alexa Fluor 647-A 4194304     ia4b7
-#> 40:   $P40     32     LOG    0,0     Spark NIR 685-A 4194304   CD45BC7
-#> 41:   $P41     32     LOG    0,0 LIVE DEAD Scarlet-A 4194304 Viability
-#> 42:   $P42     32     LOG    0,0            APC-H7-A 4194304      CD27
-#> 43:   $P43     32     LOG    0,0      APC-Fire 810-A 4194304     KLRG1
+#>  1:    $P2     32     LIN    0,0               SSC-W 4194304      <NA>
+#>  2:    $P3     32     LIN    0,0               SSC-H 4194304      <NA>
+#>  3:    $P4     32     LIN    0,0               SSC-A 4194304      <NA>
+#>  4:    $P5     32     LIN    0,0               FSC-W 4194304      <NA>
+#>  5:    $P6     32     LIN    0,0               FSC-H 4194304      <NA>
+#>  6:    $P7     32     LIN    0,0               FSC-A 4194304      <NA>
+#>  7:    $P8     32     LIN    0,0             SSC-B-W 4194304      <NA>
+#>  8:    $P9     32     LIN    0,0             SSC-B-H 4194304      <NA>
+#>  9:   $P10     32     LIN    0,0             SSC-B-A 4194304      <NA>
+#> 10:   $P11     32     LOG    0,0            BUV395-A 4194304    CD45RA
+#> 11:   $P12     32     LOG    0,0            BUV496-A 4194304    CD45RO
+#> 12:   $P13     32     LOG    0,0            BUV563-A 4194304     TCRgd
+#> 13:   $P14     32     LOG    0,0           SBUV605-A 4194304   CD45BC1
+#> 14:   $P15     32     LOG    0,0            BUV737-A 4194304       IL2
+#> 15:   $P16     32     LOG    0,0            BUV805-A 4194304       CD8
+#> 16:   $P17     32     LOG    0,0             BV421-A 4194304     CD197
+#> 17:   $P18     32     LOG    0,0      Pacific Blue-A 4194304   CD45BC2
+#> 18:   $P19     32     LOG    0,0            SBV475-A 4194304   CD45BC3
+#> 19:   $P20     32     LOG    0,0             BV605-A 4194304      CD57
+#> 20:   $P21     32     LOG    0,0             BV650-A 4194304     CD193
+#> 21:   $P22     32     LOG    0,0             BV711-A 4194304   CD45BC4
+#> 22:   $P23     32     LOG    0,0             BV750-A 4194304     CD127
+#> 23:   $P24     32     LOG    0,0             BV785-A 4194304      CD56
+#> 24:   $P25     32     LOG    0,0  KIRAVIA Blue 520-A 4194304     CD199
+#> 25:   $P26     32     LOG    0,0             RB545-A 4194304     CD49a
+#> 26:   $P27     32     LOG    0,0             RB613-A 4194304 GranzymeB
+#> 27:   $P28     32     LOG    0,0             PerCP-A 4194304   CD45BC5
+#> 28:   $P29     32     LOG    0,0  PerCP-eFluor 710-A 4194304      CD95
+#> 29:   $P30     32     LOG    0,0             RB744-A 4194304       CD3
+#> 30:   $P31     32     LOG    0,0    PerCP-Fire 806-A 4194304       CD4
+#> 31:   $P32     32     LOG    0,0             RB780-A 4194304      CD69
+#> 32:   $P33     32     LOG    0,0                PE-A 4194304      TNFa
+#> 33:   $P34     32     LOG    0,0             RY586-A 4194304     CD183
+#> 34:   $P35     32     LOG    0,0     PE-Dazzle 594-A 4194304      IFNg
+#> 35:   $P36     32     LOG    0,0       PE-Fire 640-A 4194304     CD103
+#> 36:   $P37     32     LOG    0,0            SBY720-A 4194304   CD45BC6
+#> 37:   $P38     32     LOG    0,0            PE-Cy7-A 4194304     CD122
+#> 38:   $P39     32     LOG    0,0   Alexa Fluor 647-A 4194304     ia4b7
+#> 39:   $P40     32     LOG    0,0     Spark NIR 685-A 4194304   CD45BC7
+#> 40:   $P41     32     LOG    0,0 LIVE DEAD Scarlet-A 4194304 Viability
+#> 41:   $P42     32     LOG    0,0            APC-H7-A 4194304      CD27
+#> 42:   $P43     32     LOG    0,0      APC-Fire 810-A 4194304     KLRG1
+#> 43:    $P1     32     LOG    0,0                Time 7593375      <NA>
 #>        par      B DISPLAY      E                   N       R         S
 #>     <char> <char>  <char> <char>              <char>  <char>    <char>
 #>                     TYPE      V
 #>                   <char> <char>
-#>  1:                 Time   <NA>
+#>  1:         Side_Scatter    220
 #>  2:         Side_Scatter    220
 #>  3:         Side_Scatter    220
-#>  4:         Side_Scatter    220
+#>  4:      Forward_Scatter     40
 #>  5:      Forward_Scatter     40
 #>  6:      Forward_Scatter     40
-#>  7:      Forward_Scatter     40
+#>  7:         Side_Scatter    220
 #>  8:         Side_Scatter    220
 #>  9:         Side_Scatter    220
-#> 10:         Side_Scatter    220
-#> 11: Unmixed_Fluorescence    258
-#> 12: Unmixed_Fluorescence    523
-#> 13: Unmixed_Fluorescence    535
-#> 14: Unmixed_Fluorescence      0
-#> 15: Unmixed_Fluorescence    904
-#> 16: Unmixed_Fluorescence   1087
-#> 17: Unmixed_Fluorescence    301
-#> 18: Unmixed_Fluorescence    347
-#> 19: Unmixed_Fluorescence      0
-#> 20: Unmixed_Fluorescence    330
-#> 21: Unmixed_Fluorescence    306
-#> 22: Unmixed_Fluorescence    254
-#> 23: Unmixed_Fluorescence    327
-#> 24: Unmixed_Fluorescence    539
-#> 25: Unmixed_Fluorescence      0
-#> 26: Unmixed_Fluorescence    639
-#> 27: Unmixed_Fluorescence    369
-#> 28: Unmixed_Fluorescence    401
-#> 29: Unmixed_Fluorescence    479
-#> 30: Unmixed_Fluorescence    253
-#> 31: Unmixed_Fluorescence      0
-#> 32: Unmixed_Fluorescence    616
+#> 10: Unmixed_Fluorescence    258
+#> 11: Unmixed_Fluorescence    523
+#> 12: Unmixed_Fluorescence    535
+#> 13: Unmixed_Fluorescence      0
+#> 14: Unmixed_Fluorescence    904
+#> 15: Unmixed_Fluorescence   1087
+#> 16: Unmixed_Fluorescence    301
+#> 17: Unmixed_Fluorescence    347
+#> 18: Unmixed_Fluorescence      0
+#> 19: Unmixed_Fluorescence    330
+#> 20: Unmixed_Fluorescence    306
+#> 21: Unmixed_Fluorescence    254
+#> 22: Unmixed_Fluorescence    327
+#> 23: Unmixed_Fluorescence    539
+#> 24: Unmixed_Fluorescence      0
+#> 25: Unmixed_Fluorescence    639
+#> 26: Unmixed_Fluorescence    369
+#> 27: Unmixed_Fluorescence    401
+#> 28: Unmixed_Fluorescence    479
+#> 29: Unmixed_Fluorescence    253
+#> 30: Unmixed_Fluorescence      0
+#> 31: Unmixed_Fluorescence    616
+#> 32: Unmixed_Fluorescence    312
 #> 33: Unmixed_Fluorescence    312
-#> 34: Unmixed_Fluorescence    312
-#> 35: Unmixed_Fluorescence      0
-#> 36: Unmixed_Fluorescence    358
-#> 37: Unmixed_Fluorescence      0
-#> 38: Unmixed_Fluorescence    296
+#> 34: Unmixed_Fluorescence      0
+#> 35: Unmixed_Fluorescence    358
+#> 36: Unmixed_Fluorescence      0
+#> 37: Unmixed_Fluorescence    296
+#> 38: Unmixed_Fluorescence    159
 #> 39: Unmixed_Fluorescence    159
-#> 40: Unmixed_Fluorescence    159
-#> 41: Unmixed_Fluorescence      0
-#> 42: Unmixed_Fluorescence    388
-#> 43: Unmixed_Fluorescence    264
+#> 40: Unmixed_Fluorescence      0
+#> 41: Unmixed_Fluorescence    388
+#> 42: Unmixed_Fluorescence    264
+#> 43:                 Time   <NA>
 #>                     TYPE      V
 #>                   <char> <char>
 fs$keywords
@@ -244,14 +244,14 @@ fs$keywords
 #> 3: 09:50:46.94 Aurora  V0299 27-Feb-2025 10:03:26.16
 #>                                $FIL $FLOWRATE    $INST          $LAST_MODIFIED
 #>                              <char>    <char>   <char>                  <char>
-#> 1: COVAIL_002_CYTOKINE_BLOCK1_1.fcs    Medium Cytekbio 19-JUL-2026 18:16:25.46
-#> 2: COVAIL_002_CYTOKINE_BLOCK1_2.fcs    Medium Cytekbio 19-JUL-2026 18:16:25.55
-#> 3: COVAIL_002_CYTOKINE_BLOCK1_3.fcs    Medium Cytekbio 19-JUL-2026 18:16:25.63
+#> 1: COVAIL_002_CYTOKINE_BLOCK1_1.fcs    Medium Cytekbio 21-JUL-2026 20:56:31.00
+#> 2: COVAIL_002_CYTOKINE_BLOCK1_2.fcs    Medium Cytekbio 21-JUL-2026 20:56:31.06
+#> 3: COVAIL_002_CYTOKINE_BLOCK1_3.fcs    Medium Cytekbio 21-JUL-2026 20:56:31.12
 #>      $LAST_MODIFIER         $OP $ORIGINALITY   $PAR
 #>              <char>      <char>       <char> <char>
-#> 1: flowstate_0.17.0 aurora user DataModified     43
-#> 2: flowstate_0.17.0 aurora user DataModified     43
-#> 3: flowstate_0.17.0 aurora user DataModified     43
+#> 1: flowstate_0.17.1 aurora user DataModified     43
+#> 2: flowstate_0.17.1 aurora user DataModified     43
+#> 3: flowstate_0.17.1 aurora user DataModified     43
 #>                             $PROJ $TIMESTEP   $TOT   $VOL APPLY COMPENSATION
 #>                            <char>    <char> <char> <char>             <char>
 #> 1: COVAIL_002_CYTOKINE_2025-02-27    0.0001   2000 326.86              FALSE

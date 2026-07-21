@@ -256,14 +256,14 @@ fs$keywords[
 #> 3: 09:50:46.94 Aurora  V0299 27-Feb-2025 10:03:26.16
 #>                                $FIL $FLOWRATE    $INST          $LAST_MODIFIED
 #>                              <char>    <char>   <char>                  <char>
-#> 1: COVAIL_002_CYTOKINE_BLOCK1_1.fcs    Medium Cytekbio 19-JUL-2026 18:16:38.39
-#> 2: COVAIL_002_CYTOKINE_BLOCK1_2.fcs    Medium Cytekbio 19-JUL-2026 18:16:38.48
-#> 3: COVAIL_002_CYTOKINE_BLOCK1_3.fcs    Medium Cytekbio 19-JUL-2026 18:16:38.56
+#> 1: COVAIL_002_CYTOKINE_BLOCK1_1.fcs    Medium Cytekbio 21-JUL-2026 20:56:42.36
+#> 2: COVAIL_002_CYTOKINE_BLOCK1_2.fcs    Medium Cytekbio 21-JUL-2026 20:56:42.42
+#> 3: COVAIL_002_CYTOKINE_BLOCK1_3.fcs    Medium Cytekbio 21-JUL-2026 20:56:42.49
 #>      $LAST_MODIFIER         $OP $ORIGINALITY   $PAR
 #>              <char>      <char>       <char> <char>
-#> 1: flowstate_0.17.0 aurora user DataModified     43
-#> 2: flowstate_0.17.0 aurora user DataModified     43
-#> 3: flowstate_0.17.0 aurora user DataModified     43
+#> 1: flowstate_0.17.1 aurora user DataModified     43
+#> 2: flowstate_0.17.1 aurora user DataModified     43
+#> 3: flowstate_0.17.1 aurora user DataModified     43
 #>                             $PROJ $TIMESTEP   $TOT   $VOL APPLY COMPENSATION
 #>                            <char>    <char> <char> <char>             <char>
 #> 1: COVAIL_002_CYTOKINE_2025-02-27    0.0001   2000 326.86              FALSE
@@ -304,9 +304,9 @@ add.keywords.to.data(fs, 'aliquot')
 
 ## write; reassign to capture the updated flowstate
 fs <- write.flowstate(fs, fil.suffix = "Example")
-#> flowstate --> /tmp/Rtmpf2FX0Z/COVAIL_002_CYTOKINE_BLOCK1_1_flowstateMOD_Example.fcs
-#> flowstate --> /tmp/Rtmpf2FX0Z/COVAIL_002_CYTOKINE_BLOCK1_2_flowstateMOD_Example.fcs
-#> flowstate --> /tmp/Rtmpf2FX0Z/COVAIL_002_CYTOKINE_BLOCK1_3_flowstateMOD_Example.fcs
+#> flowstate --> /tmp/RtmpON8GFS/COVAIL_002_CYTOKINE_BLOCK1_1_flowstateMOD_Example.fcs
+#> flowstate --> /tmp/RtmpON8GFS/COVAIL_002_CYTOKINE_BLOCK1_2_flowstateMOD_Example.fcs
+#> flowstate --> /tmp/RtmpON8GFS/COVAIL_002_CYTOKINE_BLOCK1_3_flowstateMOD_Example.fcs
 
 ## read newly written files
 fcs.file.paths <- list.files(
@@ -379,9 +379,9 @@ fs$keywords[, aliquot := factor(levels.aliquot)]
 #> 3: COVAIL_002_CYTOKINE_BLOCK1_3_flowstateMOD_Example.fcs    Medium Cytekbio
 #>             $LAST_MODIFIED   $LAST_MODIFIER         $OP $ORIGINALITY   $PAR
 #>                     <char>           <char>      <char>       <char> <char>
-#> 1: 19-JUL-2026 18:16:38.85 flowstate_0.17.0 aurora user DataModified     47
-#> 2: 19-JUL-2026 18:16:38.94 flowstate_0.17.0 aurora user DataModified     47
-#> 3: 19-JUL-2026 18:16:39.04 flowstate_0.17.0 aurora user DataModified     47
+#> 1: 21-JUL-2026 20:56:42.71 flowstate_0.17.1 aurora user DataModified     47
+#> 2: 21-JUL-2026 20:56:42.77 flowstate_0.17.1 aurora user DataModified     47
+#> 3: 21-JUL-2026 20:56:42.84 flowstate_0.17.1 aurora user DataModified     47
 #>                             $PROJ $TIMESTEP   $TOT   $VOL APPLY COMPENSATION
 #>                            <char>    <char> <char> <char>             <char>
 #> 1: COVAIL_002_CYTOKINE_2025-02-27    0.0001   2000 326.86              FALSE
@@ -418,7 +418,7 @@ fs$keywords[, aliquot := factor(levels.aliquot)]
 #> 2:                3       2 COVAIL_002_CYTOKINE_BLOCK1_2
 #> 3:                3       3 COVAIL_002_CYTOKINE_BLOCK1_3
 fs$data[, aliquot := NULL]
-#>        Time    SSC_W  SSC_H    SSC_A    FSC_W  FSC_H     FSC_A   SSCB_W SSCB_H
+#>       SSC_W    SSC_H  SSC_A    FSC_W    FSC_H  FSC_A    SSCB_W   SSCB_H SSCB_A
 #>       <num>    <num>  <num>    <num>    <num>  <num>     <num>    <num>  <num>
 #>    1:     0 730290.7 759933 924953.4 774044.6 997371 1286682.8 714389.4 873960
 #>    2:     1 753766.8 453137 569266.0 714706.8 444274  529209.4 749070.4 411951
@@ -431,7 +431,7 @@ fs$data[, aliquot := NULL]
 #> 5998:  2455 677347.4 701711 792170.2 702094.4 810637  948572.9 668789.1 506809
 #> 5999:  2455 696805.0 546994 635246.9 734241.6 960241 1175081.5 696149.9 465449
 #> 6000:  2455 717597.9 481212 575527.9 713571.4 772944  919251.3 712120.8 452721
-#>          SSCB_A    CD45RA    CD45RO     TCRgd    CD45BC1         IL2
+#>          CD45RA    CD45RO     TCRgd   CD45BC1        IL2         CD8
 #>           <num>     <num>     <num>     <num>      <num>       <num>
 #>    1: 1040579.6 17400.736  6296.233  3487.889  1056.3926 -2868.07104
 #>    2:  514300.5  6299.763  1073.582  2427.801 21505.0137   666.11395
@@ -444,7 +444,7 @@ fs$data[, aliquot := NULL]
 #> 5998:  564913.9  3601.014  3085.314  2354.051 -1026.0671  -749.64618
 #> 5999:  540037.1  1594.400 31943.914 -6318.851 33177.8359 -1760.08154
 #> 6000:  537320.1  4121.758  6534.809    80.228  7164.7236 -1993.13062
-#>               CD8      CD197     CD45BC2   CD45BC3      CD57      CD193
+#>             CD197    CD45BC2     CD45BC3      CD57     CD193    CD45BC4
 #>             <num>      <num>       <num>     <num>     <num>      <num>
 #>    1: 219290.2812  1701.1161 25329.08789 20529.553 2525.7261 1695.80396
 #>    2:    260.5484 18941.9355 14742.99414  4324.678 4230.0068  162.88908
@@ -457,7 +457,7 @@ fs$data[, aliquot := NULL]
 #> 5998:   -533.4910  1094.5952   -35.77078 11619.281 6814.1572 -339.72955
 #> 5999: 109734.0469   830.3315  4554.74463 12002.997 1818.2131  570.69165
 #> 6000: 122607.1562  1581.7339  1644.67358 17445.123 -637.4016  813.78949
-#>          CD45BC4     CD127       CD56      CD199     CD49a  GranzymeB
+#>            CD127      CD56      CD199      CD49a GranzymeB    CD45BC5
 #>            <num>     <num>      <num>      <num>     <num>      <num>
 #>    1: 23593.2891 1343.0120  6162.3535 1315.51941 1071.0972  54200.477
 #>    2:   410.2411 -642.7087   990.9473 1259.63062 1404.4385   1982.248
@@ -470,7 +470,7 @@ fs$data[, aliquot := NULL]
 #> 5998: 11073.8740 -528.7997  1454.7413  926.90973 1844.4650 163543.656
 #> 5999:  1443.5271 1471.8104  2837.1677   69.61098 1223.5042   2391.115
 #> 6000: 23122.0137 3150.3503 -2212.3643 1250.06580 1173.8098   1466.612
-#>            CD45BC5       CD95         CD3        CD4      CD69      TNFa
+#>               CD95        CD3         CD4       CD69      TNFa     CD183
 #>              <num>      <num>       <num>      <num>     <num>     <num>
 #>    1:    -6.487877   942.8493 36690.11719  8299.1494 4737.0107  993.0143
 #>    2:  -114.808891  2869.5635    94.28096   634.6076  912.6633  683.6307
@@ -483,7 +483,7 @@ fs$data[, aliquot := NULL]
 #> 5998:  -282.902435 -2481.5879  1108.75098  1231.4691  141.7332 1626.9031
 #> 5999:   255.437500   178.0732 23065.99414  4533.7129 3185.1895 5428.0649
 #> 6000:   436.824249   752.9613 34094.38672  7511.4536 3074.0154 2097.9915
-#>            CD183        IFNg       CD103    CD45BC6       CD122      ia4b7
+#>             IFNg       CD103     CD45BC6      CD122       ia4b7    CD45BC7
 #>            <num>       <num>       <num>      <num>       <num>      <num>
 #>    1:   473.1266  -256.25250   166.61444   821.8005   735.86768  4871.1104
 #>    2:  -478.1163  -109.60402   -21.77036 12146.9199   713.94666  1420.3256
@@ -496,7 +496,7 @@ fs$data[, aliquot := NULL]
 #> 5998: -1262.1187 -1322.14587 -3573.42236 10710.0586   420.53311  2082.1335
 #> 5999:  -787.6249 -1464.29724   -37.02888   881.4003   112.57523   200.0300
 #> 6000:  -790.8807 -1168.62866   -23.95932 14355.7578    93.75003   896.9961
-#>          CD45BC7  Viability       CD27       KLRG1 select.nonsaturating
+#>        Viability       CD27      KLRG1        Time select.nonsaturating
 #>            <num>      <num>      <num>       <num>                <num>
 #>    1:  1030.7883  1429.1698 -7657.7598  5408.66895                    1
 #>    2:  -409.5166 21949.6270   744.8879  3665.47559                    1

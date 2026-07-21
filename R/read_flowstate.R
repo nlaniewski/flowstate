@@ -304,7 +304,8 @@ flowstate.from.file.path <- function(
   }
   ## BD FACSDiscover [AS]8-specific
   if(grepl("FACSDiscover [AS]8", keywords[['$CYT']])){
-    if(any(facsdiscover.bdspectral.terms %in% names(keywords))){
+    BDSPECTRAL.kws <- grep("BDSPECTRAL", names(keywords), value = T)
+    if(length(BDSPECTRAL.kws) == 3){
       fs[['BDSPECTRAL']] <- bdspectral.data.table(keywords)
       fs[['keywords']][, (facsdiscover.bdspectral.terms) := NULL]
     }
@@ -348,8 +349,9 @@ aliases <- function(flowstate){
     if(!'S' %in% names(alias)){
       alias[, S := NA]
     }
-    ## make N syntactically valid
+    ##
     if(cyt == "Aurora"){
+      ## make N syntactically valid
       alias[
         i = !grepl("[FS]SC|Time", N),
         j = N.alias := gsub(" |-|/", "", sub("-A$", "", N))
@@ -359,17 +361,27 @@ aliases <- function(flowstate){
         j = N.alias := sub("-", "_", sub("SSC-B", "SSCB", N))
       ]
       ## make S syntactically valid
-      alias[, S.alias := gsub(" |-|/", "", S)]
-      alias[is.na(S.alias), S.alias := N.alias]
+      alias[
+        ,
+        j = S.alias := gsub(" |-|/", "", S)
+      ]
+      alias[
+        i = is.na(S.alias),
+        j = S.alias := N.alias
+      ]
     }else if(grepl("FACSDiscover [AS]8", cyt)){
-      for(j in names(alias)){
-        data.table::set(
-          x = alias,
-          i = which(!is.na(alias[[j]])),
-          j = sprintf("%s.alias", j),
-          value = gsub("..", ".", make.names(alias[[j]]), fixed = T)
-        )
-      }
+      alias[
+        ,
+        j = N.alias := gsub("..", ".", make.names(N), fixed = T)
+      ]
+      alias[
+        i = !is.na(S),
+        j = S.alias := gsub("..", ".", make.names(S), fixed = T)
+      ]
+      alias[
+        i = is.na(S.alias),
+        j = S.alias := N.alias
+      ]
     }
     ## add attributes -- named vector -- to each column in [['data']] and [['spill']]
     for(j in names(flowstate[[i]])){

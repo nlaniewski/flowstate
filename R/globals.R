@@ -3,7 +3,7 @@
 # dput(unlist(strsplit(trimws(utils::readClipboard())," ")))
 # dput(sort(c(...)))
 # c(...) |> sort() |> dput()
-res <- utils::globalVariables(
+utils::globalVariables(
   c(
     "$CYT", "$TOT", ".", "..keywords.to.add", "alias", "barcode",
     "barcode.alias", "barcode.censor", "combn.drop", "detector.peak",
@@ -13,6 +13,7 @@ res <- utils::globalVariables(
     "sample.id", "scatter.select", "select.nonsaturating", "select.population",
     "select.quantile", "select.singlets", "ssc.a", "ssc.h", "SSC_A",
     "SSC_H", "totals", "TYPE", "V1", "value", "value.x", "value.y",
-    "variable", "variable.x", "variable.y"
+    "variable", "variable.x", "variable.y",
+    "FEATURE", "KIND", "MEAS", "drop.params"
   )
 )

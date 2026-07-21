@@ -95,12 +95,12 @@ fs$parameters
 rmarkdown::paged_table(fs$parameters)
 ```
 
-`[['parameters']]` also contains attribute-level metadata -- notably, a `parameters.diff` attribute (list) that serves the purpose of preserving sample-specific differences due to unique measurement values (e.g., differences in measured 'Time').
+`[['parameters']]` also contains attribute-level metadata -- notably, a `parameters.diff` attribute (data.table) that serves the purpose of preserving sample-specific differences due to unique measurement values (e.g., differences in measured 'Time').
 
 ```{r flowstate.parameters.diff}
 ##
 pd <- attr(fs$parameters, 'parameters.diff')
-lapply(pd, '[[', 'R')
+rmarkdown::paged_table(pd)
 ```
 
 ## `[['keywords']]`

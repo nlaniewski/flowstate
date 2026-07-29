@@ -251,27 +251,38 @@ readFCSdata <- function(fcs.file.path, attribute.N = TRUE){
   ## parameter names '$P#N' -- required keyword-value pair; unique name
   pars.N <- unlist(keywords[grep("\\$P\\d+N", names(keywords), value = T)])
   pars.N <- pars.N[order(as.numeric(gsub("\\D", "", names(pars.N))))]
-  ## open a connection to the file (.fcs); read binary mode
-  con <- file(fcs.file.path, open = "rb")
-  on.exit(close(con))
-  ## seek the byte position where the DATA segment/stream starts
-  seek(con, offsets['start'])
-  ## read data stream: binary --> numeric --> matrix --> data.table
+  # ## open a connection to the file (.fcs); read binary mode
+  # con <- file(fcs.file.path, open = "rb")
+  # on.exit(close(con))
+  # ## seek the byte position where the DATA segment/stream starts
+  # seek(con, offsets['start'])
+  # ## read data stream: binary --> numeric --> matrix --> data.table
+  # dt <- data.table::as.data.table(
+  #   matrix(
+  #     data = readBin(
+  #       con = con,
+  #       what = "numeric",
+  #       n = (diff(offsets) + 1)/(32/8),
+  #       size = 32/8,
+  #       signed = TRUE,
+  #       endian = attributes(offsets)$endianness
+  #     ),
+  #     ncol = attributes(offsets)$par.n,
+  #     byrow = TRUE,
+  #     dimnames = list(NULL,(pars.N))
+  #   )
+  # )
+  ##
   dt <- data.table::as.data.table(
-    matrix(
-      data = readBin(
-        con = con,
-        what = "numeric",
-        n = (diff(offsets) + 1)/(32/8),
-        size = 32/8,
-        signed = TRUE,
-        endian = attributes(offsets)$endianness
-      ),
-      ncol = attributes(offsets)$par.n,
-      byrow = TRUE,
-      dimnames = list(NULL,(pars.N))
+    fcs_rcpp_read_data(
+      file_path = fcs.file.path,
+      byte_offset = offsets[['start']],
+      n_row = as.numeric(keywords[['$TOT']]),
+      n_par = attr(offsets, 'par.n'),
+      swap = !identical(keywords[["$BYTEORD"]], "1,2,3,4")
     )
   )
+  data.table::setnames(dt, pars.N)
   ## add attributes: 'N'
   if(attribute.N){
     for(j in names(dt)){
@@ -369,7 +380,7 @@ aliases <- function(flowstate){
         i = is.na(S.alias),
         j = S.alias := N.alias
       ]
-    }else if(grepl("FACSDiscover [AS]8", cyt)){
+    }else{#else if(grepl("FACSDiscover [AS]8", cyt))
       alias[
         ,
         j = N.alias := gsub("..", ".", make.names(N), fixed = T)

@@ -369,7 +369,7 @@ aliases <- function(flowstate){
         i = is.na(S.alias),
         j = S.alias := N.alias
       ]
-    }else if(grepl("FACSDiscover [AS]8", cyt)){
+    }else{#else if(grepl("FACSDiscover [AS]8", cyt))
       alias[
         ,
         j = N.alias := gsub("..", ".", make.names(N), fixed = T)

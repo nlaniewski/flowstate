@@ -65,7 +65,7 @@ lapply(fs.split,'[[','keywords')
 #> 1: 09:22:51.62 Aurora  V0299 27-Feb-2025 09:33:47.32
 #>                                $FIL $FLOWRATE    $INST          $LAST_MODIFIED
 #>                              <char>    <char>   <char>                  <char>
-#> 1: COVAIL_002_CYTOKINE_BLOCK1_1.fcs    Medium Cytekbio 27-JUL-2026 16:41:40.70
+#> 1: COVAIL_002_CYTOKINE_BLOCK1_1.fcs    Medium Cytekbio 29-JUL-2026 15:47:33.05
 #>      $LAST_MODIFIER         $OP $ORIGINALITY   $PAR
 #>              <char>      <char>       <char> <char>
 #> 1: flowstate_0.17.1 aurora user DataModified     43
@@ -97,7 +97,7 @@ lapply(fs.split,'[[','keywords')
 #> 1: 09:38:12.18 Aurora  V0299 27-Feb-2025 09:49:40.92
 #>                                $FIL $FLOWRATE    $INST          $LAST_MODIFIED
 #>                              <char>    <char>   <char>                  <char>
-#> 1: COVAIL_002_CYTOKINE_BLOCK1_2.fcs    Medium Cytekbio 27-JUL-2026 16:41:40.78
+#> 1: COVAIL_002_CYTOKINE_BLOCK1_2.fcs    Medium Cytekbio 29-JUL-2026 15:47:33.13
 #>      $LAST_MODIFIER         $OP $ORIGINALITY   $PAR
 #>              <char>      <char>       <char> <char>
 #> 1: flowstate_0.17.1 aurora user DataModified     43
@@ -129,7 +129,7 @@ lapply(fs.split,'[[','keywords')
 #> 1: 09:50:46.94 Aurora  V0299 27-Feb-2025 10:03:26.16
 #>                                $FIL $FLOWRATE    $INST          $LAST_MODIFIED
 #>                              <char>    <char>   <char>                  <char>
-#> 1: COVAIL_002_CYTOKINE_BLOCK1_3.fcs    Medium Cytekbio 27-JUL-2026 16:41:40.87
+#> 1: COVAIL_002_CYTOKINE_BLOCK1_3.fcs    Medium Cytekbio 29-JUL-2026 15:47:33.21
 #>      $LAST_MODIFIER         $OP $ORIGINALITY   $PAR
 #>              <char>      <char>       <char> <char>
 #> 1: flowstate_0.17.1 aurora user DataModified     43

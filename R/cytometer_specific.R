@@ -90,6 +90,7 @@ facsdiscover.conventional.data <- function(flowstate){
   cols.keep <- flowstate$parameters[, N]
   i.drop <- flowstate$data[, !sapply(.SD, attr, which = "N") %in% cols.keep]
   cols.drop <- names(flowstate$data)[i.drop]
+  cols.drop <- cols.drop[-grep('sample.id', cols.drop)]
   ##
   flowstate$data[, (cols.drop) := NULL]
   ##

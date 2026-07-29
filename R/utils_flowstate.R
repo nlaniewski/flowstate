@@ -51,10 +51,11 @@ cytometer.identifier.types <- c(
 )
 
 cytometer.identifier <- function(fcs.file.paths){
-  cyt <- check.keyword(fcs.file.paths,keyword = '$CYT')
+  cyt <- check.keyword(fcs.file.paths, keyword = '$CYT')
   i <- which(sapply(names(cytometer.identifier.types),function(i){grepl(i,cyt)}))
   if(length(i) != 1){
     message("Cytometer keyword 'identifier' could not be resolved;\nis the cytometer indexed in 'flowstate:::cytometer.identifer.types()'?")
+    message("Defaulting to '$FIL' as the sample identifier ('sample.id').")
     id <- '$FIL'
   }else{
     id <- cytometer.identifier.types[[i]]

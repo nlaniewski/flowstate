@@ -15,8 +15,10 @@ export(select_singlets)
 export(spillover.apply)
 export(spillover.update.value)
 export(write.flowstate)
-importFrom(data.table,":=")
-importFrom(data.table,.BY)
-importFrom(data.table,.I)
-importFrom(data.table,.N)
-importFrom(data.table,.SD)
+importFrom(data.table,
+  ":=",
+  .BY,
+  .I,
+  .N,
+  .SD
+)

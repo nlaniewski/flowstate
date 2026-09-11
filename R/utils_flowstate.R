@@ -162,7 +162,7 @@ add.keywords.to.data <- function(flowstate, keywords.to.add){
 
 check.keyword <- function(fcs.file.paths, keyword = NULL, value = NULL){
   kw <- sapply(fcs.file.paths, function(i){
-    readFCStext(i)[[keyword]]
+    readFCS::readTEXT(i)[[keyword]]
   })
   if(!is.null(value)){
     all(grepl(value, kw))

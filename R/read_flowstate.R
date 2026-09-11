@@ -1,108 +1,3 @@
-FCSoffsets <- function(fcs.file.path, return.version = FALSE, update.data.offsets = TRUE){
-  if(grepl("fcs", tools::file_ext(fcs.file.path), ignore.case = T) & file.exists(fcs.file.path)){
-    ## open a connection to the file (.fcs); read binary mode
-    con <- file(fcs.file.path, open = "rb")
-    on.exit(close(con))
-    ## first six bytes contain "FCS#.#"; version identifier
-    version <- readChar(con, 6)
-    if(return.version) return(version)
-    ## version test
-    if(!version %in% sprintf("FCS3.%d", 0:2)){#sprintf("FCS3.%d",0:2)
-      stop("Is this a .fcs file (version 3.0, 3.1, or 3.2)? flowstate has only been tested using FCS 3.0/3.1/3.2 files.")
-    }
-  }else{
-    stop("Need a valid '.fcs' file path/file.")
-  }
-  ## HEADER segment
-  ## version identifier; TEXT segment; DATA segment; ANALYSIS segment
-  ## 6+4+8*2+8*2+8*2 = 58 bytes
-  ## initialize a list for storing byte offsets
-  offsets <- stats::setNames(
-    vector(mode = "list", length = 4L),
-    nm = c("version", "TEXT", "DATA", "ANALYSIS")
-  )
-  version <- substring(version, 4, nchar(version))
-  offsets$version <- as.double(version)
-  ## next four bytes contain space characters (ASCII 32);
-  ## stop otherwise (not a legal/expected .FCS file)
-  stopifnot(readChar(con, 4) == "    ")
-  ## byte offsets for TEXT, DATA, and ANALYSIS
-  ## character strings; 8 bytes; right justified with space padding
-  ## start and end positions
-  for(i in c("TEXT","DATA","ANALYSIS")){
-    offsets[[i]] <- c(
-      start = as.integer(readChar(con, 8)),
-      end = as.integer(readChar(con, 8))
-    )
-  }
-  ## byte offsets for OTHER segment -- if it exists
-  if(offsets$TEXT[1] > 58){
-    n <- offsets$TEXT[1] - 58
-    seek(con,58)
-    string.binary <- readBin(con, what = "raw", n = n)
-    string.character <- rawToChar(string.binary)
-    m <- gregexpr('[0-9]+', string.character)
-    offsets$OTHER <- as.numeric(unlist(regmatches(string.character, m)))
-  }
-  ## for DATA segments larger than 99,999,999 bytes: header offsets will be '0'
-  ## update DATA offsets using keyword-value pairs stored in TEXT segment
-  ## need '$BEGINDATA' and '$ENDDATA' to update offsets
-  ## as attributes: '$BYTEORD' ('endianness'), '$PAR' (number of parameters)
-  if(update.data.offsets){
-    kv <- readFCStext(con = con, offsets = offsets[['TEXT']])
-    offsets[['DATA']] <- replace(
-      offsets[['DATA']],
-      values = as.numeric(unlist(kv[c('$BEGINDATA', '$ENDDATA')]))
-    )
-    endian.string <- c("4,3,2,1" = 'big', "1,2,3,4" = 'little')
-    if(!kv[['$BYTEORD']] %in% names(endian.string)){
-      stop("Keyword '$BYTEORD' has unexpected endianness...data segment cannot be appropriately parsed.")
-    }else{
-      attr(offsets[['DATA']], "endianness") <- endian.string[[kv[['$BYTEORD']]]]
-      attr(offsets[['DATA']], "par.n") <- as.numeric(kv[['$PAR']])
-    }
-  }
-  ##
-  return(offsets)
-}
-
-readFCStext <- function(fcs.file.path, return.string = FALSE, con = NULL, offsets = NULL){
-  if(is.null(con) & is.null(offsets)){
-    ## use the return of 'FCSoffsets(...)[["TEXT"]]'
-    offsets <- FCSoffsets(fcs.file.path)[["TEXT"]]
-    ## open a connection to the file (.fcs); read binary mode
-    con <- file(fcs.file.path, open = "rb")
-    on.exit(close(con))
-  }
-  ## seek the byte position where the TEXT segment starts
-  seek(con, where = offsets['start'])
-  ## hex/ASCII encoded keyword-value pairs
-  txt <- readBin(
-    con = con,
-    what = "raw",
-    n = diff(offsets) + 1
-  )
-  ## convert
-  txt <- rawToChar(txt)
-  ##
-  if(return.string){
-    return(txt)
-  }
-  #readChar(con, nchars = (diff(offsets) + 1))
-  ## delimiter
-  delimiter <- substr(txt, 1, 1)
-  ## split the string; start at position 2
-  kv <- strsplit(substr(txt, 2, nchar(txt)), delimiter, fixed = TRUE)[[1]]#match exactly the delimiter
-  ## keyword value pairs; keyword name (odd) and value (even)
-  kv <- stats::setNames(
-    kv[seq_along(kv) %% 2 != 1],
-    nm = kv[seq_along(kv) %% 2 == 1]
-  )
-  ## as a list
-  kv <- as.list(kv)
-  return(kv)
-}
-
 add.identifier.proj <- function(keywords){
   if(any(grepl("^\\$PROJ$", names(keywords)))){
     proj <- grep("^\\$PROJ$", names(keywords), value = T)
@@ -118,11 +13,11 @@ parameters.to.data.table <- function(
     add.PROJ.identifier = TRUE
 )
 {
-  ## using the return of 'readFCStext(...)'
+  ## using the return of readFCS::readTEXT() -- keywords
   ## number of parameters
   par.n <- as.numeric(keywords[['$PAR']])
   ## regex pattern to find '$P#' and 'P#'
-  par.pattern <- "^\\$P\\d+|^P\\d+"
+  par.pattern <- "^\\$?P\\d+"
   parameter.names <- grep(
     pattern = par.pattern,
     x = names(keywords),
@@ -174,9 +69,9 @@ parameters.to.data.table <- function(
 }
 
 keywords.to.data.table <- function(keywords, drop.primary = TRUE, drop.spill = TRUE){
-  ## using the return of 'readFCStext(...)'
+  ## using the return of readFCS::readTEXT() -- keywords
   ## regex pattern to find '$P#' and 'P#' -- inverted
-  par.pattern <- "^\\$P\\d+|^P\\d+"
+  par.pattern <- "^\\$?P\\d+"
   keyword.names<-grep(
     pattern = par.pattern,
     x = names(keywords),
@@ -205,7 +100,7 @@ keywords.to.data.table <- function(keywords, drop.primary = TRUE, drop.spill = T
 }
 
 spill.to.data.table <- function(keywords, add.PROJ.identifier = TRUE, attribute.N = TRUE){
-  ## using the return of 'readFCStext(...)'
+  ## using the return of readFCS::readTEXT() -- keywords
   ## spill/spillover keyword name
   spill.name <- grep('spill', names(keywords), ignore.case = TRUE, value = T)
   ## parse the spillover string
@@ -243,35 +138,10 @@ spill.to.data.table <- function(keywords, add.PROJ.identifier = TRUE, attribute.
   }
 }
 
-readFCSdata <- function(fcs.file.path, attribute.N = TRUE){
-  ## use the return of 'FCSoffsets(...)[["DATA"]]'
-  offsets <- FCSoffsets(fcs.file.path)[["DATA"]]
-  ## use the return of 'readFCStext(...)'
-  keywords <- readFCStext(fcs.file.path)
-  ## parameter names '$P#N' -- required keyword-value pair; unique name
-  pars.N <- unlist(keywords[grep("\\$P\\d+N", names(keywords), value = T)])
-  pars.N <- pars.N[order(as.numeric(gsub("\\D", "", names(pars.N))))]
-  ## open a connection to the file (.fcs); read binary mode
-  con <- file(fcs.file.path, open = "rb")
-  on.exit(close(con))
-  ## seek the byte position where the DATA segment/stream starts
-  seek(con, offsets['start'])
-  ## read data stream: binary --> numeric --> matrix --> data.table
-  dt <- data.table::as.data.table(
-    matrix(
-      data = readBin(
-        con = con,
-        what = "numeric",
-        n = (diff(offsets) + 1)/(32/8),
-        size = 32/8,
-        signed = TRUE,
-        endian = attributes(offsets)$endianness
-      ),
-      ncol = attributes(offsets)$par.n,
-      byrow = TRUE,
-      dimnames = list(NULL,(pars.N))
-    )
-  )
+readFCSdt <- function(fcs.file.path, attribute.N = TRUE){
+  ## read data stream: binary --> numeric/float --> matrix --> data.table
+  ### C++ reader
+  dt <- data.table::as.data.table(readFCS::readDATA(fcs.file.path))
   ## add attributes: 'N'
   if(attribute.N){
     for(j in names(dt)){
@@ -288,12 +158,11 @@ flowstate.from.file.path <- function(
     alias = c('N.alias', 'S.alias')
 )
 {
-  ## keyword-value pairs from TEXT segment; based on offsets from 'FCSoffsets(...)[["TEXT"]]'
-  keywords <- readFCStext(fcs.file.path)
+  ## keyword-value pairs from TEXT segment
+  keywords <- readFCS::readTEXT(fcs.file.path)
   ## create a flowstate (fs) S3 object ; class 'flowstate'
   fs <- flowstate(
-    ## DATA segment; based on (updated) offsets from 'FCSoffsets(...)[["DATA"]]'
-    data = readFCSdata(fcs.file.path, attribute.N = TRUE),
+    data = readFCSdt(fcs.file.path, attribute.N = TRUE),
     parameters = parameters.to.data.table(keywords, add.PROJ.identifier = TRUE),
     keywords = keywords.to.data.table(keywords, drop.primary = TRUE, drop.spill = TRUE),
     spill = spill.to.data.table(keywords)

@@ -14,6 +14,7 @@ utils::globalVariables(
     "select.quantile", "select.singlets", "ssc.a", "ssc.h", "SSC_A",
     "SSC_H", "totals", "TYPE", "V1", "value", "value.x", "value.y",
     "variable", "variable.x", "variable.y",
-    "FEATURE", "KIND", "MEAS", "drop.params"
+    "FEATURE", "KIND", "MEAS", "drop.params",
+    "keywords_originality", "keywords_required"
   )
 )

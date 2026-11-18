@@ -167,10 +167,10 @@ plot_flowstate <- function(
         oob = scales::squish
       )
   }
-  if(.ncol == 3){
+  if(.ncol >= 3){
     vars <- x[, sapply(.SD, class)]
     vars.numeric <- names(which(vars == "numeric"))
-    vars.factor <- names(which(vars == "factor"))
+    vars.facet <- names(vars[vars %in% c('factor', 'logical')])
 
     p <- ggplot2::ggplot(
       data = x,
@@ -188,7 +188,7 @@ plot_flowstate <- function(
       limits = limits,
       oob = scales::squish
     )
-    p <- p + ggplot2::facet_wrap(vars.factor)
+    p <- p + ggplot2::facet_wrap(vars.facet)
   }
   ##
   return(p)

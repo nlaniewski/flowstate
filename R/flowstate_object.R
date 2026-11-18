@@ -13,7 +13,7 @@ flowstate_object <- function(fcs.file.path, parameter.fix = NULL){
   keywords <- keywords[-i.parameters]
   keywords <- c(keywords, keywords_originality())
   ##
-  fcs[, sample.id := keywords[['TUBENAME']]]
+  fcs[, sample.id := factor(keywords[['TUBENAME']])]
   ##
   data.table::setattr(keywords, 'required', unlist(kw.required))
   data.table::setattr(fcs, 'keywords', keywords)
@@ -45,23 +45,6 @@ flowstate_object <- function(fcs.file.path, parameter.fix = NULL){
   ##
   invisible(fcs[])
 }
-
-# as.flowstate <- function(flowstate) {
-#   stopifnot(data.table::is.data.table(flowstate))
-#   if (!inherits(flowstate, "flowstate")) {
-#     data.table::setattr(flowstate, "class", c("flowstate", class(flowstate)))
-#   }
-#   flowstate
-# }
-#
-# `[.flowstate` <- function(x, ...) {
-#   res <- NextMethod()
-#   if (data.table::is.data.table(res)) {
-#     as.flowstate(res)
-#   } else {
-#     res
-#   }
-# }
 
 names_flowstate <- function(flowstate, type = c("S", "N")){
   ## for setting names, access 'parameters' attribute
@@ -153,38 +136,60 @@ plot_flowstate <- function(
     sample.n = NULL
 )
 {
-  p <- ggplot2::ggplot(
-    data = if (!is.null(sample.n)) {
-      x[sample(.N, sample.n)]
-    }
-    else {
-      x
-    },
-    mapping = ggplot2::aes(...))
-  if (...length() == 1) {
+  # dots <- as.list(match.call(expand.dots = FALSE))$...
+  # .dots <- sapply(dots, deparse)
+
+  .ncol <- ncol(x)
+  ##
+  if(.ncol == 1){
+    p <- ggplot2::ggplot(
+      data = x,
+      mapping = ggplot2::aes(!!as.name(names(x)))
+    )
     p <- p + ggplot2::geom_density()
-    return(p)
   }
-
-  if (...length() == 3) {
-    .option <- "magma"
-    dot.names = lapply(substitute(list(...))[-1], deparse)
-    z <- dot.names[[3]]
+  if(.ncol == 2){
+    p <- ggplot2::ggplot(
+      data = x,
+      mapping = ggplot2::aes(
+        x = !!as.name(names(x)[1]),
+        y = !!as.name(names(x)[2])
+      )
+    )
+    p <- p + ggplot2::geom_hex(
+      bins = bins,
+      show.legend = F
+    )
     p <- p +
-      ggplot2::stat_summary_hex(bins = bins) +
-      ggplot2::labs(fill = z)
+      viridis::scale_fill_viridis(
+        option = 'plasma',
+        limits = limits,
+        oob = scales::squish
+      )
   }
-  else {
-    .option <- "plasma"
-    p <- p + ggplot2::geom_hex(bins = bins, show.legend = F)
-  }
+  if(.ncol == 3){
+    vars <- x[, sapply(.SD, class)]
+    vars.numeric <- names(which(vars == "numeric"))
+    vars.factor <- names(which(vars == "factor"))
 
-  p <- p +
-    viridis::scale_fill_viridis(
-      option = .option,
+    p <- ggplot2::ggplot(
+      data = x,
+      mapping = ggplot2::aes(
+        x = !!as.name(vars.numeric[1]),
+        y = !!as.name(vars.numeric[2])
+      )
+    )
+    p <- p + ggplot2::geom_hex(
+      bins = bins,
+      show.legend = F
+    )
+    p <- p + viridis::scale_fill_viridis(
+      option = 'plasma',
       limits = limits,
       oob = scales::squish
     )
-
+    p <- p + ggplot2::facet_wrap(vars.factor)
+  }
+  ##
   return(p)
 }

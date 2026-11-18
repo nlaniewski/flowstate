@@ -60,3 +60,33 @@ keywords_originality <- function(){
     '$LAST_MODIFIER' = sprintf("flowstate_%s", utils::packageVersion("flowstate"))
   )
 }
+
+#' @title Print method for flowstate objects
+#'
+#' @param x An object of class flowstate; as returned from `flowstate_object`.
+#' @param ... Additional arguments passed to [data.table][data.table::print.data.table].
+#'
+#' @return Invisibly returns `flowstate`; prints to the console.
+#' @import data.table
+#' @export
+print.flowstate <- function(x, ...) {
+  NextMethod()
+  invisible(x)
+}
+
+# as.flowstate <- function(flowstate) {
+#   stopifnot(data.table::is.data.table(flowstate))
+#   if (!inherits(flowstate, "flowstate")) {
+#     data.table::setattr(flowstate, "class", c("flowstate", class(flowstate)))
+#   }
+#   flowstate
+# }
+#
+# `[.flowstate` <- function(x, ...) {
+#   res <- NextMethod()
+#   if (data.table::is.data.table(res)) {
+#     as.flowstate(res)
+#   } else {
+#     res
+#   }
+# }
